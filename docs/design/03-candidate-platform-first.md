@@ -1,5 +1,5 @@
 # EXODUS — an open migration-intelligence platform
-### Reference implementation: CORRIDOR
+### Reference implementation: Exodus
 **Lens: platform-first.** The MVP is a set of contracts. The app is the proof.
 
 ---
@@ -25,7 +25,7 @@ If this project is remembered in five years it will be because somebody added Ba
 6. `@exodus/license` — `license_id` and `redistributable` as mandatory columns; `bundle:verify` as the export gate; the SPDX declaration in every `PluginManifest`.
 
 **The reference app (40%)**
-7. CORRIDOR: nine surfaces, a deck.gl 9.4 globe, an offline world snapshot covering 233 ISO areas, eight models, a MILP allocation solver, a signed scenario format, and an SSE live layer behind a flag.
+7. Exodus: nine surfaces, a deck.gl 9.4 globe, an offline world snapshot covering 233 ISO areas, eight models, a MILP allocation solver, a signed scenario format, and an SSE live layer behind a flag.
 
 ### 1.2 Out of scope, with the reason
 

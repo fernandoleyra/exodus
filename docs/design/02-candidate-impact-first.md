@@ -1,6 +1,6 @@
-# CORRIDOR — MVP design (IMPACT-FIRST lens)
+# Exodus — MVP design (IMPACT-FIRST lens)
 
-**Working title change, deliberate.** The repo codename `EXODUS` is retired. Lexicon rule 10 structures its ban on the seven dehumanising source concepts from Mendelsohn & Budak (arXiv:2502.13246, ACL 2025) — animal, vermin, parasite, physical pressure, water, commodity, war. "Exodus" is mass-flight-under-duress imagery in the war/pressure family. **CORRIDOR** is the product's own core object: the arc between two ADM0 centroids. It is neutral, it is what the user actually clicks, and it survives the project's own CI lint. Shipping a migration tool whose name fails its own lexicon gate is the first credibility hole a critic finds.
+**Working title change, deliberate.** The repo codename `EXODUS` is retired. Lexicon rule 10 structures its ban on the seven dehumanising source concepts from Mendelsohn & Budak (arXiv:2502.13246, ACL 2025) — animal, vermin, parasite, physical pressure, water, commodity, war. "Exodus" is mass-flight-under-duress imagery in the war/pressure family. **Exodus** is the product's own core object: the arc between two ADM0 centroids. It is neutral, it is what the user actually clicks, and it survives the project's own CI lint. Shipping a migration tool whose name fails its own lexicon gate is the first credibility hole a critic finds.
 
 ---
 
@@ -12,7 +12,7 @@ Thirty seconds is the whole budget. In that window a viewer must conclude three 
 2. **It moves, and the motion is the data.** Drag one handle and 34 years of the global migration system re-render continuously at 60fps. Nothing decorative is animating. What is moving is time, and the year is 44px in the corner.
 3. **It is not lying to me.** Half the arcs are hatched because they are modelled. Some are split into two visibly disagreeing widths because two independent models disagree. The AS-OF chip says 2023, not today. There is a `/sources` link in the chrome.
 
-The third point is what makes the first two impressive rather than merely pretty. Every globe demo on the internet renders one number per arc. **A globe showing one number per arc is lying.** CORRIDOR renders the disagreement, and that is the thing nobody has seen before.
+The third point is what makes the first two impressive rather than merely pretty. Every globe demo on the internet renders one number per arc. **A globe showing one number per arc is lying.** Exodus renders the disagreement, and that is the thing nobody has seen before.
 
 **What I am spending the budget on:** the globe, the flow rendering, the year scrub, the uncertainty encoding, the density of legible information, the entry.
 **What I am buying that with:** the solver, the estimation stack, three of the eight surfaces, and the whole occupational dimension.
@@ -21,7 +21,7 @@ The third point is what makes the first two impressive rather than merely pretty
 
 UX pack §4 says: *no entrance animations, no auto-rotating globe, no convergence-on-target arc motion, no impact ripple at destination.* I keep three of those four absolutely — auto-rotation, arc convergence motion and destination ripples are banned in this design too, because they are the motifs that make a migration tool read as a targeting system (ethical rule 13's neighbourhood).
 
-I override exactly one: **no entrance animations.** CORRIDOR has a 2.4s establishing camera move. Its constraints are tight enough that it is not the thing the rule was written against:
+I override exactly one: **no entrance animations.** Exodus has a 2.4s establishing camera move. Its constraints are tight enough that it is not the thing the rule was written against:
 
 - The world is **fully rendered at frame one**. No layer pops in, no mark animates, no arc draws itself. Only the camera moves.
 - It runs **once per session** (`sessionStorage`), and **any input cancels it instantly**.
@@ -92,7 +92,7 @@ No route geometry. Great-circle between ADM0 centroids, two vertices, enforced a
 ### `/headroom/:iso3` — Absorption calculator
 The one deep analytic, one screen. Five sliders (physicians, nurses+midwives, hospital beds, dwellings, health spend per capita targets), one horizon slider, one assumption-set name. Output: a single figure with the **binding indicator named explicitly**, and the mandatory label *"Modelled labour-market absorption under assumption set «name» — not a policy limit."* Banned strings (`capacity limit`, `carrying capacity`, `maximum`, `threshold`, `saturation`) are CI-enforced against the built bundle, not just the source.
 
-The honest part: under WHO floors this is **negative for essentially every country on Earth** (216/216 at or below a 100% electricity target, 214/214 at or below 100% water). CORRIDOR renders negative headroom as a **service deficit in warm hue**, which is what it actually is, and states in the panel that the formula holds service stock fixed while growing population — migrants bring physicians, so it systematically understates. A calculator that admits its own sign error in public is more impressive than one that hides it.
+The honest part: under WHO floors this is **negative for essentially every country on Earth** (216/216 at or below a 100% electricity target, 214/214 at or below 100% water). Exodus renders negative headroom as a **service deficit in warm hue**, which is what it actually is, and states in the panel that the formula holds service stock fixed while growing population — migrants bring physicians, so it systematically understates. A calculator that admits its own sign error in public is more impressive than one that hides it.
 
 ### `/sources` — Licence and cadence ledger
 A table of every source: id, licence SPDX, `redistributable` boolean, cadence, vintage, latency days, coverage count, estimate kind, and what breaks without it. Sorted by latency. Three rows are the argument: **UN DESA IMS — excluded, non-commercial no-derivatives, replaced by Gaskin & Abel**; **UNHCR — licence contradictory across two verification passes, online-only connector, not redistributed, unresolved with webportal@unhcr.org**; **ACLED — excluded, no AI/ML training regardless of purpose**. Nobody else ships this screen. It costs a day.
@@ -207,7 +207,7 @@ Arc **geometry is invariant across years** — the same 12,000 ADM0-centroid pai
 - Under `prefers-reduced-motion`: transitions to 0, the track snaps to discrete year notches, arcs are static.
 
 ### Globe ↔ Flat
-`_GlobeView` is **experimental**, imported aliased as `{_GlobeView as GlobeView}`, `lnglat` only, with documented issues mixing or switching between GlobeView and MapView. This is gating unknown #1 and is prototyped in the first hours. FLAT mode above zoom 6 is MapLibre + `MapboxOverlay` interleaved for place context. **Per-capita people-density encoding is never rendered on Web Mercator** — the density layer is hidden in Mercator FLAT mode and the legend says why. There is no Equal Earth projection in MapLibre; rather than fake one, CORRIDOR restricts Mercator to non-density place context and keeps all density work on the globe.
+`_GlobeView` is **experimental**, imported aliased as `{_GlobeView as GlobeView}`, `lnglat` only, with documented issues mixing or switching between GlobeView and MapView. This is gating unknown #1 and is prototyped in the first hours. FLAT mode above zoom 6 is MapLibre + `MapboxOverlay` interleaved for place context. **Per-capita people-density encoding is never rendered on Web Mercator** — the density layer is hidden in Mercator FLAT mode and the legend says why. There is no Equal Earth projection in MapLibre; rather than fake one, Exodus restricts Mercator to non-density place context and keeps all density work on the globe.
 
 ### Live transport and degradation
 One multiplexed SSE stream, `GET /live/stream?sources=a,b`. Not websockets. Poll cadence: GDELT 60s on `lastupdate.txt`, GDACS 15 min, USGS 5 min, Eurostat TOC daily. Backoff: full jitter, base 1s, cap 300s, `degraded` after 5 consecutive failures with a struck-through legend entry that **does not disappear**. Ladder `LIVE → CACHED → SNAPSHOT → UNAVAILABLE`, explicit in the status bar.

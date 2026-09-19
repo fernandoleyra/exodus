@@ -1,4 +1,4 @@
-# EXODUS / "CORRIDOR" — GROUND-TRUTH REFERENCE BRIEF
+# EXODUS / "Exodus" — GROUND-TRUTH REFERENCE BRIEF
 *All probes 2026-09-18. `[verified]` = confirmed live against a primary source. `[UNVERIFIED]` = plausible, unconfirmed — never upgrade.*
 
 ---

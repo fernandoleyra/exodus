@@ -131,7 +131,7 @@ every downstream section reads a different one.
 *Resolution:* consistent only if `DataState` (§2.10, two members, in contracts) and `LadderState` (§8.7, four members, in `apps/live`) stay separate types and the v1 chip is typed `DataState`. Say so, or the two-state rule is unenforceable.
 
 **L2. The record-replay client is v1 infrastructure and lives behind an M9 gate.**
-§8.1: "The one thing you must build in v1 that looks like live plumbing: the **record-replay HTTP client in `packages/sdk`** and the **corpus transform path**." §8.7 and §8.8 are M9-only. But §8.10's `ReplayClient` interface, `CorpusEntry` and the `CORRIDOR_MODE` contract are cited by §9.4.4's `IngestCtx` and by §9.6's reference connector at M1.
+§8.1: "The one thing you must build in v1 that looks like live plumbing: the **record-replay HTTP client in `packages/sdk`** and the **corpus transform path**." §8.7 and §8.8 are M9-only. But §8.10's `ReplayClient` interface, `CorpusEntry` and the `EXODUS_MODE` contract are cited by §9.4.4's `IngestCtx` and by §9.6's reference connector at M1.
 *Resolution:* consistent; but §8's heading ("Live layer") and §11.7's M9 description both read as if all of §8 is optional. Split §8 explicitly into "v1 (M1)" and "M9" subsections, or an agent under time pressure will skip the client and have no offline ingest.
 
 **L3. Two `ReplayClient` interfaces.**

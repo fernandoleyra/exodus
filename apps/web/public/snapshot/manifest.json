@@ -1,0 +1,43 @@
+{
+  "builtFrom": "World Bank WDI (observed) + Natural Earth 110m (geometry)",
+  "corridorCount": 1279,
+  "placeCount": 174,
+  "disputedRenderedWithoutData": [
+    "N. Cyprus",
+    "Somaliland",
+    "Kosovo"
+  ],
+  "yearRange": [
+    1990,
+    2023
+  ],
+  "sources": [
+    {
+      "id": "wb-wdi",
+      "title": "World Bank World Development Indicators",
+      "licence": "CC BY-4.0",
+      "estimateKind": "observed",
+      "latencyClass": "annual",
+      "vintage": "2023",
+      "note": "SP.POP.TOTL, SM.POP.TOTL, SL.UEM.TOTL.ZS, NY.GDP.PCAP.PP.KD"
+    },
+    {
+      "id": "naturalearth",
+      "title": "Natural Earth 110m Admin-0",
+      "licence": "Public domain",
+      "estimateKind": "observed",
+      "latencyClass": "annual",
+      "vintage": "v5",
+      "note": "geometry and centroids only"
+    },
+    {
+      "id": "synthetic-grav",
+      "title": "Gravity fixture (M0)",
+      "licence": "n/a",
+      "estimateKind": "modelled",
+      "latencyClass": "modelled",
+      "vintage": "M0",
+      "note": "SYNTHETIC. Two friction exponents stand in for two models; their divergence is the disagreement channel. Not a published estimate."
+    }
+  ]
+}

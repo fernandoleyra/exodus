@@ -1,4 +1,4 @@
-# BUILD PROMPT — CORRIDOR
+# BUILD PROMPT — Exodus
 
 **An open-source migration intelligence workspace: a WebGL globe over the whole world's bilateral migration system, a service-capacity calculator, and a placement optimiser that helps people land somewhere they can actually live.**
 
@@ -115,7 +115,7 @@ Gaskin & Abel's "73% test correlation" · UN DESA's "53% moved within their own 
 
 You are an autonomous coding agent with one sustained effort and no follow-up conversation. Nobody will answer a question you ask. Every fork in the road that matters has already been decided in this document; where a decision is pre-made, apply it and record it in `DECISIONS.md`. Where reality contradicts the document — a DOI that does not resolve, a schema that does not match, a frame budget that does not hold — apply the named fallback, record the failure with its date and HTTP status, and keep building. **Stalling is the only failure mode with no recovery path.**
 
-You are building **CORRIDOR**: an offline-first, statically-hosted globe that flipbooks the entire world's bilateral migration system, one year per frame, 1990→2023, at 60fps — and that renders, on the same arc, how much the best available evidence disagrees with itself.
+You are building **Exodus**: an offline-first, statically-hosted globe that flipbooks the entire world's bilateral migration system, one year per frame, 1990→2023, at 60fps — and that renders, on the same arc, how much the best available evidence disagrees with itself.
 
 It is a monorepo (pnpm + Turborepo), a Vite React SPA, a deck.gl `_GlobeView`, a committed ≤40 MiB Parquet bundle, five pure kernel models, three plugin contracts, and one policy package with one linter binary. `git clone && pnpm i && pnpm dev` renders the whole world **with the network cable out**. There is no server, no account, no API key, and no runtime fetch in v1.
 
@@ -125,7 +125,7 @@ It is a monorepo (pnpm + Turborepo), a Vite React SPA, a deck.gl `_GlobeView`, a
 
 The spectacle and the epistemics are the same object. This is the whole product and it is the thing you must not compromise.
 
-Every existing migration globe renders one number per arc, which is a lie, because **no bilateral migration number on earth is observed** — it is modelled, and two competent models of the same corridor disagree by tens of percent. CORRIDOR renders that disagreement as a visual property of the arc (dash density), dims the corridors of states with no functioning statistical office so they cannot borrow the authority of German register data (arc opacity), and renders `—` with a reason where the world has no data. It is the first migration tool whose most striking image is an argument about what is not known.
+Every existing migration globe renders one number per arc, which is a lie, because **no bilateral migration number on earth is observed** — it is modelled, and two competent models of the same corridor disagree by tens of percent. Exodus renders that disagreement as a visual property of the arc (dash density), dims the corridors of states with no functioning statistical office so they cannot borrow the authority of German register data (arc opacity), and renders `—` with a reason where the world has no data. It is the first migration tool whose most striking image is an argument about what is not known.
 
 Three sentences you will be tempted to soften. Do not:
 
@@ -138,7 +138,7 @@ Three sentences you will be tempted to soften. Do not:
 Both strings are product copy. The first is the `/methods` opening line and the About panel; the second is the README hero paragraph and the repository description. Neither may be paraphrased.
 
 **To a minister:**
-> "For every country on earth and every year since 1990, CORRIDOR shows you how many people moved where — and, on the same screen, exactly how much the best available evidence disagrees with itself, so you can see which of these numbers you are allowed to act on."
+> "For every country on earth and every year since 1990, Exodus shows you how many people moved where — and, on the same screen, exactly how much the best available evidence disagrees with itself, so you can see which of these numbers you are allowed to act on."
 
 **To a hacker:**
 > "A deck.gl globe that flipbooks 34 years of the global bilateral migration matrix at 60fps off a 40 MiB committed Parquet bundle with the network disabled, where arc dash density is cross-model disagreement, arc opacity is per-country data coverage, and a CI-enforced AST rule means no number can render outside `<Figure>`."
@@ -161,7 +161,7 @@ Nothing in this product is person-shaped. The `Cmd+K` palette indexes actions, d
 
 All rows below are verified prior art as of 2026-09-18. Use them to calibrate; do not vendor, fork or fetch any of them at runtime.
 
-| Prior art | What it does well | Why it is not this | What CORRIDOR does instead |
+| Prior art | What it does well | Why it is not this | What Exodus does instead |
 |---|---|---|---|
 | **IOM Migration Data Portal** | Best per-indicator metadata in the field | **No API at all; returns HTTP 403 to scripted clients.** SaaS, read-only | Provenance popover on every `<Figure>`, from a committed bundle, offline |
 | **UNHCR Refugee Data Finder** | The most reliable open bilateral forced-displacement API, series from 1951 | Annual; forced displacement only; **licence contradictory across two verification passes → [UNVERIFIED]** | Ships as a **recipe connector** — code, never bytes. See §1.8 non-goal N10 |
@@ -179,19 +179,19 @@ The five-part wedge, stated so you can check your own work against it:
 4. **Nobody treats the connector layer as the product.** Four independently verified upstream breakages in a single probing session is the evidence.
 5. **Nobody renders their own absence.** `/methods` is the loudest screen: the field's honest accuracy ceiling first, the refusals after.
 
-### 1.6 The name: CORRIDOR — and the rename you perform first
+### 1.6 The name: Exodus — and the rename you perform first
 
-**Decision (already made, do not relitigate): the product, the repository, the npm scope and every identifier are `CORRIDOR` / `corridor` / `@corridor`. `EXODUS` is retired.**
+**Decision (already made, do not relitigate): the product, the repository, the npm scope and every identifier are `Exodus` / `corridor` / `@exodus`. `EXODUS` is retired.**
 
-Rationale, in one line: *"Exodus" is mass-flight-under-duress imagery, squarely inside the war/pressure family of the seven dehumanising source concepts (animal, vermin, parasite, physical pressure, water, commodity, war; Mendelsohn & Budak, arXiv:2502.13246, ACL 2025) on which this project's own lexicon lint is structured. A product name that fails your own CI gate is the first credibility hole a critic finds.* "Corridor" is the field's neutral technical term for an origin–destination pair, it is the product's core geometry, and it survives every rule in `@corridor/policy`.
+Rationale, in one line: *"Exodus" is mass-flight-under-duress imagery, squarely inside the war/pressure family of the seven dehumanising source concepts (animal, vermin, parasite, physical pressure, water, commodity, war; Mendelsohn & Budak, arXiv:2502.13246, ACL 2025) on which this project's own lexicon lint is structured. A product name that fails your own CI gate is the first credibility hole a critic finds.* "Corridor" is the field's neutral technical term for an origin–destination pair, it is the product's core geometry, and it survives every rule in `@exodus/policy`.
 
 **The checkout you have been handed is named `exodus`.** Your first commit performs the rename:
 
 | Step | Action | Verification |
 |---|---|---|
 | 1 | Rename the checkout directory to `corridor`; update the git remote URL if one is configured | `basename $(git rev-parse --show-toplevel) === 'corridor'` |
-| 2 | Workspace root `package.json` → `"name": "corridor"`; every package → `@corridor/<pkg>` | `pnpm check:policy` lexicon module walks package names |
-| 3 | Environment variables: `CORRIDOR_MODE`, `CORRIDOR_CLOCK`. No `EXODUS_*` anywhere | grep gate in the lexicon module |
+| 2 | Workspace root `package.json` → `"name": "corridor"`; every package → `@exodus/<pkg>` | `pnpm check:policy` lexicon module walks package names |
+| 3 | Environment variables: `EXODUS_MODE`, `EXODUS_CLOCK`. No `EXODUS_*` anywhere | grep gate in the lexicon module |
 | 4 | Keep `docs/research/**` exactly as committed — it is the research corpus, not build output, and it is the only place the retired name may legitimately appear as history | Excluded by path from the lexicon walk, with the exclusion itself unit-tested |
 | 5 | Delete the untracked root probe artifacts. `jv.json` is a Eurostat `jvs_q_isco_r2` vacancy probe and vacancies are a non-goal (N9) — delete it. `est.json` is a `migr_asyappctzm` JSON-stat probe; either move it to `packages/connectors/eurostat-asylum/fixtures/` after asserting its dataset code, or delete it. Neither may sit at the repo root | `git status --short` is clean after M0 |
 | 6 | If the hosting platform's repository name cannot be changed from inside this build, record it in `DECISIONS.md` as the single outstanding rename, with the reason | `DECISIONS.md` entry exists; all agent-controlled names are already `corridor` |
@@ -200,7 +200,7 @@ Write the identity once, in the policy package, and derive everything else from 
 
 ```ts
 // packages/policy/src/identity.ts
-// Apache-2.0 boundary does not apply here: @corridor/policy is AGPL-3.0-or-later.
+// Apache-2.0 boundary does not apply here: @exodus/policy is AGPL-3.0-or-later.
 // TypeScript 7 with `erasableSyntaxOnly`: no `enum`, no `namespace` (TS1294).
 
 export type Route =
@@ -212,11 +212,11 @@ export type Route =
   | '/methods';
 
 export const PRODUCT = {
-  name: 'CORRIDOR',
+  name: 'Exodus',
   slug: 'corridor',
-  npmScope: '@corridor',
+  npmScope: '@exodus',
   repoBasename: 'corridor',
-  envPrefix: 'CORRIDOR_',
+  envPrefix: 'EXODUS_',
   tagline:
     'The whole world’s migration system, one year per frame — and how much the evidence disagrees with itself.',
   /** Names retired by decision register #1. Legal ONLY in this file, DECISIONS.md and docs/research/**. */
@@ -307,7 +307,7 @@ export const isRetiredName = (s: string): boolean =>
 Write `README.md` at M0 with exactly this hero, then extend it below the fold as the build progresses. Do not decorate it with badges that do not resolve offline.
 
 ```markdown
-# CORRIDOR
+# Exodus
 
 **The whole world's migration system, one year per frame — and how much the evidence
 disagrees with itself.**
@@ -453,8 +453,8 @@ Three rules govern the register:
 
 | ID | DECISION | WHY | REJECTED ALTERNATIVE |
 |---|---|---|---|
-| D-01 | The product, the repository, the workspace root package, every package scope (`@corridor/*`), every environment variable prefix (`CORRIDOR_`), every route path and every asset filename use **CORRIDOR**. The token `EXODUS`/`exodus` appears nowhere in the shipped repository. | "Exodus" is mass-flight-under-duress imagery, inside the war and physical-pressure source concepts that the project's own lexicon rule module (§ policy package) is built on. A product name that fails its own CI gate is the first credibility hole a critic finds. | Keeping `EXODUS` as the platform name with `CORRIDOR` as the app name |
-| D-01a | **The checkout you are handed may be a directory named `exodus`, on a git remote named `exodus`.** Neither is authoritative. Set the workspace root `package.json` `"name": "corridor"`, scope every package `@corridor/*`, and name the git remote target `corridor` when you push. If you cannot rename the remote, record that in `DECISIONS.md` as an outstanding lexicon-lint exception with the exact remote URL — do not silently let the old name into a package name, a route, an env var, an asset path or a `README` title. | The lexicon rule module runs over package names, route paths, asset filenames **and the repository name**. A directory name inherited from a previous design is not a licence to ship the lexeme. | Renaming only the app and leaving package scopes as `@exodus/*` |
+| D-01 | The product, the repository, the workspace root package, every package scope (`@exodus/*`), every environment variable prefix (`EXODUS_`), every route path and every asset filename use **Exodus**. The token `EXODUS`/`exodus` appears nowhere in the shipped repository. | "Exodus" is mass-flight-under-duress imagery, inside the war and physical-pressure source concepts that the project's own lexicon rule module (§ policy package) is built on. A product name that fails its own CI gate is the first credibility hole a critic finds. | Keeping `EXODUS` as the platform name with `Exodus` as the app name |
+| D-01a | **The checkout you are handed may be a directory named `exodus`, on a git remote named `exodus`.** Neither is authoritative. Set the workspace root `package.json` `"name": "corridor"`, scope every package `@exodus/*`, and name the git remote target `corridor` when you push. If you cannot rename the remote, record that in `DECISIONS.md` as an outstanding lexicon-lint exception with the exact remote URL — do not silently let the old name into a package name, a route, an env var, an asset path or a `README` title. | The lexicon rule module runs over package names, route paths, asset filenames **and the repository name**. A directory name inherited from a previous design is not a licence to ship the lexeme. | Renaming only the app and leaving package scopes as `@exodus/*` |
 | D-02 | Schema-level renames are frozen: `watchlist` → `saved_views`, `target` → `area_of_interest`, `entity` → `place` or `indicator`. | A norm enforced at schema level cannot be reintroduced by a careless contributor; a norm enforced in a style guide can. | Documenting preferred vocabulary in `CONTRIBUTING.md` |
 
 ### 2.2 Language, runtime, package manager, monorepo
@@ -466,7 +466,7 @@ Three rules govern the register:
 | D-04 | **Node 24.21.0 LTS ("Krypton")**, pinned in `.nvmrc` and in root `engines`. | It is the current LTS line. | Node 26.9.0 — it is Current, `lts: false`; do not use it |
 | D-05 | **pnpm 12.4.2** workspaces, with the shared dependency set pinned once in `pnpm-workspace.yaml` under the `catalog` field and consumed as `catalog:` by every package. | Content-addressed store plus strict `node_modules` catches the phantom dependencies that silently break plugin isolation; the catalog is what keeps `apache-arrow` at one version across six packages. | npm/yarn workspaces; per-package duplicated version strings |
 | D-06 | **Turborepo 2.11.2** as the task runner. Ingest is cached per connector package; `turbo run ingest --affected --filter=./packages/connectors/*` selects the intersection of "changed on this branch" and "is a connector". | Content-hash caching plus documented intersection semantics for `--affected` + `--filter` is exactly what per-connector incremental ingest needs. | Nx (its plugin inference fights a repo that has its own plugin concept); Lerna (publish-only); raw pnpm scripts |
-| D-07 | The import graph in the architecture section is **enforced in CI by a real graph checker** (`dependency-cruiser` config), not by convention or by an in-file lint rule. | An in-file pattern matcher cannot see a transitive import. The rule that `connectors/*` may import only `@corridor/contracts` and `@corridor/sdk` is the seam the whole plugin story rests on. | Trusting code review; a Biome/GritQL in-file rule as a substitute for graph analysis |
+| D-07 | The import graph in the architecture section is **enforced in CI by a real graph checker** (`dependency-cruiser` config), not by convention or by an in-file lint rule. | An in-file pattern matcher cannot see a transitive import. The rule that `connectors/*` may import only `@exodus/contracts` and `@exodus/sdk` is the seam the whole plugin story rests on. | Trusting code review; a Biome/GritQL in-file rule as a substitute for graph analysis |
 
 ### 2.3 Application framework, state, validation, styling
 
@@ -474,7 +474,7 @@ Three rules govern the register:
 |---|---|---|---|
 | D-08 | **Vite 8.3.0 + React 19.3.0**, output is a **static directory**. No SSR, no server runtime, no edge functions, no API routes in v1. | The load-bearing constraint is `git clone && pnpm i && pnpm dev` with the network cable out, and `pnpm build` producing a folder any host can serve. Vite satisfies that directly. | Next.js 16.3.5. **[UNVERIFIED]** — the claim that Next *cannot* static-export this well was never re-tested. Justify this decision on the static-host constraint only; **do not write copy or comments asserting a Next.js limitation.** |
 | D-09 | **TanStack Router 1.170.38**, search params validated by Zod. Six routes exist and no seventh ships. | The URL is the shareable state. Typed, validated search params are how the scenario permalink stays honest. | React Router 8.4.0 (acceptable fallback if 1.170.38 does not install; record the substitution in `DECISIONS.md`) |
-| D-10 | **Zustand 5.0.15** for client state, one store per concern. `timeStore` (`{cursor, playing}`) and `workingSet` live in `@corridor/store`. **No component holds local year state.** | One global time cursor is what makes the flipbook a single coherent object rather than 15 components disagreeing about the year. The 60 Hz animation loop writes to a store, never to React state. | Jotai 3.0.0. **[UNVERIFIED]** — the "atom-per-indicator explodes" reasoning was never benchmarked. Do not repeat it as fact; the decision stands on the single-time-cursor requirement. |
+| D-10 | **Zustand 5.0.15** for client state, one store per concern. `timeStore` (`{cursor, playing}`) and `workingSet` live in `@exodus/store`. **No component holds local year state.** | One global time cursor is what makes the flipbook a single coherent object rather than 15 components disagreeing about the year. The 60 Hz animation loop writes to a store, never to React state. | Jotai 3.0.0. **[UNVERIFIED]** — the "atom-per-indicator explodes" reasoning was never benchmarked. Do not repeat it as fact; the decision stands on the single-time-cursor requirement. |
 | D-11 | **Zod 4.6.5** is the only validation library. Every plugin manifest, every ingested row batch, every permalink payload is parsed at the boundary. JSON Schema for non-TypeScript consumers is generated with `z.toJSONSchema()` (confirmed present in 4.6.5). | One schema source produces runtime validation, TS types and the published contract. | Valibot 1.5.0, ArkType 2.2.3. **[UNVERIFIED]** — the ergonomic arguments against them were never benchmarked. The decision stands on `z.toJSONSchema()` being the published-contract mechanism. |
 | D-12 | Design tokens are **CSS custom properties on `:root`** and are the single source of truth for colour, type scale, spacing, radii and borders. **Tailwind CSS 4.3.3** is permitted as a utility layer that reads those tokens; it may not define a colour. Headless primitives: **radix-ui 1.6.7** (popover, dialog, tabs only). Icons: **lucide-react 1.47.0**. | Every contrast ratio in the design is computed against a specific hex value. If a utility framework can invent a colour, the ratios stop being true. | styled-components 6 (it is the reason kepler.gl is excluded, so it must not arrive by another door); CSS-in-JS runtimes generally |
 | D-13 | **Biome 2.5.14** is the formatter and primary linter (`biome ci .`, zero warnings). One **ESLint** config exists for exactly one purpose: a `no-restricted-syntax` rule banning `Date.now()` outside `packages/kernel/clock` and `Math.random()` anywhere in `packages/kernel`. | One fast binary for formatting and lint; one tiny second config for the determinism rule, because determinism is a correctness property and deserves a hard gate. Inline disables are forbidden. | Adding ESLint as the general linter; enforcing determinism by code review |
@@ -529,7 +529,7 @@ Every version in this block is pinned exactly and installed together. A mismatch
 | D-39 | **`packages/contracts` and the connector template are Apache-2.0.** Everything else is **AGPL-3.0-or-later**. | The patent grant matters for third parties implementing the interface; copyleft matters for the product so a vendor cannot close it and resell it to ministries. | MIT or Apache-2.0 throughout; AGPL throughout including the contracts |
 | D-40 | The README states AGPL **§13's actual scope**: the offer of Corresponding Source runs to *all* users interacting with a modified version remotely over a network, **including internal ones**. There is no "public" qualifier. | Telling an institution the obligation "only triggers publicly" is false, and being caught being false about your own licence is fatal for a trust product. The accurate reassurance is that a ministry's internal users are all inside the ministry. | Repeating the common "public network use" paraphrase |
 | D-41 | **REUSE 3.3 via `REUSE.toml`**, `reuse lint` in CI. **DCO sign-off (`git commit -s`), not a CLA.** | DEP5 is deprecated and the two are mutually exclusive, so `REUSE.toml` is the only correct choice. A CLA deters exactly the institutional and academic contributors this project needs. | A DEP5 `.reuse/dep5` file; a CLA bot |
-| D-42 | The README states the **OSD clause 5 and 6 trade-off out loud**: a use-restricted licence forfeits the open-source designation, and this project does not add use restrictions to its licence. Its ethical rules live in `@corridor/policy`, which is executable, not in the licence, which is not. | A norm enforced by an importable, unit-tested package ships every time a third party installs it. A norm in a `CONDUCT.md` ships once. | A custom ethical-source licence; hiding the trade-off |
+| D-42 | The README states the **OSD clause 5 and 6 trade-off out loud**: a use-restricted licence forfeits the open-source designation, and this project does not add use restrictions to its licence. Its ethical rules live in `@exodus/policy`, which is executable, not in the licence, which is not. | A norm enforced by an importable, unit-tested package ships every time a third party installs it. A norm in a `CONDUCT.md` ships once. | A custom ethical-source licence; hiding the trade-off |
 | D-43 | **Redress is a shipped artifact**: `.github/ISSUE_TEMPLATE/harm-report.yml`, a monitored address, a **30-day response SLA**, the power to de-publish a layer, and a public de-publication log. | A trust product with no complaint path is a claim. | A `SECURITY.md` and nothing else |
 | D-44 | **Viewer privacy**: zero third-party scripts, cookieless self-hosted analytics if any, 7-day retention, IP truncated to **/24 IPv4 and /32 IPv6**. | A /48 IPv6 prefix can still single out a household; /32 is the truncation that actually anonymises. | /48 IPv6 truncation; any hosted analytics SDK |
 
@@ -917,7 +917,7 @@ Every column in every table declares a `UnitId` in the manifest. An undeclared u
 | GHS-POP | persons per 1 km² Mollweide pixel | sum to H3 r3 → `persons`; area from `h3-js cellArea(h3,'km2')` → `km2` | Raw counts read as density; r3 cell areas vary enough to invert the reading |
 | Eurostat, UNHCR numerics | strings, and `"-"` | coerce; `"-"` → **null, never 0** | A sentinel rendered as zero |
 
-**The dimensionless-ratio rule.** `assertSameUnit(a, b)` is called before every division in `@corridor/kernel`. M1's `H_k = ((r_k / t_k) − 1) · P / T` requires `r_k` and `t_k` in the *same* per-capita unit so the ratio is dimensionless. This is the form that structurally prevents the factor-of-1,000 error: you never multiply a per-1,000 rate by population without dividing by 1,000, because the type system will not let you divide `per_1000_pop` by `persons`.
+**The dimensionless-ratio rule.** `assertSameUnit(a, b)` is called before every division in `@exodus/kernel`. M1's `H_k = ((r_k / t_k) − 1) · P / T` requires `r_k` and `t_k` in the *same* per-capita unit so the ratio is dimensionless. This is the form that structurally prevents the factor-of-1,000 error: you never multiply a per-1,000 rate by population without dividing by 1,000, because the type system will not let you divide `per_1000_pop` by `persons`.
 
 #### Missing data
 
@@ -936,7 +936,7 @@ The chain has five links and no gaps.
 
 **2. Stamping.** `transform()` is pure and stamps every `Fact` with `source_id`, `vintage_date`, `latency_days`, `estimate_kind`, `license_id`, `redistributable`, plus `obs_flag` and `conf_status` where the source supplies them. `snapshot:build` rejects a row missing any of the six with `MissingProvenance: <sourceId> row <n> lacks <field>`.
 
-**3. Inheritance.** Any derived value in `@corridor/semantic` calls `inheritProvenance(parts)`, which takes the **worst** `latencyClass`, the **worst** `estimateKind`, the **oldest** `vintageDate`, the **largest** `latencyDays`, the logical **AND** of `redistributable`, and the union of `sourceIds` and `licenseIds`. The badness orders are declared once, as const arrays, and are the only orders used:
+**3. Inheritance.** Any derived value in `@exodus/semantic` calls `inheritProvenance(parts)`, which takes the **worst** `latencyClass`, the **worst** `estimateKind`, the **oldest** `vintageDate`, the **largest** `latencyDays`, the logical **AND** of `redistributable`, and the union of `sourceIds` and `licenseIds`. The badness orders are declared once, as const arrays, and are the only orders used:
 
 - `latencyClass`: `live < daily < periodic < annual < modelled < projected`
 - `estimateKind`: `observed < observed_flagged < modelled < extrapolated < assumed_zero`
@@ -1452,17 +1452,17 @@ Note the two schema-level gates: `budget.totalBytes` cannot exceed the cap, and 
 
 ## 4. Ontology and semantic layer
 
-This section defines the object model that every other part of CORRIDOR is a view over. Build it first inside `packages/contracts` and `packages/semantic`; every panel, layer, model and route in §3 and §6 reads it and nothing else.
+This section defines the object model that every other part of Exodus is a view over. Build it first inside `packages/contracts` and `packages/semantic`; every panel, layer, model and route in §3 and §6 reads it and nothing else.
 
 Read three sentences before you write a line of it:
 
 1. **The ontology is a type system and a registry. It is not a page generator.** Decision 15 and kill-list item 15 stand: there are no `/o/{typeId}/{objectId}` routes, no generated object pages, no `/graph`. Six routes exist. The ontology's job is to make a *new dataset* a data change instead of a code change — not to spawn screens.
 2. **The ontology adds no fourth plugin contract.** §6 ships exactly three (`DataSource`, `MapLayer`, `Model`). Object types, link types and indicator specs are *data*, validated by Zod schemas in `packages/contracts`, emitted into `snapshot/manifest.json` by `pnpm snapshot:build`, and loaded by `packages/registry` at boot.
-3. **The word `entity` is banned in identifiers by `@corridor/policy` rule module 4** (`entity → place|indicator`). Use the Foundry vocabulary instead: *object type, property, link type, function*. §6 writes `buildAttributeCube` as generic over `(entityPairId, year, value)`; **the field ships as `pairId`.** It is the same field. Do not reintroduce `entityPairId` anywhere — `pnpm check:policy` fails the build on it.
+3. **The word `entity` is banned in identifiers by `@exodus/policy` rule module 4** (`entity → place|indicator`). Use the Foundry vocabulary instead: *object type, property, link type, function*. §6 writes `buildAttributeCube` as generic over `(entityPairId, year, value)`; **the field ships as `pairId`.** It is the same field. Do not reintroduce `entityPairId` anywhere — `pnpm check:policy` fails the build on it.
 
 ### 4.1 Foundry vocabulary, mapped
 
-| Palantir Foundry term | CORRIDOR artefact | Where it lives |
+| Palantir Foundry term | Exodus artefact | Where it lives |
 |---|---|---|
 | Object type | `ObjectTypeSpec` (nine of them, §4.2) | `packages/contracts/src/ontology/object-types.ts` |
 | Property | `Fact` rows keyed by `IndicatorSpec.id`, plus a small fixed set of intrinsic fields on each object | `packages/contracts/src/ontology/facts.ts` |
@@ -1577,7 +1577,7 @@ export interface Corridor {
   readonly spineRank: number | null;
   /**
    * EXACTLY TWO POINTS, both ADM0 centroids. There is no waypoint field and never
-   * will be. Great-circle tessellation to 32 points happens in @corridor/globe at
+   * will be. Great-circle tessellation to 32 points happens in @exodus/globe at
    * render time and is never persisted. Zod refinement asserts length === 2.
    */
   readonly endpoints: readonly [readonly [number, number], readonly [number, number]];
@@ -1636,7 +1636,7 @@ export interface WorldEvent {
 }
 ```
 
-Cohort carries one further invariant, enforced by the query planner in `semantic` and by `@corridor/policy` rule module 6: **a Cohort may be crossed with a `Place` of kind `country` and nothing finer.** `crossTab(cohortId, placeId)` returns a `PolicyVerdict{deny, code, body}` for any `placeId` whose kind is `admin1` or `h3cell`. That is the nationality × sub-ADM0 ban expressed once, in the ontology, instead of in every panel.
+Cohort carries one further invariant, enforced by the query planner in `semantic` and by `@exodus/policy` rule module 6: **a Cohort may be crossed with a `Place` of kind `country` and nothing finer.** `crossTab(cohortId, placeId)` returns a `PolicyVerdict{deny, code, body}` for any `placeId` whose kind is `admin1` or `h3cell`. That is the nationality × sub-ADM0 ban expressed once, in the ontology, instead of in every panel.
 
 ### 4.5 Link types
 
@@ -1780,7 +1780,7 @@ export const higherIsBetter = (i: IndicatorSpec): boolean => i.direction === 'hi
 
 Three registry-level bans, each with a test in §4.11:
 
-- **No composite.** `composite: false` is a literal type. There is no `dependsOn`, no `weights`, no `compute(inputs)`. An indicator is a measurement bound to one source measure, or it does not exist. Cross-indicator arithmetic happens in `@corridor/kernel` (M1–M5), where it is named, seeded and refusable.
+- **No composite.** `composite: false` is a literal type. There is no `dependsOn`, no `weights`, no `compute(inputs)`. An indicator is a measurement bound to one source measure, or it does not exist. Cross-indicator arithmetic happens in `@exodus/kernel` (M1–M5), where it is named, seeded and refusable.
 - **No normalisation for scoring.** `DisplayScale` sets a ramp domain. It does not z-score, min-max or quantile anything into a unitless index. The research pack's ACI weighting, and every DPI-style weight vector, are author constructions with no literature behind them and are out of scope (§5, "Not implemented").
 - **No hard-coded coverage integers.** Country counts move with every WDI/WHO refresh. `MeasuredCoverage` is written at build. `/sources` renders it. Any source file containing a literal country count for an indicator fails `check:policy`.
 
@@ -1884,7 +1884,7 @@ export interface ScenarioObject {
 }
 ```
 
-Serialised as `base64url(deflate-raw(json))` — `CompressionStream` supports gzip/deflate/deflate-raw only, never zstd. Keep the blob under ~2 KB so links survive mail gateways. The tray that holds these is `saved_views`; the identifier `watchlist` is banned by `@corridor/policy` rule module 4.
+Serialised as `base64url(deflate-raw(json))` — `CompressionStream` supports gzip/deflate/deflate-raw only, never zstd. Keep the blob under ~2 KB so links survive mail gateways. The tray that holds these is `saved_views`; the identifier `watchlist` is banned by `@exodus/policy` rule module 4.
 
 ### 4.9 Resolution: the crosswalk is ontology, not a dict
 
@@ -2095,7 +2095,7 @@ Every row is a test that exists and runs in CI.
 
 ## 5. The calculator: capacity, pressure, flows, matching and scenarios
 
-This section specifies every computation CORRIDOR performs, and every computation it refuses to perform. Both are deliverables. You implement the first set in `packages/kernel`; you render the second set as prose on `/methods`, bound to tests that fail if the code ever appears.
+This section specifies every computation Exodus performs, and every computation it refuses to perform. Both are deliverables. You implement the first set in `packages/kernel`; you render the second set as prose on `/methods`, bound to tests that fail if the code ever appears.
 
 The heading of this section names seven capabilities. Three exist as code, one exists as a degraded form of itself, and three exist only as refusals. Resolve the mapping now and do not revisit it:
 
@@ -2109,7 +2109,7 @@ The heading of this section names seven capabilities. Three exist as code, one e
 | (f) Scenario simulation over a time horizon | **Replaced by replay + two named WPP variants + a permalink** | §5.9 |
 | (g) The allocation optimiser | **Refused, rendered in full including its solver and budget** | `/methods#allocation`, §5.10 |
 
-Two further kernel models — `M3` (cross-model disagreement) and `M4` (coverage asymmetry) — are specified here as well, because `@corridor/kernel` is one package and all five models share the contracts in §5.1. Their visual encoding is specified elsewhere; their arithmetic is specified here.
+Two further kernel models — `M3` (cross-model disagreement) and `M4` (coverage asymmetry) — are specified here as well, because `@exodus/kernel` is one package and all five models share the contracts in §5.1. Their visual encoding is specified elsewhere; their arithmetic is specified here.
 
 ### 5.1 Shared contracts, and the rule that every output states its own ignorance
 
@@ -2654,7 +2654,7 @@ Banned strings — `capacity limit`, `carrying capacity`, `maximum`, `threshold`
 
 ### 5.5 M3 — cross-model disagreement, and M4 — coverage asymmetry
 
-Specified here because they live in `@corridor/kernel`. Their visual encoding is specified in the rendering section; encode nothing here.
+Specified here because they live in `@exodus/kernel`. Their visual encoding is specified in the rendering section; encode nothing here.
 
 #### 5.5.1 M3 — disagreement on the period grid
 
@@ -2947,7 +2947,7 @@ Add a fourth, which is the one that would have cost a week: **the LP relaxation 
 >
 > A critical study of the Dutch deployment, based on freedom-of-information requests, found that the system "prioritises aggregate optimisation over individual opportunities," with disproportionate risk of discrimination on the basis of ethnicity, gender or marital status, and that it reduced the capacity of both refugees and caseworkers to contest an automated decision.
 >
-> So: we did not build it. Its output is a ranked shortlist of destinations for people. On a targeting-tool axis, absence beats mitigation, and a per-term decomposition of an invented weight vector is fake precision in its purest form. The `Model` contract in this repository is the seam. A third party can implement one against the public software development kit and will inherit every policy rule in `@corridor/policy` by construction — which is a better outcome than us shipping it with a disclaimer.
+> So: we did not build it. Its output is a ranked shortlist of destinations for people. On a targeting-tool axis, absence beats mitigation, and a per-term decomposition of an invented weight vector is fake precision in its purest form. The `Model` contract in this repository is the seam. A third party can implement one against the public software development kit and will inherit every policy rule in `@exodus/policy` by construction — which is a better outcome than us shipping it with a disclaimer.
 
 ### 5.11 The full test and budget ledger
 
@@ -3293,7 +3293,7 @@ These five are what a screenshot must show. Nothing else animates.
 
 | Refused | Why |
 |---|---|
-| **GPU-advected particle flow field / animated arc pulses** | The data is annual. A particle implies continuous movement at sub-annual resolution the source does not have. §1: "they animate particles. CORRIDOR animates nothing except the time cursor." Do not subclass `ArcLayer`, do not inject `DECKGL_FILTER_COLOR`, do not add a `uTime` uniform. |
+| **GPU-advected particle flow field / animated arc pulses** | The data is annual. A particle implies continuous movement at sub-annual resolution the source does not have. §1: "they animate particles. Exodus animates nothing except the time cursor." Do not subclass `ArcLayer`, do not inject `DECKGL_FILTER_COLOR`, do not add a `uTime` uniform. |
 | **Bloom / hex-binned pressure bloom / emissive pulses** | Bloom's only subject was the live incident layer, which is now corpus replay. Glowing chrome over replayed data is the exact freshness lie the latency-class rules exist to prevent. `@luma.gl/effects` ships `bloom`; do not import it. |
 | **Chromatic aberration** | It exists only as a `chromaticAberration` prop of the bloom lens pipeline, and colour-fringing a data visualisation displaces marks by a subpixel amount that means nothing. It is a correctness bug wearing a film grade. |
 | **Terminator / day-night / night-lights texture** | It requires a wall clock (`Date.now()` is banned outside `packages/kernel/clock`), it implies a sub-annual time base that contradicts the year cursor, the VIIRS/Black Marble redistribution terms are unestablished, and it costs a multi-MB texture against a 40 MiB cap. |
@@ -3551,7 +3551,7 @@ One shell, identical on all six routes. The map canvas is the interface; chrome 
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ TOPBAR 40px  CORRIDOR │ Globe  Sources  Methods │ AS OF 2019-11-04 (oldest) │⌘K│ ← 40px, surface-0
+│ TOPBAR 40px  Exodus │ Globe  Sources  Methods │ AS OF 2019-11-04 (oldest) │⌘K│ ← 40px, surface-0
 ├───────────────┬──────────────────────────────────────────┬───────────────────┤
 │ LAYER STACK   │                                          │ CONTEXT RAIL      │
 │ 280px         │                                          │ 320px             │
@@ -3825,7 +3825,7 @@ Rules: opens in ≤1 frame from a prebuilt index (258 places, 12,000 corridors, 
 
 ```ts
 // packages/ui/src/figure/types.ts
-import type { Refusal } from '@corridor/contracts';
+import type { Refusal } from '@exodus/contracts';
 
 export const ESTIMATE_KINDS = [
   'observed', 'observed_flagged', 'modelled', 'extrapolated', 'assumed_zero',
@@ -3935,7 +3935,7 @@ export interface LayerStackItem {
   readonly geometry: 'text' | 'point' | 'arc' | 'h3' | 'choropleth' | 'graticule' | 'sphere';
   readonly lockedVisible: boolean;        // true for sphere and graticule
   readonly channels: readonly LayerChannel[];
-  /** Channels computed in @corridor/semantic and merged AFTER encode().
+  /** Channels computed in @exodus/semantic and merged AFTER encode().
    *  A layer author cannot set these, and the panel cannot expose a control for them. */
   readonly platformComputed: readonly ('opacity' | 'estimateKindStyling' | 'latencyClass')[];
   readonly legend: LegendSpec;
@@ -4227,7 +4227,7 @@ Five states, one component, all named and testable. **The v1 degradation ladder 
 | **Empty** | A valid query with no data | The figure renders `—` with its badge in place. The panel does **not** disappear and does **not** collapse. A country with nine em-dashes is the correct render. |
 | **Refusal** | A kernel `Refusal` | `<RefusalSentence>`: the reason as prose, the `code` in 11px mono beneath it, and the contributing `sourceIds` as links. Example, verbatim in kind: *"No unique solution: the projected support ratio is not monotone in annual intake for this age profile."* Never a number, never a bare em-dash, never an interpolation. Handle all eight `RefusalCode` values, including the three added in §12. |
 | **Error** | Parse failure, manifest mismatch, bad permalink, unknown route | `<NonIdealState>` naming what failed, the observed-vs-expected values, and one action. Never a generic "Something went wrong". A manifest-hash mismatch names both hashes. |
-| **Policy denial** | A `PolicyVerdict{deny}` from `@corridor/policy` | `<PolicyVerdictSheet>`: the refusal sentence, then the machine-readable body rendered as formatted JSON in a `<pre>`, then a link to the rule. The **403-not-451** specification is documented here and the verdict function is tested; there is no server in v1 to return a status code, so do not render a status code as though one were returned. |
+| **Policy denial** | A `PolicyVerdict{deny}` from `@exodus/policy` | `<PolicyVerdictSheet>`: the refusal sentence, then the machine-readable body rendered as formatted JSON in a `<pre>`, then a link to the rule. The **403-not-451** specification is documented here and the verdict function is tested; there is no server in v1 to return a status code, so do not render a status code as though one were returned. |
 
 ### 7.11 Accessibility
 
@@ -4285,7 +4285,7 @@ A real `<table>` with a `<caption>` naming the year and the sort, `scope` on eve
 
 ### 7.12 Binding anti-dehumanising visual constraints
 
-These are not guidance. Each is enforced by a named `@corridor/policy` rule module over source, copy, the **built bundle**, package names, route paths, asset filenames and the repository name, and each has a test that fails on a seeded violation.
+These are not guidance. Each is enforced by a named `@exodus/policy` rule module over source, copy, the **built bundle**, package names, route paths, asset filenames and the repository name, and each has a test that fails on a seeded violation.
 
 | # | Constraint | Enforcement |
 |---|---|---|
@@ -4412,7 +4412,7 @@ Six classes. The union in `packages/contracts/src/latency.ts` is authoritative a
 | `daily` | near-real-time | Source cadence 24 hours or less; newest observation under 7 days old | `cadence === 'daily'` |
 | `periodic` | recent | An official release on a biweekly, monthly or quarterly schedule, with a stated publication lag | `cadence` in `monthly`, `quarterly` |
 | `annual` | annual | An annual official estimate or register count; typically 6 to 24 months stale | `cadence` in `annual`, `quinquennial`, `frozen` |
-| `modelled` | modelled | Computed by a model, never observed. No decay: stamped with the vintage of its **oldest** input | any `estimate_kind` of `modelled` or `extrapolated`, or any `@corridor/kernel` output |
+| `modelled` | modelled | Computed by a model, never observed. No decay: stamped with the vintage of its **oldest** input | any `estimate_kind` of `modelled` or `extrapolated`, or any `@exodus/kernel` output |
 | `projected` | projected | A scenario or counterfactual with no truth value at any date | WPP variant differentials, the constant-PSR bisection result |
 
 ```ts
@@ -4620,7 +4620,7 @@ A single Node process, roughly 150 lines plus the three connector modules it reu
 
 ```ts
 // apps/live/src/collector.ts
-import type { Signal } from '@corridor/contracts';
+import type { Signal } from '@exodus/contracts';
 
 export type LadderState = 'LIVE' | 'CACHED' | 'SNAPSHOT' | 'UNAVAILABLE';
 
@@ -4673,7 +4673,7 @@ Rules:
 3. **Degraded layers do not disappear.** After five consecutive failures the legend entry is struck through and shows the last-good `fetchedAt`; the marks stay drawn from the last good payload. A vanishing conflict layer reads as no conflict.
 4. **Killing the process walks the ladder without a layer vanishing:** `LIVE` to `CACHED` (client still holds signals, bloom off, chrome changes) to `SNAPSHOT` (client falls back to the committed corpus). A Playwright test kills the sidecar mid-session and asserts the mark count never drops to zero and that `LIVE` chrome is gone within one reconnect interval.
 5. **Bloom is enabled only while the ladder state is exactly `LIVE`.** `CACHED`, `SNAPSHOT`, `UNAVAILABLE` and replay all disable it. Pulsing chrome over replayed data is the exact freshness lie this whole section exists to prevent (decision 11).
-6. **No clock outside the clock module.** `apps/live` takes its `now` from `@corridor/kernel/clock`, injected. `Date.now()` outside `packages/kernel/clock` is an ESLint error with no inline disable permitted; `Math.random()` is banned in `kernel` entirely and injected here so replay is reproducible.
+6. **No clock outside the clock module.** `apps/live` takes its `now` from `@exodus/kernel/clock`, injected. `Date.now()` outside `packages/kernel/clock` is an ESLint error with no inline disable permitted; `Math.random()` is banned in `kernel` entirely and injected here so replay is reproducible.
 
 ### 8.8 Transport: SSE, and why not WebSockets
 
@@ -4743,7 +4743,7 @@ Replay adds no ladder state. In replay the ladder is pinned to `SNAPSHOT` and a 
 
 Replay is day one, not an afterthought. It is what makes `pnpm dev` with `--network=none` render the whole product, and it is what makes `transform()` unit-testable for sources the build agent cannot reach.
 
-**The record-replay client in `packages/sdk` is the only way any connector touches the network.** A connector that calls `fetch` directly fails `check:dogfood`, which is restricted to `connectors/*` and permits imports of `@corridor/contracts` and `@corridor/sdk` and nothing else.
+**The record-replay client in `packages/sdk` is the only way any connector touches the network.** A connector that calls `fetch` directly fails `check:dogfood`, which is restricted to `connectors/*` and permits imports of `@exodus/contracts` and `@exodus/sdk` and nothing else.
 
 ```ts
 // packages/sdk/src/replay-client.ts
@@ -4774,7 +4774,7 @@ export interface ReplayClient {
 Layout and environment:
 
 - Corpus root `./corpus/{sourceId}/{ISO8601}.{ext}`, with `./corpus/manifest.json` holding one `CorpusEntry` per artefact.
-- `CORRIDOR_MODE=replay CORRIDOR_CLOCK=2026-09-18T21:30:00Z CORRIDOR_SEED=1` makes every connector read from the corpus, makes `now()` the injected constant and seeds every injected `rand`. The `EXODUS` prefix is retired from env vars along with the name (decision 1); the lexicon module walks env var names.
+- `EXODUS_MODE=replay EXODUS_CLOCK=2026-09-18T21:30:00Z EXODUS_SEED=1` makes every connector read from the corpus, makes `now()` the injected constant and seeds every injected `rand`. The `EXODUS` prefix is retired from env vars along with the name (decision 1); the lexicon module walks env var names.
 - **Frame determinism:** same corpus plus same clock plus same seed produces byte-identical `Signal[]` and byte-identical layer props. A test runs the pipeline twice and asserts deep equality of the serialised layer props, not merely of the row count.
 - `pnpm live --replay --speed=60` drives the SSE stream from the corpus in recorded order, 60x wall clock, with timestamps derived from the injected clock. This is how the live layer is demonstrated on hotel wifi. The chrome reads `REPLAY`, never `LIVE`.
 
@@ -4899,7 +4899,7 @@ corridor/
 └─ e2e/                              # Playwright: smoke.spec.ts, offline.spec.ts, a11y.spec.ts, visual.spec.ts
 ```
 
-Package names are `@corridor/<dir>`; connectors are `@corridor/connector-<id>`. No package, route, env var, asset filename or identifier anywhere contains `exodus`, and the lexicon rule module walks all of them.
+Package names are `@exodus/<dir>`; connectors are `@exodus/connector-<id>`. No package, route, env var, asset filename or identifier anywhere contains `exodus`, and the lexicon rule module walks all of them.
 
 ---
 
@@ -4916,7 +4916,7 @@ Package names are `@corridor/<dir>`; connectors are `@corridor/connector-<id>`. 
 | `semantic` | AGPL-3.0-or-later | joins, `align()`, latency/licence/vintage inheritance, coverage-asymmetry application, `buildAttributeCube()`, platform-channel merge | Layer styling decisions an author could make |
 | `ui` | AGPL-3.0-or-later | `<Figure>`, `<Provenance>`, `<RefusalSentence>`, tokens, `locales/en.json` | Raw numbers outside `<Figure>`; any `fetch` |
 | `globe` | AGPL-3.0-or-later | the seven-layer deck.gl stack, camera, picking, post-FX (`fxaa` + `vignette`) | Data access; `transitions` on any data accessor |
-| `connectors/*` | per-source | `plan`/`fetch`/`transform`, fixtures, schema assertion, traps + their regression tests | Imports of anything but `@corridor/contracts`, `@corridor/sdk`, `zod` |
+| `connectors/*` | per-source | `plan`/`fetch`/`transform`, fixtures, schema assertion, traps + their regression tests | Imports of anything but `@exodus/contracts`, `@exodus/sdk`, `zod` |
 | `apps/web` | AGPL-3.0-or-later | six routes, four overlays, composition | Direct connector or store-internal imports |
 | `apps/cli` | AGPL-3.0-or-later | `ingest`, `snapshot:build|measure|verify`, `bundle:verify`, `gen:connector`, `check:policy` | Being required at runtime by `apps/web` |
 
@@ -4970,10 +4970,10 @@ module.exports = {
 };
 ```
 
-2. **`pnpm check:dogfood`** — restricted to `packages/connectors/*` only. It reads each connector's `package.json` and fails unless `dependencies` is a subset of `{"@corridor/contracts", "@corridor/sdk", "zod"}`. This catches what the import graph cannot: a connector that reaches for `axios` or `papaparse`.
+2. **`pnpm check:dogfood`** — restricted to `packages/connectors/*` only. It reads each connector's `package.json` and fails unless `dependencies` is a subset of `{"@exodus/contracts", "@exodus/sdk", "zod"}`. This catches what the import graph cannot: a connector that reaches for `axios` or `papaparse`.
 3. **pnpm strictness** — `.npmrc` sets `engine-strict=true` and `save-exact=true`; workspace deps use `workspace:*`; all third-party versions live in the `catalog:` block of `pnpm-workspace.yaml` so `apache-arrow`, `zod` and `deck.gl` cannot skew between packages.
 
-*Accept:* a seeded `import { arcLayer } from '@corridor/globe'` inside `packages/kernel/src/headroom.ts` fails `pnpm check:deps` by rule name; a seeded `"papaparse"` in a connector's `package.json` fails `pnpm check:dogfood` naming the package and the offending dependency.
+*Accept:* a seeded `import { arcLayer } from '@exodus/globe'` inside `packages/kernel/src/headroom.ts` fails `pnpm check:deps` by rule name; a seeded `"papaparse"` in a connector's `package.json` fails `pnpm check:dogfood` naming the package and the offending dependency.
 
 ---
 
@@ -5297,15 +5297,15 @@ This is the connector CI generates, ingests and snapshots at M8 to prove the sea
 
 ```json
 {
-  "name": "@corridor/connector-demo-wdi-gdp",
+  "name": "@exodus/connector-demo-wdi-gdp",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./src/index.ts",
   "corridor": { "kind": "datasource", "id": "demo-wdi-gdp", "apiVersion": "1.0" },
   "dependencies": {
-    "@corridor/contracts": "workspace:*",
-    "@corridor/sdk": "workspace:*",
+    "@exodus/contracts": "workspace:*",
+    "@exodus/sdk": "workspace:*",
     "zod": "catalog:"
   },
   "scripts": { "test": "vitest run" }
@@ -5353,10 +5353,10 @@ export const EXPECTED_KEYS = ['countryiso3code', 'date', 'value', 'indicator'] a
 import { z } from 'zod';
 import {
   defineSource, SchemaDriftError, decodeUtf8, sha256Hex,
-} from '@corridor/sdk';
+} from '@exodus/sdk';
 import type {
   Fact, FetchPlan, IngestCtx, Iso3, RawArtifact, SourceId,
-} from '@corridor/contracts';
+} from '@exodus/contracts';
 import { WdiPage, EXPECTED_KEYS } from './schema.js';
 import { WDI_BASE, INDICATOR, PAGE_SIZE } from './endpoints.js';
 
@@ -5458,7 +5458,7 @@ export { SOURCE_ID, sha256Hex };
 
 ```ts
 import { describe, expect, it } from 'vitest';
-import { fixtureArtifact, sourceConformance } from '@corridor/sdk/testing';
+import { fixtureArtifact, sourceConformance } from '@exodus/sdk/testing';
 import source, { SOURCE_ID } from './index.js';
 
 describe(SOURCE_ID, () => {
@@ -5499,11 +5499,11 @@ Reference implementations for the other two contracts, for shape:
 
 ```ts
 // packages/kernel/src/models/radiation.ts  (M5)
-import { defineModel } from '@corridor/sdk';
+import { defineModel } from '@exodus/sdk';
 export default defineModel({ /* id, inputs, outputs, assumptions */ }, (inputs, world, _seed) => { /* … */ });
 
 // packages/globe/src/layers/corridor-path.ts  (one of three MapLayer impls)
-import { defineLayer } from '@corridor/sdk';
+import { defineLayer } from '@exodus/sdk';
 export default defineLayer({ id: 'corridor-path', geometry: 'arc' }, (facts) => ({
   geometry: 'arc', positions: tessellate(facts, 32), indices: null,
   channels: { width: perCapitaWidth(facts), color: directionColor(facts),
@@ -5532,20 +5532,20 @@ The web app never imports a connector. It reads `snapshot/manifest.json` + Parqu
 
 | Variable | Values | Default | Effect |
 |---|---|---|---|
-| `CORRIDOR_MODE` | `replay` \| `record` \| `live` | `replay` | Replay reads `corpus/` + connector `fixtures/` and opens no socket. `record` and `live` are only legal under `apps/cli`. |
-| `CORRIDOR_CLOCK` | ISO-8601 instant | `manifest.builtAt` | Freezes `IngestCtx.now()` and the AS-OF chip for deterministic tests. |
-| `CORRIDOR_SNAPSHOT_DIR` | path | `./snapshot` | Where the CLI writes and the dev server serves the bundle from. |
-| `CORRIDOR_BASE_PATH` | url path | `/` | Static-host sub-path; becomes Vite `base`. |
-| `CORRIDOR_LOCALE` | BCP-47 | `en` | Only `en` ships in v1 (§9.14). |
-| `CORRIDOR_CORRIDOR_LIMIT` | integer | `manifest.corridorCount` | M0 escape hatch for the 12,000 → 6,000 → 4,000 ladder. Logged on screen when it overrides the manifest. |
-| `CORRIDOR_PERF_TRACE` | `0` \| `1` | `0` | Emits `window.__corridorFrames` for the Playwright fps harness. |
+| `EXODUS_MODE` | `replay` \| `record` \| `live` | `replay` | Replay reads `corpus/` + connector `fixtures/` and opens no socket. `record` and `live` are only legal under `apps/cli`. |
+| `EXODUS_CLOCK` | ISO-8601 instant | `manifest.builtAt` | Freezes `IngestCtx.now()` and the AS-OF chip for deterministic tests. |
+| `EXODUS_SNAPSHOT_DIR` | path | `./snapshot` | Where the CLI writes and the dev server serves the bundle from. |
+| `EXODUS_BASE_PATH` | url path | `/` | Static-host sub-path; becomes Vite `base`. |
+| `EXODUS_LOCALE` | BCP-47 | `en` | Only `en` ships in v1 (§9.14). |
+| `EXODUS_CORRIDOR_LIMIT` | integer | `manifest.corridorCount` | M0 escape hatch for the 12,000 → 6,000 → 4,000 ladder. Logged on screen when it overrides the manifest. |
+| `EXODUS_PERF_TRACE` | `0` \| `1` | `0` | Emits `window.__corridorFrames` for the Playwright fps harness. |
 
 Rules, all enforced:
 
-1. The prefix is `CORRIDOR_`. `EXODUS_*` is a lexicon violation and fails `pnpm check:policy`.
+1. The prefix is `EXODUS_`. `EXODUS_*` is a lexicon violation and fails `pnpm check:policy`.
 2. `process.env` / `import.meta.env` may be read **only** in `packages/sdk/src/env.ts` and `apps/cli/src/env.ts`. Everything else receives values as arguments. Enforced by a Biome GritQL plugin in `tools/grit/`.
-3. Both env modules Zod-parse into a frozen typed object and **fail fast on an invalid value** (`CORRIDOR_MODE=repaly` exits 1 naming the variable, the bad value and the legal set). An *unknown* `CORRIDOR_*` variable prints one warning and continues — a typo must not brick a clone.
-4. The browser build inlines only `CORRIDOR_BASE_PATH`, `CORRIDOR_LOCALE` and `CORRIDOR_PERF_TRACE`. Any other variable reaching the client bundle fails `bundle:verify`.
+3. Both env modules Zod-parse into a frozen typed object and **fail fast on an invalid value** (`EXODUS_MODE=repaly` exits 1 naming the variable, the bad value and the legal set). An *unknown* `EXODUS_*` variable prints one warning and continues — a typo must not brick a clone.
+4. The browser build inlines only `EXODUS_BASE_PATH`, `EXODUS_LOCALE` and `EXODUS_PERF_TRACE`. Any other variable reaching the client bundle fails `bundle:verify`.
 5. Data shape is configuration too, and it lives in `snapshot/manifest.json` — never in a TypeScript constant. `corridorCount`, `years` and `animatedAttributes` are read, never assumed.
 
 ---
@@ -5556,8 +5556,8 @@ Root `package.json` scripts, verbatim names — CI, docs and every acceptance cr
 
 | Script | Runs | Gate |
 |---|---|---|
-| `pnpm dev` | `turbo run dev --filter=@corridor/web` | Boots from `snapshot/` with zero network requests |
-| `pnpm build` | `turbo run build --filter=@corridor/web` | Static output at `apps/web/dist/`; **excludes `apps/placement`** |
+| `pnpm dev` | `turbo run dev --filter=@exodus/web` | Boots from `snapshot/` with zero network requests |
+| `pnpm build` | `turbo run build --filter=@exodus/web` | Static output at `apps/web/dist/`; **excludes `apps/placement`** |
 | `pnpm typecheck` | `tsc -b --noEmit` | Zero errors across project references |
 | `pnpm lint` | `biome ci .` | Zero warnings |
 | `pnpm test` | `vitest run --coverage` | See §9.10 thresholds |
@@ -5587,7 +5587,7 @@ Root `package.json` scripts, verbatim names — CI, docs and every acceptance cr
     "typecheck":{ "dependsOn": ["^build"], "outputs": [] },
     "ingest":   { "cache": true, "inputs": ["src/**", "fixtures/**"], "outputs": ["../../.cache/raw/**"] }
   },
-  "globalEnv": ["CORRIDOR_MODE", "CORRIDOR_CLOCK", "CORRIDOR_BASE_PATH", "CORRIDOR_LOCALE"]
+  "globalEnv": ["EXODUS_MODE", "EXODUS_CLOCK", "EXODUS_BASE_PATH", "EXODUS_LOCALE"]
 }
 ```
 
@@ -5646,7 +5646,7 @@ Goldens are never rewritten by `vitest -u`. `pnpm golden:accept --reason "<text>
 
 **Network isolation, mechanically.** `vitest.setup.ts` at the root replaces `globalThis.fetch` with a thrower. A test that needs bytes uses `fixtureArtifact()`. The offline Playwright project runs in a container with networking disabled, and `e2e/offline.spec.ts` additionally asserts `performance.getEntriesByType('resource')` contains zero cross-origin entries during a full 1990→2023 scrub.
 
-**Shared conformance suite** (`@corridor/sdk/testing`), run by every connector: manifest parses and `apiVersion` major is `1`; `plan()` is synchronous, deterministic across two calls, and returns only `https:` URLs; `transform()` is called twice on the same artefact and returns deep-equal output; every returned `Fact` parses against the `Fact` schema, carries a non-empty `licenseId`, and has `redistributable === false` **only** if the source manifest says so; a mutated artefact throws `SchemaDriftError` and not a `TypeError`.
+**Shared conformance suite** (`@exodus/sdk/testing`), run by every connector: manifest parses and `apiVersion` major is `1`; `plan()` is synchronous, deterministic across two calls, and returns only `https:` URLs; `transform()` is called twice on the same artefact and returns deep-equal output; every returned `Fact` parses against the `Fact` schema, carries a non-empty `licenseId`, and has `redistributable === false` **only** if the source manifest says so; a mutated artefact throws `SchemaDriftError` and not a `TypeError`.
 
 ---
 
@@ -5696,7 +5696,7 @@ Scheduled data refresh (`cron`) runs `pnpm ingest && pnpm snapshot:build && pnpm
 
 | Budget | Value | Measured by | On failure |
 |---|---|---|---|
-| Globe orbit | **≥55fps median** over a 10s scripted orbit, SwiftShader | `tools/perf/globe-orbit.spec.ts` | Drop corridors 12,000 → 6,000 → 4,000 via `CORRIDOR_CORRIDOR_LIMIT`, record in `DECISIONS.md` |
+| Globe orbit | **≥55fps median** over a 10s scripted orbit, SwiftShader | `tools/perf/globe-orbit.spec.ts` | Drop corridors 12,000 → 6,000 → 4,000 via `EXODUS_CORRIDOR_LIMIT`, record in `DECISIONS.md` |
 | Full-range scrub 1990→2023 | **≥55fps median, no frame >50ms, zero network requests** | same harness + resource-timing assertion | Build fails; do not "fix" it by adding easing |
 | Committed bundle | **≤40 MiB total**, per-table bytes printed | `pnpm snapshot:measure` | Apply the §4 cut ladder in order: corpus 72h→24h · corridors 12,000→6,000 · asylum 24→12 months · drop `stock_mean`/`stock_std` |
 | Initial JS (non-globe routes) | ≤350 KiB gzip | `size-limit` | Fails |
@@ -5704,7 +5704,7 @@ Scheduled data refresh (`cron`) runs `pnpm ingest && pnpm snapshot:build && pnpm
 | GPU attribute buffers | 34 years × `corridorCount` × {width f32, dashArray 2×f32, color u8×4} ≈ 8 MB | unit assertion on `buildAttributeCube` byte-lengths | Fails if the cube allocates per-frame |
 | Cold boot to first globe paint | <3s at 4× CPU throttle **(lab proxy, not a Core Web Vitals pass — label it as such wherever it is reported)** | Playwright | Fails |
 
-`CORRIDOR_PERF_TRACE=1` makes the app push frame durations onto `window.__corridorFrames`; the harness reads it, computes median and max, and writes `docs/smoke/perf-<sha>.json` for the M0 evidence set.
+`EXODUS_PERF_TRACE=1` makes the app push frame durations onto `window.__corridorFrames`; the harness reads it, computes median and max, and writes `docs/smoke/perf-<sha>.json` for the M0 evidence set.
 
 ---
 
@@ -5737,7 +5737,7 @@ services:
     command: sh -c "pnpm test:e2e --project=offline"
 ```
 
-**Static export is the product.** `pnpm build` writes `apps/web/dist/` containing `index.html`, hashed assets, a copy of `snapshot/` and a `404.html` that is a byte copy of `index.html` (GitHub Pages history fallback). All asset URLs are relative to `CORRIDOR_BASE_PATH`. Verify deployability with `npx http-server apps/web/dist` and nothing else — if it needs a runtime, you have built the wrong thing. Parquet is fetched with plain `fetch()` + `Range` where the host supports it; no service worker, no server-side anything, and `pnpm build` must not emit `apps/placement` (§12: `grep -r "highs" apps/web/dist/` returns nothing).
+**Static export is the product.** `pnpm build` writes `apps/web/dist/` containing `index.html`, hashed assets, a copy of `snapshot/` and a `404.html` that is a byte copy of `index.html` (GitHub Pages history fallback). All asset URLs are relative to `EXODUS_BASE_PATH`. Verify deployability with `npx http-server apps/web/dist` and nothing else — if it needs a runtime, you have built the wrong thing. Parquet is fetched with plain `fetch()` + `Range` where the host supports it; no service worker, no server-side anything, and `pnpm build` must not emit `apps/placement` (§12: `grep -r "highs" apps/web/dist/` returns nothing).
 
 ---
 
@@ -5807,7 +5807,7 @@ Also permitted, and nothing else: `SECURITY.md` (90-day disclosure window), `BAC
 6. `pnpm snapshot:measure` prints a per-table byte table and fails above 40 MiB.
 7. `docker compose run --rm verify` renders the whole product with `network_mode: none`.
 8. Every golden file in §9.10 exists and passes; `vitest -u` cannot rewrite one.
-9. The built bundle contains no third-party origin and no `CORRIDOR_*` value beyond the three inlined ones.
+9. The built bundle contains no third-party origin and no `EXODUS_*` value beyond the three inlined ones.
 10. The repository contains no markdown file outside the §9.16 list.
 
 ---
@@ -5818,7 +5818,7 @@ This section is normative. Every rule is a MUST or a MUST NOT and every rule nam
 
 Three framing facts you carry into every rule below:
 
-1. **CORRIDOR holds no personal data and has no server.** v1 is a static site. There is no query planner to reject a request at runtime, no HTTP status to return, no account, no telemetry endpoint. Policy is therefore enforced at three earlier points: **ingest** (rows that violate policy are never written), **build** (the linter and the AST rule fail CI), and **render** (`<Figure>`, the coverage channel and the refusal renderer). You do not build a runtime policy server to satisfy any rule in this section.
+1. **Exodus holds no personal data and has no server.** v1 is a static site. There is no query planner to reject a request at runtime, no HTTP status to return, no account, no telemetry endpoint. Policy is therefore enforced at three earlier points: **ingest** (rows that violate policy are never written), **build** (the linter and the AST rule fail CI), and **render** (`<Figure>`, the coverage channel and the refusal renderer). You do not build a runtime policy server to satisfy any rule in this section.
 2. **Absence is the countermeasure.** The allocation optimiser, the departure forecast, the origin-pressure index, route geometry, ADM1 people layers and every person-shaped type are cut. Do not re-add any of them as a guarded, gated or flagged variant. A guarded targeting feature is still a targeting feature.
 3. **Project policy is labelled as project policy.** The aggregation floors, the significant-figure caps, the redress SLA and the latency rules below are ours. No standards body publishes them. You MUST NOT present any of them in the UI or in the repo as an obligation inherited from IOM, UNHCR, OCHA or the IASC. The externally anchored rules are separately marked.
 
@@ -5826,12 +5826,12 @@ Three framing facts you carry into every rule below:
 
 | # | Rule | Enforced by | Acceptance |
 |---|---|---|---|
-| E1 | The schema MUST NOT contain a person-shaped type. The banned field tokens are `person`, `individual`, `case_id`, `applicant`, `biometric`, `name`, `dob`. | `@corridor/policy` rule module 3 (banned schema fields), same file walk as the lexicon rule | `pnpm check:policy` exits non-zero on a seeded `case_id` field in any Zod schema or TS interface under `packages/` |
+| E1 | The schema MUST NOT contain a person-shaped type. The banned field tokens are `person`, `individual`, `case_id`, `applicant`, `biometric`, `name`, `dob`. | `@exodus/policy` rule module 3 (banned schema fields), same file walk as the lexicon rule | `pnpm check:policy` exits non-zero on a seeded `case_id` field in any Zod schema or TS interface under `packages/` |
 | E2 | No connector may write a row with a granularity finer than ADM0 for any movement measure, and no connector may write a coordinate pair for a person, body or incident involving a person. `iom-mm` coordinates are dropped inside `transform()`, before the fact rows exist. | connector `transform()` + ingest assertion | a `transform()` unit test on the recorded `iom-mm` fixture asserts the output `Fact[]` contains no `lat`/`lon`/`geometry` key and that row count equals distinct `(country, year)` pairs |
 | E3 | `iom-mm` MUST NOT bind to any map layer, in v1 or ever. It renders as an ADM0 annual count in a `<Figure>` on `/place/:iso3` and a row on `/sources`. | layer registry | a test asserts no entry in the layer registry has `sourceId === 'iom-mm'` |
 | E4 | The `Cmd+K` palette indexes exactly four namespaces: `>` actions, `#` datasets, `@` countries, `~` corridors. It MUST NOT index any fifth namespace, and no namespace may resolve to a person, a case or a household. | palette index builder | a test enumerates the palette index types and asserts the set equals those four |
-| E5 | Movement geometry is a 2-vertex great circle between ADM0 centroids, tessellated for rendering only. Any movement `LineString` with more than 2 authored vertices MUST be rejected at construction. Tessellation to 32 points happens inside the layer, after the geometry has passed the guard. | Zod refinement in `@corridor/contracts` | a unit test constructs a 3-vertex movement geometry and asserts the Zod parse throws with a named error; a second test asserts the 32-point tessellated path still passes because it is derived, not authored |
-| E6 | Nationality or country-of-origin MUST NOT be crossed with geography finer than ADM0. Ethnicity, religion, sexual orientation, health status and political opinion are not layers, not columns and not filters at any granularity. | `@corridor/policy` verdict function | the verdict function returns `allow: false` with code `SubAdm0Nationality` for a seeded ADM1-crossed request, and `SpecialCategory` for a seeded religion dimension; both tested as pure functions |
+| E5 | Movement geometry is a 2-vertex great circle between ADM0 centroids, tessellated for rendering only. Any movement `LineString` with more than 2 authored vertices MUST be rejected at construction. Tessellation to 32 points happens inside the layer, after the geometry has passed the guard. | Zod refinement in `@exodus/contracts` | a unit test constructs a 3-vertex movement geometry and asserts the Zod parse throws with a named error; a second test asserts the 32-point tessellated path still passes because it is derived, not authored |
+| E6 | Nationality or country-of-origin MUST NOT be crossed with geography finer than ADM0. Ethnicity, religion, sexual orientation, health status and political opinion are not layers, not columns and not filters at any granularity. | `@exodus/policy` verdict function | the verdict function returns `allow: false` with code `SubAdm0Nationality` for a seeded ADM1-crossed request, and `SpecialCategory` for a seeded religion dimension; both tested as pure functions |
 | E7 | Gridded people layers MUST NOT go finer than H3 resolution 3, and MUST render `pop / area_km2`, never a raw count. | `ghs-h3` connector + layer encode | a test asserts every cell id in the snapshot has resolution 3 and that the layer's value accessor divides by `area_km2` |
 
 The verdict function is a pure function with no server behind it. Ship it and test it anyway: it is the seam a third-party `Model` or `MapLayer` inherits.
@@ -6049,7 +6049,7 @@ These are binding on the WebGL layer and on every chart.
    - **Protected attributes out of the outcome model**, with a proxy audit; the adversary-AUC gate of 0.65 is a project convention, not a standard, and must be labelled as chosen.
 5. **The contested evidence, both sides, at equal weight.** Report the headline effects as *off-policy backtest estimates, contested*: Science 359(6373):325–329 (2018) approximately +40% (US) and +75% (CH, 2013 entrants 15% to 26%); Annie MOORE, Operations Research 69(5):1468–1486 (2021), +22% to +38% relative on the 496-person HIAS 2017 cohort of whom 159 found work within 90 days. Then, in the same block and at the same visual weight: **arXiv 2605.06686** (robustness across IPW/AIPW estimators, gains "consistent in magnitude in all scenarios") **and arXiv 2602.08892** (Bastani, Bastani and McLaughlin — model-based evaluation reports gains around 60% in a refugee-matching simulation constructed so the true effect is zero, "on par with improvements of 22–75% reported in the literature"). Citing the first without the second is the exact failure this product exists to prevent, and a content test asserts both arXiv ids appear.
 6. **The critique**: Alajak, Burnazoglu, Leurs and van Schie, *Social Inclusion* 14 (2026), art. 10923, doi:10.17645/si.10923 — the Dutch GeoMatch deployment "prioritises aggregate optimisation over individual opportunities", with disproportionate discrimination risk on ethnicity, gender and marital status, and reduced capacity for refugees and caseworkers to contest decisions.
-7. **The AI Act boundary.** CORRIDOR implements no function in **Annex III point 7** of Regulation (EU) 2024/1689 — no polygraph-like inference; no assessment of a risk, including a security risk, a risk of irregular migration or a health risk, posed by a person intending to enter or having entered a Member State; no assistance in examining asylum, visa or residence applications; no detection, recognition or identification of natural persons. Nor any Art. 5(1)(g) biometric categorisation. Dates, citable: Art. 5 prohibitions applicable since 2 February 2025; new Art. 5(1)(ba)/(bb) from 2 December 2026; Annex III high-risk obligations from 2 December 2027 and Annex I from 2 August 2028, per **Regulation (EU) 2026/1744** (Digital Omnibus on AI), OJ 24 July 2026. You MUST NOT create `/compliance/ai-act/` or a DPIA template: those are artefacts of a high-risk system, and building them would imply we built one.
+7. **The AI Act boundary.** Exodus implements no function in **Annex III point 7** of Regulation (EU) 2024/1689 — no polygraph-like inference; no assessment of a risk, including a security risk, a risk of irregular migration or a health risk, posed by a person intending to enter or having entered a Member State; no assistance in examining asylum, visa or residence applications; no detection, recognition or identification of natural persons. Nor any Art. 5(1)(g) biometric categorisation. Dates, citable: Art. 5 prohibitions applicable since 2 February 2025; new Art. 5(1)(ba)/(bb) from 2 December 2026; Annex III high-risk obligations from 2 December 2027 and Annex I from 2 August 2028, per **Regulation (EU) 2026/1744** (Digital Omnibus on AI), OJ 24 July 2026. You MUST NOT create `/compliance/ai-act/` or a DPIA template: those are artefacts of a high-risk system, and building them would imply we built one.
 
 The `Model` contract carries the inheritance seam. Every model, including a third party's, declares its prohibited uses, and `/methods` renders them.
 
@@ -6232,7 +6232,7 @@ attributed to UN ESA/P/WP.160, Table 8. Do not paraphrase it, do not soften it, 
 One file, repo root, linked from the README's first screen. It is a normative artefact, not a status report or a design document, which is why it exists alongside the five build documents. Fourteen sections, in this order, each one sentence or more, none of them empty:
 
 1. **Why this file is first.** The tool models human beings; the scope of the commitment.
-2. **What CORRIDOR is, and the five things it will never be.** No individual data. No route intelligence. No screening or scoring of persons or groups. No departure forecast or origin pressure index. No EU AI Act Annex III(7) function.
+2. **What Exodus is, and the five things it will never be.** No individual data. No route intelligence. No screening or scoring of persons or groups. No departure forecast or origin pressure index. No EU AI Act Annex III(7) function.
 3. **Frameworks we hold ourselves to**, as a table with links and retrieval dates and the specific obligation derived from each — IOM Data Protection Principles; UNHCR General Policy on Personal Data Protection and Privacy (UNHCR/HCP/2022/02); OCHA Data Responsibility Guidelines (finalised October 2021, current edition 2025); IASC Operational Guidance on Data Responsibility (first endorsed February 2021, current version April 2023); Centre for Humanitarian Data Guidance Note #1 on Statistical Disclosure Control (August 2019); the Signal Code (January 2017); GDPR; Regulation (EU) 2024/1689 as amended by Regulation (EU) 2026/1744; non-refoulement; ECHR Protocol No. 4 Art. 4 and Charter Art. 19(1); UNGA Res. 3449 (XXX). **With an explicit line separating external obligations from our own chosen numbers.**
 4. **Data responsibility.** The floors in 10.2 reproduced verbatim and labelled project policy; the HDX rule adopted (global risk under 3%, no record violating 3-anonymity) and marked as not yet triggered because v1 ingests no microdata; the frozen-suppression ledger and where to read it; what we do not collect about viewers.
 5. **Dual-use risk register**, the table in 10.3, each row linking to the file that implements it.
@@ -6312,7 +6312,7 @@ Rules that bind the build:
 
 ## 11. Build plan, acceptance criteria and agent operating rules
 
-You are building CORRIDOR in one sustained effort. There is no follow-up conversation, no reviewer to unblock you, and no second chance to ask what a term means. This section tells you the order to build in, the exact condition that closes each milestone, the rules you operate under while building, and the rubric you run before you are allowed to say you are done.
+You are building Exodus in one sustained effort. There is no follow-up conversation, no reviewer to unblock you, and no second chance to ask what a term means. This section tells you the order to build in, the exact condition that closes each milestone, the rules you operate under while building, and the rubric you run before you are allowed to say you are done.
 
 Read §11.1 before you run anything. Then run the five commands in §11.12.
 
@@ -6398,7 +6398,7 @@ This is the only milestone that runs with the network on. Decision 5 in §9 puts
 | M0.2 | Every column in `orig,dest,year,stock_mean,stock_std,mig_prev,mig_prev_std,mig_brth,mig_brth_std` is present in the observed header. | `pnpm gate:m0 --check spine-schema` | Exact set match, or **the §4 fallback is applied and D-00n records the failure with date and HTTP status** |
 | M0.3 | `_GlobeView` renders an opaque ocean sphere, 258 ADM0 polygons, 12,000 32-point dashed `PathLayer` paths and 41,162 H3 r3 hexes. | `pnpm test:perf` | All four layers present in the rendered frame; screenshots written |
 | M0.4 | ≥55fps median over a 10s scripted orbit on integrated graphics, no frame >50ms. | `pnpm test:perf` | Median ≥55fps. **On failure drop corridors 12,000 → 6,000, re-measure, then → 4,000. Record the drop as a decision. Do not lower the fps target.** |
-| M0.5 | `apache-arrow@21.2.0` → plain typed arrays → deck.gl `data: {length, attributes}` renders without `@geoarrow/deck.gl-geoarrow`. | `pnpm test --filter @corridor/globe -t arrow-binary` | Layer renders from a binary attribute payload |
+| M0.5 | `apache-arrow@21.2.0` → plain typed arrays → deck.gl `data: {length, attributes}` renders without `@geoarrow/deck.gl-geoarrow`. | `pnpm test --filter @exodus/globe -t arrow-binary` | Layer renders from a binary attribute payload |
 | M0.6 | `pnpm snapshot:measure` prints real compressed bytes per table and a total. | `pnpm snapshot:measure` | Total < 40 MiB, **or the §4 cut ladder is applied in order (corpus 72h→24h, corridors 12k→6k, asylum 24mo→12mo, drop `stock_mean`/`stock_std` from the render table) and the applied rungs are recorded** |
 | M0.7 | The repository, packages, route paths, env vars and asset filenames contain no banned lexeme, including `exodus`. | `pnpm check:policy` | Exit 0 |
 
@@ -6424,7 +6424,7 @@ This is the only milestone that runs with the network on. Decision 5 in §9 puts
 | M1.2 | The 2 MiB demo slice rebuilds with the network off. | `pnpm snapshot:build --from-fixtures` under `--network=none` | Exit 0, byte-identical across two runs |
 | M1.3 | `license_id` and `redistributable` are non-null on every fact row. | `pnpm test -t fact-licence-columns` | Zero violating rows; a seeded null fails ingest with a named error |
 | M1.4 | `bundle:verify` refuses a deliberately inserted UNHCR row and names the reason on stderr. | `pnpm test -t bundle-verify-hostile` | Non-zero exit, stderr contains the source id and the licence reason |
-| M1.5 | The crosswalk resolves five namespaces with the collisions unit-tested. | `pnpm test --filter @corridor/semantic -t xwalk` | `AUS`(Austria≠Australia), `CHI`(China), `UK`/`GB`, `EL`/`GR`, `XK`, Sudan-2011 all asserted with validity ranges |
+| M1.5 | The crosswalk resolves five namespaces with the collisions unit-tested. | `pnpm test --filter @exodus/semantic -t xwalk` | `AUS`(Austria≠Australia), `CHI`(China), `UK`/`GB`, `EL`/`GR`, `XK`, Sudan-2011 all asserted with validity ranges |
 | M1.6 | WPP normalisation is unit-tested. | `pnpm test -t wpp-normalisation` | `SRB/100`, `ASFR/1000`, `population×1000`; a test asserts the male birth share is ≈0.514, **not 0.991** |
 | M1.7 | The WPP reader is multi-member gzip. | `pnpm test -t wpp-gzip-members` | Row count **> 600,000**. A single-member reader returns 634 bytes and no error; this test is the only thing that catches it |
 | M1.8 | Abel & Cohen is summed across `sex` and filtered to `type='outward'`. | `pnpm test -t abel-cohen-aggregation` | Summing across `{outward,return,transit}` fails the test; omitting the sex sum fails the test |
@@ -6448,7 +6448,7 @@ This is the only milestone that runs with the network on. Decision 5 in §9 puts
 | id | Statement | Command | Pass |
 |---|---|---|---|
 | M2.1 | Cold clone renders ≥190 countries with networking disabled at the container level. | `pnpm test:e2e -g @offline-boot` | ≥190 ADM0 features rendered, zero network requests recorded |
-| M2.2 | H3 renders `pop / area_km2`, never raw count. | `pnpm test --filter @corridor/globe -t h3-density` | Accessor divides by `area_km2`; `highPrecision` is `'auto'`, and a test fails if it is forced `false` |
+| M2.2 | H3 renders `pop / area_km2`, never raw count. | `pnpm test --filter @exodus/globe -t h3-density` | Accessor divides by `area_km2`; `highPrecision` is `'auto'`, and a test fails if it is forced `false` |
 | M2.3 | Corridor opacity is coverage-asymmetry `min(C_o, C_d)`, computed in `semantic`. | `pnpm test -t opacity-not-authorable` | A type-level test proves `MapLayer.encode()` cannot reach the opacity field |
 | M2.4 | The opaque ocean sphere is present and far-side marks do not bleed through. | `pnpm test:e2e -g @ocean-sphere` | Screenshot comparison at two antipodal cameras |
 | M2.5 | Only the three-slot map palette carries people. | `pnpm check:policy` | No warm hue bound to a people-valued accessor |
@@ -6497,7 +6497,7 @@ This is the only milestone that runs with the network on. Decision 5 in §9 puts
 | M4.2 | A missing value renders `—` with a badge, never `0`. | `pnpm test -t figure-missing` | Fixture with a deliberately absent value renders the em dash and the badge |
 | M4.3 | `/sources` lists every source in the manifest with its `plan()` URLs, measured bundle size and traps. | `pnpm test:e2e -g @sources-complete` | Manifest ids ⊆ rendered ids; `plan()` output rendered as the exact URLs the system would fetch |
 | M4.4 | The three exclusion rows are present by name. | `pnpm test:e2e -g @sources-exclusions` | UN DESA, UNHCR and ACLED rows render with their reasons |
-| M4.5 | Each trap paragraph is bound by id to a fixture-backed test that fails if the trap stops being true. | `pnpm test --filter @corridor/connectors -t traps` | Every `trapId` in copy has a matching test; an orphan id on either side fails |
+| M4.5 | Each trap paragraph is bound by id to a fixture-backed test that fails if the trap stops being true. | `pnpm test --filter @exodus/connectors -t traps` | Every `trapId` in copy has a matching test; an orphan id on either side fails |
 
 **Exit.** `git tag m4-green`. At this tag the product is already demonstrable to a stranger. Everything after this widens it.
 
@@ -6551,7 +6551,7 @@ This is the only milestone that runs with the network on. Decision 5 in §9 puts
 |---|---|---|
 | M8.1 | `pnpm gen:connector demo-wdi-gdp && pnpm ingest --only demo-wdi-gdp && pnpm snapshot:build` runs in CI. | Sequence exits 0 |
 | M8.2 | That sequence produces **zero diffs outside `packages/connectors/demo-wdi-gdp/` and `snapshot/`**. | `git status --porcelain` filtered; any other path fails |
-| M8.3 | `check:dogfood` passes over `connectors/*`. | Connectors import only `@corridor/contracts` and `@corridor/sdk` |
+| M8.3 | `check:dogfood` passes over `connectors/*`. | Connectors import only `@exodus/contracts` and `@exodus/sdk` |
 | M8.4 | `Shift+G` yields a sorted, keyboard-navigable top-25 table with `role="application"` and `aria-describedby`. | axe-core + keyboard traversal e2e |
 | M8.5 | axe-core is clean on all six routes. | Zero violations at serious or critical |
 | M8.6 | No encoding is colour-alone. | Each encoded channel pairs hue with size, opacity or pattern |
@@ -6675,7 +6675,7 @@ Ranked by likelihood. Each has a guard; the guard's check id is the thing that s
 | 10 | Annualising Abel & Cohen, or comparing it to the spine at annual resolution. | Period totals only. Six period points. Step function held constant within each period. Corridor-years outside the shared grid return `Refusal('NoSharedPeriodGrid')`. | M5.1 |
 | 11 | Summing Abel & Cohen across `type ∈ {outward, return, transit}` (triple-counts) or forgetting to sum across `sex` (there is no total row). | Both are unit-tested at M1. Do not disable the test. | M1.8 |
 | 12 | A single-member gzip reader on WPP — returns 634 bytes and no error. | The assertion is row count **> 600,000**, not "no exception". | M1.7 |
-| 13 | Ethics treated as documentation: a `CONDUCT.md` and some CI scripts. | `@corridor/policy` is an importable, unit-tested package with six rule modules behind one file walk, running over source, copy, the built bundle, package names, route paths and asset filenames. A third-party layer inherits every rule without its author reading anything. | M7.6, M6.4 |
+| 13 | Ethics treated as documentation: a `CONDUCT.md` and some CI scripts. | `@exodus/policy` is an importable, unit-tested package with six rule modules behind one file walk, running over source, copy, the built bundle, package names, route paths and asset filenames. A third-party layer inherits every rule without its author reading anything. | M7.6, M6.4 |
 | 14 | Twelve bespoke CI scripts. | One binary, six rule modules, one file walk. If a gate needs its own project, it does not ship in v1. | R9, M7.6 |
 | 15 | A licence contamination event: one IDMC, UNESCO or ACLED file in `snapshot/` or `corpus/` makes the whole data component non-redistributable. | `license_id` and `redistributable` are mandatory columns; `bundle:verify` refuses and names the reason. Never disable it "temporarily". | M1.3, M1.4 |
 | 16 | Git LFS, for anything, for any reason. | Forking and pulling counts against the parent repository's bandwidth until `git clone` breaks for everyone. Tier B is a GitHub Release asset. | R9 (non-reopenable) |
@@ -6766,7 +6766,7 @@ After command 5, scaffold the workspace to the §6 package layout, write `packag
 
 ---
 
-## 12. The Placement & Solidarity module (`@corridor/placement`)
+## 12. The Placement & Solidarity module (`@exodus/placement`)
 
 ### 12.0 Why this section exists, and what it overrides
 
@@ -6778,8 +6778,8 @@ The objection was nonetheless correct about the *mechanism* of harm. So this mod
 
 | Design rule | Amendment |
 |---|---|
-| OUT #1 — no allocation solver | **Reversed.** The solver is IN, as `@corridor/placement`, a separate workspace package and a separate route tree. |
-| "no person-shaped type anywhere in the schema" | **Preserved for `@corridor/semantic`.** The public globe, `/place`, `/corridor`, `/headroom`, `/sources` and `/methods` still contain zero person-shaped types. Person-shaped types exist **only** in `@corridor/placement`, under a different schema, a different auth scope and a different visual chrome. The two never share a table, a store or a build artefact. |
+| OUT #1 — no allocation solver | **Reversed.** The solver is IN, as `@exodus/placement`, a separate workspace package and a separate route tree. |
+| "no person-shaped type anywhere in the schema" | **Preserved for `@exodus/semantic`.** The public globe, `/place`, `/corridor`, `/headroom`, `/sources` and `/methods` still contain zero person-shaped types. Person-shaped types exist **only** in `@exodus/placement`, under a different schema, a different auth scope and a different visual chrome. The two never share a table, a store or a build artefact. |
 | `RefusalCode` closed at five codes | **Extended to eight**, and closed again. The three additions are named in §12.6. No ninth. |
 
 `OUT #4` (no live layer) and `OUT #7` (no Scenario Studio, no Compare, no Brief) **remain cut** and are not reopened by this section.
@@ -6809,11 +6809,11 @@ apps/
 
 Enforce the separation mechanically, not by convention:
 
-- **Dependency rule, CI-enforced:** `@corridor/semantic` and `@corridor/kernel` MUST NOT import from `@corridor/placement/*`. Add the edge to the existing dependency-cruiser config as a `forbidden` rule. *Accept:* a seeded import in `packages/semantic` fails `pnpm check:deps` with a named error.
+- **Dependency rule, CI-enforced:** `@exodus/semantic` and `@exodus/kernel` MUST NOT import from `@exodus/placement/*`. Add the edge to the existing dependency-cruiser config as a `forbidden` rule. *Accept:* a seeded import in `packages/semantic` fails `pnpm check:deps` with a named error.
 - **Chrome rule:** every route under `apps/placement` renders a persistent, non-dismissible banner. In sandbox mode the words are exactly `SIMULATION — NOT AN ORDER`. *Accept:* a Playwright test asserts the banner is present and has a computed opacity ≥ 0.9 on every placement route, and that no runtime flag promotes a sandbox scenario into an operational batch.
 - **Auth rule:** operational mode requires an authenticated actor with role `caseworker` or `supervisor`. The public build (`pnpm build`) **excludes `apps/placement` entirely** — the deployed static site that carries the globe ships no placement code at all. *Accept:* `pnpm build && grep -r "highs" dist/` returns nothing.
 
-### 12.3 Ontology extension (lives only in `@corridor/placement/schema`)
+### 12.3 Ontology extension (lives only in `@exodus/placement/schema`)
 
 ```ts
 /** A case is the atomic unit of assignment: the family that moves together.
@@ -6840,7 +6840,7 @@ export type CapacityDim = (typeof CAPACITY_DIMS)[number];
 
 export interface Locality {
   readonly id: LocalityId;
-  readonly placeId: PlaceId;              // FK into @corridor/semantic Place — the ONLY join between the two schemas
+  readonly placeId: PlaceId;              // FK into @exodus/semantic Place — the ONLY join between the two schemas
   readonly capacity: Readonly<Record<CapacityDim, number>>;  // c_jd
   readonly servicesOffered: readonly ServiceReq[];
   readonly languagesServed: readonly Iso639_3[];
@@ -6859,7 +6859,7 @@ export interface ConsentRecord {
 
 ### 12.4 The models: M6–M9
 
-These continue the M1–M5 sequence in `@corridor/kernel` and follow the same contract — pure functions, deterministic, `Result<T> = Ok<T> | Refusal`, every returned figure carrying its provenance.
+These continue the M1–M5 sequence in `@exodus/kernel` and follow the same contract — pure functions, deterministic, `Result<T> = Ok<T> | Refusal`, every returned figure carrying its provenance.
 
 #### M6 — candidate generation and hard gates
 
@@ -6977,7 +6977,7 @@ Do not let the UI promise choice it cannot deliver. It offers a **menu and a vet
 10. **No individual-level export, ever.** The API emits opaque pseudonyms. Public aggregates suppress cells with **k < 10**. *Accept:* a request for any cell with n < 10 returns `SUPPRESSED`, not a number. No individual tracks, no vessel-level or person-level trajectories, anywhere, ever.
 11. **Simulation and operations are physically separated** — §12.2.
 12. **EU AI Act posture — state it accurately or not at all.** An allocation tool used by a public authority sits **adjacent to**, and not squarely inside, Annex III point 7 of Regulation (EU) 2024/1689, whose four limbs cover polygraphs, risk assessment of a natural person entering a Member State, assisting authorities examining asylum/visa/residence applications, and person detection or identification in the migration context. A placement optimiser for people already admitted is not plainly any of them. **Get a legal opinion; do not assert the classification in either direction.** Annex III high-risk obligations now apply from **2 December 2027** following Regulation (EU) 2026/1744 (Digital Omnibus on AI, OJ 24 July 2026). Build the Art. 9–15 artefacts now, as files: `/compliance/ai-act/{risk-management,data-governance,technical-documentation,logging,human-oversight,accuracy-robustness}.md`, plus a GDPR Art. 35 DPIA template pre-filled for this processing.
-13. **Licensing honesty.** This module follows the repository's licence split (§9/§10): **AGPL-3.0-or-later**, like all other application code, with only `contracts` and `connectors/_template` under Apache-2.0 for the patent grant. Do not license `@corridor/placement` permissively — the network-use clause is the point for a module institutions will self-host. Say plainly in `GOVERNANCE.md` that OSI-approved licences **cannot** restrict fields of use (Open Source Definition clause 6) and that ethical-source licences such as Hippocratic are not OSI-approved — **governance is the real control, not licence text**. Name an ethics board and a documented deployment-support-revocation process.
+13. **Licensing honesty.** This module follows the repository's licence split (§9/§10): **AGPL-3.0-or-later**, like all other application code, with only `contracts` and `connectors/_template` under Apache-2.0 for the patent grant. Do not license `@exodus/placement` permissively — the network-use clause is the point for a module institutions will self-host. Say plainly in `GOVERNANCE.md` that OSI-approved licences **cannot** restrict fields of use (Open Source Definition clause 6) and that ethical-source licences such as Hippocratic are not OSI-approved — **governance is the real control, not licence text**. Name an ethics board and a documented deployment-support-revocation process.
 14. **Contestability.** Every placed case gets a human-readable reason sheet and a named route to challenge it. Log challenges; publish the challenge-and-reversal rate. *A system that can allocate but cannot be appealed is a containment planner regardless of its objective function.*
 
 #### 12.6.1 The three new refusal codes

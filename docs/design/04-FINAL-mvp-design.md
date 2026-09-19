@@ -1,4 +1,4 @@
-# CORRIDOR — FINAL MVP DESIGN (v1.0, build-authoritative)
+# Exodus — FINAL MVP DESIGN (v1.0, build-authoritative)
 
 This supersedes all three competing designs. Where it differs from any of them, this document wins. Every "either/or" in the source material is resolved below; nothing is left to the builder's judgement except implementation detail.
 
@@ -10,17 +10,17 @@ This supersedes all three competing designs. Where it differs from any of them, 
 
 **A globe that flipbooks the entire world's bilateral migration system, one year per frame, 1990→2023, at 60fps, offline — and that shows, on the same arc, how much the best available evidence disagrees with itself.**
 
-The spectacle and the epistemics are the same object. Every existing migration globe renders one number per arc, which is a lie, because no bilateral migration number on earth is observed — it is modelled, and two competent models of the same corridor disagree by tens of percent. CORRIDOR renders the disagreement as a visual property of the arc, dims the corridors of states with no statistical office so they cannot borrow the authority of German register data, and renders `—` where the world has no data. It is the first migration tool whose most striking image is an argument about what is not known.
+The spectacle and the epistemics are the same object. Every existing migration globe renders one number per arc, which is a lie, because no bilateral migration number on earth is observed — it is modelled, and two competent models of the same corridor disagree by tens of percent. Exodus renders the disagreement as a visual property of the arc, dims the corridors of states with no statistical office so they cannot borrow the authority of German register data, and renders `—` where the world has no data. It is the first migration tool whose most striking image is an argument about what is not known.
 
 ### Positioning
 
-- **Against the incumbents** (IOM Migration Data Portal, UNHCR RDF, Frontex, JRC Atlas): they are SaaS behind a 403, read-only outputs of someone else's assumptions, and they render modelled and observed figures identically. CORRIDOR is `git clone && pnpm i && pnpm dev` with the network cable out, and it makes `estimate_kind` a visual channel you cannot turn off.
-- **Against the other dark-globe demos**: they animate particles. CORRIDOR animates nothing except the time cursor, under the user's hand, in discrete annual steps, because the data has no sub-annual resolution and implying one is the cheapest available lie.
+- **Against the incumbents** (IOM Migration Data Portal, UNHCR RDF, Frontex, JRC Atlas): they are SaaS behind a 403, read-only outputs of someone else's assumptions, and they render modelled and observed figures identically. Exodus is `git clone && pnpm i && pnpm dev` with the network cable out, and it makes `estimate_kind` a visual channel you cannot turn off.
+- **Against the other dark-globe demos**: they animate particles. Exodus animates nothing except the time cursor, under the user's hand, in discrete annual steps, because the data has no sub-annual resolution and implying one is the cheapest available lie.
 - **Not a decision system.** There is no allocation solver, no placement shortlist, no departure forecast, no origin-side pressure index, and no person-shaped type anywhere in the schema. The absence is rendered as a screen, not buried in a README.
 
 ### The one sentence, twice
 
-**To a minister:** "For every country on earth and every year since 1990, CORRIDOR shows you how many people moved where — and, on the same screen, exactly how much the best available evidence disagrees with itself, so you can see which of these numbers you are allowed to act on."
+**To a minister:** "For every country on earth and every year since 1990, Exodus shows you how many people moved where — and, on the same screen, exactly how much the best available evidence disagrees with itself, so you can see which of these numbers you are allowed to act on."
 
 **To a hacker:** "A deck.gl globe that flipbooks 34 years of the global bilateral migration matrix at 60fps off a 40 MiB committed Parquet bundle with the network disabled, where arc dash density is cross-model disagreement, arc opacity is per-country data coverage, and a CI-enforced AST rule means no number can render outside `<Figure>`."
 
@@ -64,7 +64,7 @@ The spectacle and the epistemics are the same object. Every existing migration g
  *Accept:* `bundle:verify` **refuses** a deliberately inserted UNHCR row and names the reason in its stderr; a `transform()` unit test passes with the network off.
 17. **Accessibility.** `Shift+G` text alternative, `prefers-reduced-motion`, non-colour encoding, `--border-interactive` on every control.
  *Accept:* axe-core clean on every route; `Shift+G` yields a sorted, keyboard-navigable top-25 table with `role="application"` + `aria-describedby`; reduced-motion disables the camera move entirely.
-18. **One policy package (`@corridor/policy`) with one linter binary.** Importable, unit-tested, runs over source, copy, built bundle, package names, route paths and asset filenames.
+18. **One policy package (`@exodus/policy`) with one linter binary.** Importable, unit-tested, runs over source, copy, built bundle, package names, route paths and asset filenames.
  *Accept:* `pnpm check:policy` exits non-zero on a seeded violation of each of its six rule modules.
 
 ### OUT — numbered, each with why and when it comes back
@@ -159,7 +159,7 @@ Each writes to a gitignored path, prints the licence text before running, is exc
 
 ## 5. The exact models in v1
 
-Five. All pure, all seeded, all in `@corridor/kernel`, no I/O, no `Date.now()`, no `Math.random()`. Every model returns `Result<T> = Ok<T> | Refusal`.
+Five. All pure, all seeded, all in `@exodus/kernel`, no I/O, no `Date.now()`, no `Math.random()`. Every model returns `Result<T> = Ok<T> | Refusal`.
 
 ```ts
 type Refusal = { kind: 'refusal'; code: RefusalCode; reason: string; sourceIds: string[] };
@@ -357,7 +357,7 @@ Scenario permalinks: `base64url(deflate-raw(json))` — `CompressionStream` supp
 
 ### One policy package, one linter binary
 
-`@corridor/policy` exports a tested verdict function and six rule modules that share **one file walk** in `pnpm check:policy`. This is the single most important budgeting decision in the build: twelve separate CI scripts are twelve mini-projects; six rule modules behind one walker is one afternoon.
+`@exodus/policy` exports a tested verdict function and six rule modules that share **one file walk** in `pnpm check:policy`. This is the single most important budgeting decision in the build: twelve separate CI scripts are twelve mini-projects; six rule modules behind one walker is one afternoon.
 
 1. **Lexicon** — structured on Mendelsohn & Budak's seven dehumanising source concepts (animal, vermin, parasite, physical pressure, water, commodity, war); UNGA Res. 3449 (XXX)'s "non-documented or irregular migrant workers" as the required form. Runs over source, copy, **the built bundle**, package names, route paths, asset filenames and the repository name.
 2. **Banned strings** — `capacity limit`, `carrying capacity`, `maximum`, `threshold`, `saturation`, `real-time` (adjacent to a stock or flow), `PPML is unbiased`, `confidence interval` (adjacent to disagreement). Same walker, different word list.
@@ -366,7 +366,7 @@ Scenario permalinks: `base64url(deflate-raw(json))` — `CompressionStream` supp
 5. **`<Figure>` AST rule** — no numeric literal or numeric-typed expression renders outside `<Figure>`.
 6. **Geometry + policy verdict** — movement `LineString` with >2 vertices rejected at construction (Zod refinement, unit-tested); nationality × sub-ADM0 returns a `PolicyVerdict{deny, code, body}` rendered as a refusal sheet with the machine-readable body shown as JSON. The **403-not-451** specification (RFC 7725 reserves 451 for legally-compelled blocking) is documented and the *verdict function* is tested; there is no server in v1 to return a status code.
 
-Separately and cheaply: `no-restricted-syntax` ESLint rule banning `Date.now()` outside `packages/kernel/clock`; `dependency-cruiser` config for the import graph; `pnpm check:dogfood` restricted to `connectors/*` only (they may import `@corridor/contracts` + `@corridor/sdk` and nothing else).
+Separately and cheaply: `no-restricted-syntax` ESLint rule banning `Date.now()` outside `packages/kernel/clock`; `dependency-cruiser` config for the import graph; `pnpm check:dogfood` restricted to `connectors/*` only (they may import `@exodus/contracts` + `@exodus/sdk` and nothing else).
 
 Suppression: K=25 at ADM0×ADM0, denominator floor 10,000, complementary suppression, **frozen suppression with an append-only ledger committed as `snapshot/suppression-ledger.json`** and a test asserting append-only. Rounding runs **after** suppression, never instead of it.
 
@@ -442,7 +442,7 @@ Each milestone must run end-to-end from a cold install before the next begins. E
 
 | # | Decision | Reason (one line) | Rejected alternative |
 |---|---|---|---|
-| 1 | Product is **CORRIDOR**; `EXODUS` is retired from repo, packages, env vars and ids | "Exodus" is mass-flight-under-duress imagery in the war/pressure family of the seven source concepts the project's own lexicon lint is built on; a name that fails your own CI gate is the first credibility hole a critic finds | Keeping EXODUS as the platform and CORRIDOR as the app |
+| 1 | Product is **Exodus**; `EXODUS` is retired from repo, packages, env vars and ids | "Exodus" is mass-flight-under-duress imagery in the war/pressure family of the seven source concepts the project's own lexicon lint is built on; a name that fails your own CI gate is the first credibility hole a critic finds | Keeping EXODUS as the platform and Exodus as the app |
 | 2 | **Cut the allocation MILP entirely**; render its absence at `/methods#allocation` | Its output is a ranked placement shortlist over destinations for people; on a targeting-tool axis, absence beats mitigation, and a human-actor-id gate does not fix the epistemics | Shipping it behind a human-actor gate and an adversary-AUC test |
 | 3 | **No fitted models, no placeholder coefficients** | A placeholder coefficient in a dark dashboard becomes a cited coefficient within a week; PPML-as-IRLS and a calibrated nested logit are research results that can swallow the entire budget | Shipping `β_dist`/`β_comlang`/`β_contig` behind a "placeholder" badge |
 | 4 | Spine is **Gaskin & Abel**, with a pre-decided fallback to Abel & Cohen | Only global bilateral source that is annual, CC BY 4.0, and ships per-cell uncertainty — the property the whole product rests on; the fallback exists because an offline agent cannot verify a June 2026 DOI | UN DESA IMS (non-commercial, no derivatives — unshippable) |
@@ -462,7 +462,7 @@ Each milestone must run end-to-end from a cold install before the next begins. E
 | 18 | **The Year Machine is a generic `AttributeCube` driven by `snapshot/manifest.json`** | Pre-quantising 34 GPU buffers around one dataset's top 12,000 corridors makes the spine unswappable and pushes source coupling into the render layer | Hard-coding 12,000 Gaskin & Abel corridors into the renderer |
 | 19 | **Coverage-asymmetry is computed in `semantic`**; layer authors cannot set opacity | If a layer author can choose authority, a plugin can render Gulf corridors with German-register confidence | Making it a layer styling choice |
 | 20 | **One linter binary, six rule modules, one file walk** | A dozen bespoke CI gates are a dozen mini-projects that render no pixels; the same walker with six word lists is one afternoon | Twelve independent CI scripts |
-| 21 | **Ethics ship as `@corridor/policy`, an importable tested package** | A third-party layer inherits every rule without its author reading the doc; a norm that is not executable ships once | `CONDUCT.md` plus CI scripts |
+| 21 | **Ethics ship as `@exodus/policy`, an importable tested package** | A third-party layer inherits every rule without its author reading the doc; a norm that is not executable ships once | `CONDUCT.md` plus CI scripts |
 | 22 | **Recipe connectors: ship the pipe, never the water** (UN DESA, UNHCR) | Testable offline against a recorded fixture, and it turns a licence problem into a build step | An online-only connector that renders UNAVAILABLE |
 | 23 | **`bundle:verify` must refuse a deliberately inserted non-redistributable row and name the reason** | A hostile test of a policy claim, writable in fifteen minutes, proves the licence engine exists instead of asserting it | Asserting the licence gate in prose |
 | 24 | **`snapshot:measure` fails CI above 40 MiB**, with a pre-decided cut ladder | Converts the largest unquantified risk in the plan into a build failure instead of a late surprise | "MEASURE IN WEEK ONE" as an instruction |

@@ -1,4 +1,4 @@
-# Exodus — build brief for CORRIDOR
+# Exodus — build brief for Exodus
 
 This repository does not yet contain an application. It contains the **brief to build one**, and the full, auditable record of how that brief was arrived at.
 
@@ -39,6 +39,6 @@ Every stage is kept, not just the conclusion.
 
 ## Two things worth knowing before you build
 
-**The product name is unsettled.** The design names the product CORRIDOR; the repository is `exodus`. "Exodus" carries considerable baggage in a migration context, which is why the design moved away from it. Settle this before the first commit of application code.
+**The product name is unsettled.** The design names the product Exodus; the repository is `exodus`. "Exodus" carries considerable baggage in a migration context, which is why the design moved away from it. Settle this before the first commit of application code.
 
 **Three capabilities from the original brief were ruled on explicitly**, and `§0.3` of the build prompt records the decisions and overrides any section that argues otherwise: the placement optimiser is **built**; the real-time layer is **cut** (v1 is a static site); cross-country simulations are **cut**.

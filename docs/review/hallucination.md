@@ -8,7 +8,7 @@
 
 **What the paper says** (arXiv:1711.05462, §Results): *"The ANN and XGBoost models **without** a production function **outperform** the same models **with** a production function in 5 out of the 6 metrics."* The production function is `G_i = α·m_i`, a crude constant-share-of-population estimate of origin outflow. Supplying it *constrains and degrades* ML models — which is exactly why the prompt's own table shows 0.21/0.22 with it and 0.43/0.40 without.
 
-The sentence asserts the reverse mechanism: that outflow totals are where the accuracy *lives*. They are where the accuracy is *lost*. This also makes §5.6.1 incoherent — CORRIDOR's radiation null is "given the production function, exactly as in the reference literature," which the copy then frames as inheriting the field's hard part rather than its handicap.
+The sentence asserts the reverse mechanism: that outflow totals are where the accuracy *lives*. They are where the accuracy is *lost*. This also makes §5.6.1 incoherent — Exodus's radiation null is "given the production function, exactly as in the reference literature," which the copy then frames as inheriting the field's hard part rather than its handicap.
 
 **Fix:** replace with the mechanism the paper supports, e.g. *"A model handed a crude origin-outflow production function scores roughly half what the same model scores when it predicts flows directly — which tells you how much of a published CPC is an artefact of the constraint, not of the model."* Then delete the "which is why we do not ship a fitted flow model" clause, which does not follow from either reading.
 

@@ -1,4 +1,4 @@
-## 12. The Placement & Solidarity module (`@corridor/placement`)
+## 12. The Placement & Solidarity module (`@exodus/placement`)
 
 ### 12.0 Why this section exists, and what it overrides
 
@@ -10,8 +10,8 @@ The objection was nonetheless correct about the *mechanism* of harm. So this mod
 
 | Design rule | Amendment |
 |---|---|
-| OUT #1 — no allocation solver | **Reversed.** The solver is IN, as `@corridor/placement`, a separate workspace package and a separate route tree. |
-| "no person-shaped type anywhere in the schema" | **Preserved for `@corridor/semantic`.** The public globe, `/place`, `/corridor`, `/headroom`, `/sources` and `/methods` still contain zero person-shaped types. Person-shaped types exist **only** in `@corridor/placement`, under a different schema, a different auth scope and a different visual chrome. The two never share a table, a store or a build artefact. |
+| OUT #1 — no allocation solver | **Reversed.** The solver is IN, as `@exodus/placement`, a separate workspace package and a separate route tree. |
+| "no person-shaped type anywhere in the schema" | **Preserved for `@exodus/semantic`.** The public globe, `/place`, `/corridor`, `/headroom`, `/sources` and `/methods` still contain zero person-shaped types. Person-shaped types exist **only** in `@exodus/placement`, under a different schema, a different auth scope and a different visual chrome. The two never share a table, a store or a build artefact. |
 | `RefusalCode` closed at five codes | **Extended to eight**, and closed again. The three additions are named in §12.6. No ninth. |
 
 `OUT #4` (no live layer) and `OUT #7` (no Scenario Studio, no Compare, no Brief) **remain cut** and are not reopened by this section.
@@ -41,11 +41,11 @@ apps/
 
 Enforce the separation mechanically, not by convention:
 
-- **Dependency rule, CI-enforced:** `@corridor/semantic` and `@corridor/kernel` MUST NOT import from `@corridor/placement/*`. Add the edge to the existing dependency-cruiser config as a `forbidden` rule. *Accept:* a seeded import in `packages/semantic` fails `pnpm check:deps` with a named error.
+- **Dependency rule, CI-enforced:** `@exodus/semantic` and `@exodus/kernel` MUST NOT import from `@exodus/placement/*`. Add the edge to the existing dependency-cruiser config as a `forbidden` rule. *Accept:* a seeded import in `packages/semantic` fails `pnpm check:deps` with a named error.
 - **Chrome rule:** every route under `apps/placement` renders a persistent, non-dismissible banner. In sandbox mode the words are exactly `SIMULATION — NOT AN ORDER`. *Accept:* a Playwright test asserts the banner is present and has a computed opacity ≥ 0.9 on every placement route, and that no runtime flag promotes a sandbox scenario into an operational batch.
 - **Auth rule:** operational mode requires an authenticated actor with role `caseworker` or `supervisor`. The public build (`pnpm build`) **excludes `apps/placement` entirely** — the deployed static site that carries the globe ships no placement code at all. *Accept:* `pnpm build && grep -r "highs" dist/` returns nothing.
 
-### 12.3 Ontology extension (lives only in `@corridor/placement/schema`)
+### 12.3 Ontology extension (lives only in `@exodus/placement/schema`)
 
 ```ts
 /** A case is the atomic unit of assignment: the family that moves together.
@@ -72,7 +72,7 @@ export type CapacityDim = (typeof CAPACITY_DIMS)[number];
 
 export interface Locality {
   readonly id: LocalityId;
-  readonly placeId: PlaceId;              // FK into @corridor/semantic Place — the ONLY join between the two schemas
+  readonly placeId: PlaceId;              // FK into @exodus/semantic Place — the ONLY join between the two schemas
   readonly capacity: Readonly<Record<CapacityDim, number>>;  // c_jd
   readonly servicesOffered: readonly ServiceReq[];
   readonly languagesServed: readonly Iso639_3[];
@@ -91,7 +91,7 @@ export interface ConsentRecord {
 
 ### 12.4 The models: M6–M9
 
-These continue the M1–M5 sequence in `@corridor/kernel` and follow the same contract — pure functions, deterministic, `Result<T> = Ok<T> | Refusal`, every returned figure carrying its provenance.
+These continue the M1–M5 sequence in `@exodus/kernel` and follow the same contract — pure functions, deterministic, `Result<T> = Ok<T> | Refusal`, every returned figure carrying its provenance.
 
 #### M6 — candidate generation and hard gates
 
@@ -209,7 +209,7 @@ Do not let the UI promise choice it cannot deliver. It offers a **menu and a vet
 10. **No individual-level export, ever.** The API emits opaque pseudonyms. Public aggregates suppress cells with **k < 10**. *Accept:* a request for any cell with n < 10 returns `SUPPRESSED`, not a number. No individual tracks, no vessel-level or person-level trajectories, anywhere, ever.
 11. **Simulation and operations are physically separated** — §12.2.
 12. **EU AI Act posture — state it accurately or not at all.** An allocation tool used by a public authority sits **adjacent to**, and not squarely inside, Annex III point 7 of Regulation (EU) 2024/1689, whose four limbs cover polygraphs, risk assessment of a natural person entering a Member State, assisting authorities examining asylum/visa/residence applications, and person detection or identification in the migration context. A placement optimiser for people already admitted is not plainly any of them. **Get a legal opinion; do not assert the classification in either direction.** Annex III high-risk obligations now apply from **2 December 2027** following Regulation (EU) 2026/1744 (Digital Omnibus on AI, OJ 24 July 2026). Build the Art. 9–15 artefacts now, as files: `/compliance/ai-act/{risk-management,data-governance,technical-documentation,logging,human-oversight,accuracy-robustness}.md`, plus a GDPR Art. 35 DPIA template pre-filled for this processing.
-13. **Licensing honesty.** This module follows the repository's licence split (§9/§10): **AGPL-3.0-or-later**, like all other application code, with only `contracts` and `connectors/_template` under Apache-2.0 for the patent grant. Do not license `@corridor/placement` permissively — the network-use clause is the point for a module institutions will self-host. Say plainly in `GOVERNANCE.md` that OSI-approved licences **cannot** restrict fields of use (Open Source Definition clause 6) and that ethical-source licences such as Hippocratic are not OSI-approved — **governance is the real control, not licence text**. Name an ethics board and a documented deployment-support-revocation process.
+13. **Licensing honesty.** This module follows the repository's licence split (§9/§10): **AGPL-3.0-or-later**, like all other application code, with only `contracts` and `connectors/_template` under Apache-2.0 for the patent grant. Do not license `@exodus/placement` permissively — the network-use clause is the point for a module institutions will self-host. Say plainly in `GOVERNANCE.md` that OSI-approved licences **cannot** restrict fields of use (Open Source Definition clause 6) and that ethical-source licences such as Hippocratic are not OSI-approved — **governance is the real control, not licence text**. Name an ethics board and a documented deployment-support-revocation process.
 14. **Contestability.** Every placed case gets a human-readable reason sheet and a named route to challenge it. Log challenges; publish the challenge-and-reversal rate. *A system that can allocate but cannot be appealed is a containment planner regardless of its objective function.*
 
 #### 12.6.1 The three new refusal codes
