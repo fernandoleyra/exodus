@@ -102,10 +102,19 @@ document.** Do not re-derive these; do not restore the originals.
 
 **Refuted — these would have shipped as false. Never render them:**
 
-1. **The intraregional share is 45%, not 53%.** UN DESA IMS 2024: *45% of international
-   migrants were living in their region of origin in 2024* — Europe 74%, Oceania 73%,
-   sub-Saharan Africa 64% (not 83/73/63). Also say **"living in"**, not "moved within": the
-   figure is a stock, and "moved" turns it into a flow claim the source does not make.
+1. **The intraregional share: both 45% and 53% are real, under different regional
+   groupings — and the breakdown that shipped with them matches neither.**
+   - UN DESA IMS 2024 publishes **45%** under **SDG regional groupings**: Europe 74%,
+     Oceania 73%, sub-Saharan Africa 64%. Cite UN DESA/POP/2024/DC/NO. 13.
+   - **53%** is *not* a fabrication: it reproduces to 52.97% from the official DESA workbook
+     under the **continental (M49)** grouping, and IOM's Migration Data Portal publishes it.
+     If you want that framing, its correct breakdown is **by region of destination** —
+     Africa 86%, Asia 81%, Latin America and the Caribbean 80%, Europe 48% — and it must be
+     cited to **IOM**, not to the UN DESA release.
+   - **The 83 / 73 / 63 breakdown matches no grouping at all.** Never ship it.
+   - Never mix a global share from one grouping with a breakdown from the other.
+   - Say **"were living in"**, not "moved within": the figure is a stock, and "moved" turns
+     it into a flow claim neither source makes.
 2. **UNHCR does use a bare asterisk in numeric cells, and it does not mean 1–4.** The
    Global Trends statelessness annex carries 84 cells whose entire value is `*`, meaning
    *"information exists but no reliable data"*. A dash means zero, not available, or not
@@ -125,8 +134,11 @@ document.** Do not re-derive these; do not restore the originals.
 5. **GHS-POP 323,340,844 bytes is right only for a fully pinned product**: GHS-POP R2023A,
    **epoch 2025, Mollweide, 1 km**. Never call it "the GHS-POP R2023A global archive" — that
    name covers many files of different sizes and the assertion will fail against the wrong one.
-6. **JRC Atlas: "198 countries and territories"**, never "198 countries". The digits are
-   right; the noun is the JRC's own and the distinction is politically load-bearing.
+6. **JRC Atlas: "198 countries" is correct and directly attributable.** A first pass
+   proposed softening this to "countries and territories"; that correction was overturned —
+   198 is the JRC's own headline wording on the Knowledge Centre on Migration and
+   Demography page (27 EU Member States plus 171 non-EU countries and territories). Ship
+   it as written.
 7. **`visgl:webgl-only` is published by deck.gl only** — `@deck.gl/core`, `layers`,
    `aggregation-layers`, `geo-layers`, `mesh-layers` at 9.4.0. **luma.gl does not publish it.**
 
@@ -150,9 +162,15 @@ document.** Do not re-derive these; do not restore the originals.
     without-production-function value; gravity and radiation cannot, because the production
     function is what defines them.
 
-Still outstanding, and governed by §0.6 until the ledger says otherwise: the
-Sanderson–Scherbov Germany +11.3% / +49.2% figures. Render an em-dash until they are read
-out of the paper.
+13. **Sanderson–Scherbov Germany +11.3% vs +49.2% is confirmed, but is meaningless
+    without its window.** Sanderson & Scherbov, *Are We Overly Dependent on Conventional
+    Dependency Ratios?*, **Population and Development Review 41(4):687–708, Table 5**, on UN
+    WPP 2012, **2013→2030**: prospective old-age dependency ratio +11.3% against conventional
+    +49.2%. The authors state the +49% in print, and an independent recomputation reproduced
+    +48.98%. **Always render the window**: over 2013→2050 Germany's conventional ratio rises
+    far more than 49%, so the bare pair misleads.
+
+Nothing remains outstanding. Every figure §0.5 opened with has been adjudicated.
 
 ### §0.6 The rule that outranks every other rule
 
