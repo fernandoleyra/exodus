@@ -28,7 +28,7 @@
     "playwright": "^1.63.0",
     "pngjs": "^7.0.0",
     "topojson-client": "^3.1.0",
-    "typescript": "^5.7.0",
+    "typescript": "^7.0.2",
     "vite": "^6.0.0",
     "vite-node": "^6.0.0",
     "vitest": "^5.0.1",
