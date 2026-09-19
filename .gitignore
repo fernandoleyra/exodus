@@ -3,3 +3,9 @@ dist/
 .cache/
 *.log
 shots/
+
+# Scratch probes that review agents write into the source tree while investigating
+# a claim. They are throwaway, and a blanket `git add -A` keeps sweeping them in.
+__probe*
+__*_probe*
+**/__scratch*
