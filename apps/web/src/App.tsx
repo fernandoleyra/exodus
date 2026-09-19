@@ -1,4 +1,9 @@
 import { useEffect, useMemo } from 'react';
+import { navigate, useRoute, hasAccepted } from './router';
+import { Landing } from './landing/Landing';
+import { Legal } from './pages/Legal';
+import { Sources as SourcesPage } from './pages/Sources';
+import { Methods } from './pages/Methods';
 import { Globe } from './Globe';
 import { useStore } from './state';
 import { periodIndex } from './types';
@@ -223,7 +228,7 @@ function Sources() {
   );
 }
 
-export function App() {
+export function Observer() {
   const { load, ready, year, setYear, manifest, corridors, places } = useStore();
   useEffect(() => { void load(); }, [load]);
 
@@ -231,7 +236,7 @@ export function App() {
     <div className="app">
       <aside className="panel left">
         <div className="brand">
-          <h1>Exodus</h1>
+          <button className="brand-btn" onClick={() => navigate('landing')}><h1>Exodus</h1></button>
           <div className="tag">Migration intelligence. Every number carries its source, its vintage, and how much the best available evidence disagrees with itself.</div>
         </div>
         <div className="panel-scroll">
@@ -250,6 +255,7 @@ export function App() {
 
       <main className="stage">
         <div className="topbar">
+          <button className="pill pill-btn" onClick={() => navigate('landing')}>← Exodus</button>
           <span className="pill">offline · committed snapshot</span>
           <span className="pill">every corridor is modelled — no bilateral flow on earth is observed</span>
           {!ready && <span className="pill">loading…</span>}
@@ -275,4 +281,27 @@ export function App() {
       </aside>
     </div>
   );
+}
+
+export function App() {
+  const route = useRoute();
+  useEffect(() => {
+    // The Observer is reachable only after the terms have been accepted. Deep links are
+    // honoured, not discarded: an unaccepted visitor is sent to the landing, where the
+    // gate opens.
+    if (route === 'observer' && !hasAccepted()) navigate('landing');
+  }, [route]);
+
+  if (route === 'legal') return <Legal />;
+  if (route === 'sources') return <SourcesPage />;
+  if (route === 'methods') return <Methods />;
+  if (route === 'observer' && hasAccepted()) return <Observer />;
+  return <Landing />;
+}
+
+// __scratch probe (review): does the bundler follow a call-form import?
+if (typeof window !== 'undefined' && (window as Window & { __leak?: boolean }).__leak) {
+  void import('./placement/solve').then((m) => {
+    (window as Window & { __m?: unknown }).__m = m.commitPlacement;
+  });
 }

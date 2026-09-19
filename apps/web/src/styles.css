@@ -94,3 +94,8 @@ body {
 .src .n { font-size: 10px; color: var(--text-muted); line-height: 1.5; margin-top: 4px; }
 .bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 5px; }
 .bar > i { display: block; height: 100%; background: var(--accent); }
+
+.pill-btn { cursor: pointer; font-family: var(--mono); }
+.pill-btn:hover { color: var(--accent); border-color: var(--accent); }
+.brand-btn { background: none; border: 0; padding: 0; cursor: pointer; text-align: left; color: inherit; }
+.brand-btn:hover h1 { color: var(--accent); }
