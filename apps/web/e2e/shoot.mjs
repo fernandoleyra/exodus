@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 import { writeFileSync } from 'node:fs';
 
-const URL = 'http://127.0.0.1:5173/';
+const URL = 'http://127.0.0.1:5173/#/observer';
 const errors = [];
 const browser = await chromium.launch({
   ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
@@ -11,9 +11,12 @@ const page = await browser.newPage({ viewport: { width: 1600, height: 950 }, dev
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
 
+// The Observer sits behind the terms gate. Accept first, so this harness exercises the
+// Observer itself rather than the landing.
+await page.goto('http://127.0.0.1:5173/', { waitUntil: 'domcontentloaded' });
+await page.evaluate(() => localStorage.setItem('exodus.terms.accepted.v1', new Date().toISOString()));
 await page.goto(URL, { waitUntil: 'networkidle' });
-// Wait for the snapshot to load and deck to paint.
-await page.waitForFunction(() => document.querySelectorAll('.src').length > 0, { timeout: 30000 });
+await page.waitForFunction(() => document.querySelectorAll('.legend-row').length > 0, { timeout: 30000 });
 await page.waitForTimeout(4500);
 
 const shot = async (name) => { await page.screenshot({ path: `shots/${name}.png` }); console.log('shot:', name); };
