@@ -62,6 +62,36 @@ NOT REACHED — www.unhcr.org is behind a bot wall from this environment and can
 
 ---
 
+## REFUTED — `un_desa_ims2024_intraregional_migration_share`
+
+**Verdict.** The claim is false as stated — UN DESA's International Migrant Stock 2024 publishes 45 per cent (not 53), with an intra-regional breakdown of 74% Europe / 73% Oceania / 64% sub-Saharan Africa (not 83/73/63) — but the first verifier was materially wrong on one point: 53% is NOT a fabrication, it reproduces exactly (52.97%) from the official UN DESA workbook under the continental M49 grouping and is published by IOM's Migration Data Portal citing "UN DESA, 2025"; the 83/73/63 breakdown, by contrast, matches no grouping at all.
+
+**Corrected value.** 45 per cent of international migrants were living in their region of origin in 2024; Europe 74%, Oceania 73%, sub-Saharan Africa 64% (UN DESA IMS 2024 Key facts and figures, SDG regional groupings). If the continental (M49) grouping is wanted instead, the correct paired figures are 53% globally with a by-destination breakdown of Africa 86%, Asia 81%, Latin America and the Caribbean 80%, Europe 48% — and that framing must be cited to IOM's Migration Data Portal, not to the UN DESA release.
+
+**What the build must do.** Do not ship "53% ... 83/73/63" as a UN DESA IMS 2024 statistic — the breakdown is wrong under every grouping and the attribution is wrong. Ship the corrected UN DESA figure instead: "45% of international migrants were living in their region of origin in 2024 (Europe 74%, Oceania 73%, sub-Saharan Africa 64%)", cited to UN DESA, International Migrant Stock 2024: Key facts and figures (UN DESA/POP/2024/DC/NO. 13), and use "were living in" rather than "moved". If the product specifically wants the continental framing, 53% is shippable but ONLY as "53% of international migrants live in their region of origin (continental grouping)" cited to IOM Migration Data Portal drawing on UN DESA 2025, paired with its own correct breakdown (Africa 86%, Asia 81%, LAC 80%, Europe 48%, all by region of destination) — never paired with 83/73/63. Do not render an em-dash refusal; a verified value exists for both framings.
+
+<details><summary>Evidence</summary>
+
+PRIMARY SOURCE, FETCHED INDEPENDENTLY: curl (browser UA) -> https://www.un.org/development/desa/pd/sites/www.un.org.development.desa.pd/files/undesa_pd_2025_intlmigstock_2024_key_facts_and_figures_advance-unedited.pdf — HTTP 200, 1,844,233 bytes, application/pdf, PDF v1.6, 24 pages, MD5 27b045d19d48281d31ea93b9982eeed6 (matches first verifier's hash; same artifact). Text extracted myself with pypdf 6.19.0 -> 49,605 chars at /tmp/claude-0/-home-user-exodus/655ddf7b-3dfa-5a65-869f-2a751253cc07/scratchpad/indep/kf.txt.
+
+VERBATIM, para. 6 (lines 227-236 of my extraction): "In 2024, nearly half (45 per cent) of all international migrants worldwide were living in their region of origin (using regional groupings as shown in figures 2 and 3). Europe had the largest share of intra-regional migration, with 74 per cent of all migrants born in Europe residing in another European country or area (figure 5). Similarly, 73 per cent of international migrants from Oceania resided within the region, and 64 per cent of all migrants born in sub-Saharan Africa lived in another country or area in the region in 2024. By contrast, Central and Southern Asia had the largest share (75 per cent) of its diaspora residing outside the region."
+
+NEGATIVE CHECK (mine): grep for "53 per cent", "83 per cent", "63 per cent", "86 per cent", "80 per cent" -> 0 matches each. Complete inventory of "N per cent" in the document: 2.3, 3.7, 3.8, 13, 16, 21, 45, 48, 64, 71, 73, 74, 75, 76, 87. Zero "N%" sign-forms. I also checked the workbook's "Migrant notes" and "Table of contents" sheets (12,221 and 58,099 chars): no "53", "83", "63", no "per cent", no "%". And WebFetch of the IMS landing page https://www.un.org/development/desa/pd/content/international-migrant-stock: contains no percentages at all. So 53% is absent from the UN DESA release, its workbook notes and its landing page — the claim's stated WHERE.
+
+INDEPENDENT RECOMPUTATION (my own download and arithmetic): https://www.un.org/development/desa/pd/sites/www.un.org.development.desa.pd/files/undesa_pd_2024_ims_stock_by_sex_destination_and_origin.xlsx — HTTP 200, 6,005,287 bytes, MD5 edf2157cf0b0bf3baee88a3c117bfcaa. Table 2 (POP/DB/MIG/Stock/Rev.2024), world total 304,021,813.
+- SDG grouping used by Key facts (Europe and Northern America separate, Oceania combined): diagonal 135,633,116 / 304,021,813 = 44.61% -> 45%. Europe 45,201,439/60,981,166 = 74.1%; Oceania 1,161,812/1,602,503 = 72.5%; sub-Saharan Africa 19,564,204/30,661,610 = 63.8%. Also reproduces Central and Southern Asia 24.5% in-region (75% outside), LAC 29.1% (71% outside), Northern America 26.6% (73% outside). Every published digit reproduces.
+
+WHERE I DIVERGE FROM THE FIRST VERIFIER: they asserted "No grouping tested yields 53%." That is wrong — they did not test the continental M49 grouping. Using AFRICA(903)/ASIA(935)/EUROPE(908)/LAC(904)/NORTHERN AMERICA(905)/OCEANIA(909), the diagonal is 161,051,609 / 304,021,813 = 52.97% -> 53%. Under that same grouping, by destination: Africa 85.85% -> 86%, Asia 80.71% -> 81%, LAC 80.14% -> 80%, Europe 48.06% -> 48%; Northern America's migrants born in LAC 44.75% -> 45%; Oceania's born in Asia 50.00% -> 50%. All six match IOM's Migration Data Portal verbatim (WebFetch of https://www.migrationdataportal.org/themes/international-migrant-stocks-overview: "more than half of all international migrants (53%) migrated within their same region of origin", "86 per cent of all international migrants in Africa originated from the same region", "81 per cent ... in Asia", "nearly half (48%) ... in Europe", "approximately 80 per cent ... Latin America and the Caribbean", attributed to "UN DESA, 2025"). So the 53%/86% pair is a legitimate derivation of UN DESA IMS 2024 microdata under a different regional grouping and a by-destination framing — not, as the first verifier concluded, an unreliable fabrication.
+
+THE 83/73/63 BREAKDOWN IS STILL INDEFENSIBLE. I swept every region in Table 2, by origin and by destination, for any value within 1.0pp of 83, 73 or 63. The only hits: Europe and Northern America COMBINED by origin 82.58%; Oceania by origin 72.50%; sub-Saharan Africa by origin 63.81% (which rounds to 64, not 63); plus unrelated South America by destination 82.47% and Southern Asia by destination 73.12%. The claimed triple is stitched from three mutually incompatible groupings and one truncation error, and it does not pair with 53% under any grouping — the combined-Europe+N.America grouping that yields 83 gives a global diagonal of 47.01%, not 53%.
+
+FRAMING ERROR: the source measures migrant STOCK ("were living in" / "resided within"), not flow. The claim's verb "moved" is wrong on the substance, though note the Migration Data Portal itself uses the same loose wording ("migrated within their same region of origin"), so this error is inherited from the secondary source rather than introduced by the claim.
+
+</details>
+
+
+---
+
 ## CORRECTED — `ghs_pop_r2023a_archive_bytes`
 
 **Verdict.** 323,340,844 bytes is a genuine, exactly-matching content-length on the live JRC GHSL endpoint, but it belongs specifically to GHS_POP_E2025_GLOBE_R2023A_54009_1000 (epoch 2025, Mollweide, 1 km) — not to "the GHS-POP R2023A global archive" as a whole; the V1-0/V1_0 URL grammar is intact and returns HTTP 200.
@@ -220,6 +250,51 @@ SECONDARY (corroboration only, not the basis) — https://deck.gl/docs/developer
 
 ---
 
+## CORRECTED — `ghs_pop_r2023a_global_archive_bytes`
+
+**Verdict.** 323,340,844 bytes is a real, exactly-matching content-length on the live JRC GHSL endpoint, but it identifies exactly one file — GHS_POP_E2025_GLOBE_R2023A_54009_1000 (epoch 2025, Mollweide, 1 km) — not "the GHS-POP R2023A global archive," which is not a single file; the V1-0/V1_0 path grammar is correct and returns HTTP 200.
+
+**Corrected value.** 323,340,844 bytes = GHS_POP_E2025_GLOBE_R2023A_54009_1000_V1_0.zip (GHS-POP R2023A, epoch 2025, Mollweide ESRI:54009, 1000 m), at https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_1000_V1_0.zip
+
+**What the build must do.** Ship the byte count only with the full product identifier attached — never as "the GHS-POP R2023A global archive," which is ambiguous across ~dozens of epoch x CRS x resolution files. Render it as: GHS_POP_E2025_GLOBE_R2023A_54009_1000 (2025, Mollweide, 1 km) — 323,340,844 bytes. Replace any "within 5%" size assertion: it passes against at least five different R2023A 1 km Mollweide files (E2010 through E2030) and would silently accept the wrong epoch. Assert exact equality against 323340844, or validate the etag "1345ca2c-62cb2d3ee0e38", or read Content-Range from a tail byte-range request. If the size is ever fetched at runtime and cannot be resolved, render an em-dash and refuse rather than falling back to a nearby epoch's value.
+
+<details><summary>Evidence</summary>
+
+All checks are my own live requests via curl on 2026-09-19, base https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/ — no blog, mirror, dataset page or recollection used.
+
+EXACT MATCH. HEAD .../GHS_POP_E2025_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_1000_V1_0.zip
+  HTTP/2 200
+  date: Sat, 19 Sep 2026 15:58:33 GMT
+  last-modified: Mon, 27 Jan 2025 16:47:11 GMT
+  etag: "1345ca2c-62cb2d3ee0e38"
+  accept-ranges: bytes
+  content-length: 323340844
+  content-type: application/zip
+  via: 2.0 cidportal.jrc.ec.europa.eu
+  server: Apache
+Repeat HEAD returned identical etag and content-length.
+
+THREE INDEPENDENT CORROBORATIONS OF THE SIZE (beyond the header the first verifier read):
+1. Range GET bytes=323340840-323340843 -> HTTP/2 206, content-range: bytes 323340840-323340843/323340844, 4 bytes delivered. The origin itself states total length 323340844 in a second, separate header field.
+2. Range GET bytes=323340844-323340900 -> HTTP 416 Range Not Satisfiable. Byte 323,340,844 does not exist, so the file ends exactly at offset 323,340,843 — i.e. exactly 323,340,844 bytes. This is a true EOF probe, not a header assertion.
+3. Apache's etag encodes the size in hex: 0x1345CA2C = 323,340,844 decimal — internally consistent with content-length.
+
+SIBLING PRODUCTS I PROBED MYSELF (all HTTP 200, V1-0/V1_0 grammar):
+  E2030_GLOBE_R2023A_54009_1000 -> 324363154
+  E2025_GLOBE_R2023A_4326_30ss  -> 483694490
+  E2020_GLOBE_R2023A_4326_30ss  -> 482351880
+  E2020_GLOBE_R2023A_54009_1000 -> 322293568
+  E2020_GLOBE_R2023A_54009_100  -> 5097074334
+  E2015_GLOBE_R2023A_54009_1000 -> 320436226   (first verifier did not check this)
+  E2010_GLOBE_R2023A_54009_1000 -> 317876163   (first verifier did not check this)
+
+TOLERANCE FINDING — STRONGER THAN THE FIRST VERIFIER REPORTED. Deviation from 323,340,844 for the 1 km Mollweide series: E2030 +0.316%, E2020 -0.324%, E2015 -0.898%, E2010 -1.690%. That is at least FIVE distinct files inside a 5% band, not three. A "within 5%" check cannot distinguish epochs at all here and is worthless as a guard for this value; only an exact-match or etag/Content-Range check pins the file.
+
+</details>
+
+
+---
+
 ## CONFIRMED — `gaskin-abel-73-percent-test-correlation`
 
 **Verdict.** Gaskin & Abel do report exactly 73% correlation on the held-out test flows — specifically a Pearson R of 73% on test flows versus 94% on training flows, under fivefold cross-validation of flow corridors — so the digits in the product copy are correct as stated.
@@ -363,6 +438,41 @@ CONTROLS RULING OUT NETWORK/PROXY/RATE-LIMIT/UA CAUSES:
 ONE SIGNAL I CHECKED AND DISCARDED: /api/v2/geo/ returns 403, which looked like "directory exists, script missing" — but /api/v2/doc/, /api/v2/tv/ and /api/v2/context/ all return 403 identically, so it is just Apache directory-listing denial and distinguishes nothing.
 
 NEGATIVE FINDING: no GDELT blog post or announcement found stating GEO 2.0 was retired, moved, or deprecated. The docs still present the endpoint as live. So the endpoint is 404ing against its own still-published documentation, with no deprecation notice.
+
+</details>
+
+
+---
+
+## CONFIRMED — `cpc_scoreboard_robinson_dilkina_2018`
+
+**Verdict.** Every digit in the claim matches Table 3 (Global Migration) of Robinson & Dilkina 2018, CPC column under "Metrics on full matrix": all four traditional models 0.16, XGBoost+extended 0.21, ANN+extended 0.22 with a production function, and XGBoost+extended 0.43 / ANN+extended 0.40 without one — but the numbers are the GLOBAL scoreboard, not the USA one, and the copy must say so or it misleads.
+
+**What the build must do.** Ship this exact value, with the scope named. Render as: gravity 0.16, radiation 0.16, XGBoost+extended 0.21, ANN+extended 0.22 (with production function); 0.43 / 0.40 (without). Label the block "Global migration, CPC on the full matrix" and cite: Robinson & Dilkina, "A Machine Learning Approach to Modeling Human Migration", ACM COMPASS 2018, doi:10.1145/3209811.3209868 (arXiv:1711.05462), Table 3, CPC column. Do not label it with USA or county-level migration — those are Table 2's numbers and are roughly 3x higher (0.53-0.69).
+
+<details><summary>Evidence</summary>
+
+Primary source fetched, not summarized. (1) https://doi.org/10.1145/3209811.3209868 -> HTTP 302 -> https://dl.acm.org/doi/10.1145/3209811.3209868. Crossref API for that DOI returns: "A Machine Learning Approach to Modeling Human Migration", Robinson & Dilkina, Proceedings of the 1st ACM SIGCAS Conference on Computing and Sustainable Societies (COMPASS), published 2018-06-20. (2) https://arxiv.org/abs/1711.05462 -> HTTP 200, same title/authors (Caleb Robinson, Bistra Dilkina, Georgia Tech). (3) Downloaded https://arxiv.org/pdf/1711.05462 -> HTTP 200, 1,444,810 bytes, "PDF document, version 1.5, 6 page(s)"; text extracted locally with pdfminer (paper saved at /tmp/claude-0/-home-user-exodus/655ddf7b-3dfa-5a65-869f-2a751253cc07/scratchpad/paper.pdf and paper.txt).
+
+TABLE 3 ("Global Migration results ... average and standard deviations of the models' test performance on 2006 through 2014 data"), column group "Metrics on full matrix", first column "CPC", rows in printed order:
+  Production Function block:
+    Gravity Model Exponential Decay .... 0.16 +/- 0.00
+    Gravity Model Power Law Decay ...... 0.16 +/- 0.00
+    Radiation Model .................... 0.16 +/- 0.00
+    Extended Radiation Model ........... 0.16 +/- 0.00
+    XGBoost model - traditional features 0.18 +/- 0.01
+    ANN model - traditional features ... 0.19 +/- 0.01
+    XGBoost model - extended features .. 0.21 +/- 0.01
+    ANN model - extended features ...... 0.22 +/- 0.02
+  No Production Function block:
+    XGBoost model traditional features . 0.33 +/- 0.02
+    ANN model traditional features ..... 0.33 +/- 0.01
+    XGBoost model extended features .... 0.43 +/- 0.03
+    ANN model extended features ........ 0.40 +/- 0.02
+
+Contrast, so the two tables are not conflated: TABLE 2 ("USA Migration results"), same CPC column, reads 0.53 / 0.56 / 0.53 / 0.58 (traditional), 0.51 / 0.63 / 0.58 / 0.68 (ML, with production function), and 0.54 / 0.63 / 0.62 / 0.69 (no production function). None of the claimed digits come from Table 2.
+
+Caption quoted verbatim: "Table 3: Global Migration results. Comparison of the ANN and XGBoost models with and without a production function to traditional migration models. The values shown in the table are the average and standard deviations of the models' test performance on 2006 through 2014 data. Bold values indicate the best values per column."
 
 </details>
 

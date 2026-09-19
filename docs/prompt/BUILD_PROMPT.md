@@ -140,8 +140,19 @@ document.** Do not re-derive these; do not restore the originals.
 11. **GDELT GEO 2.0 returns HTTP 404** on its own documented example, while sibling APIs on
     the same host answer normally. The trap copy is accurate.
 
-Still outstanding at the time of writing, and still governed by §0.6 until the ledger says
-otherwise: the Sanderson–Scherbov Germany figures, and the six CPC scoreboard digits.
+12. **The six CPC digits are correct — but they are the GLOBAL scoreboard, and mislabelling
+    them is the trap.** Robinson & Dilkina, ACM COMPASS 2018, `doi:10.1145/3209811.3209868`,
+    **Table 3 (Global Migration), CPC column, metrics on the full matrix**: gravity 0.16,
+    radiation 0.16, XGBoost+extended 0.21, ANN+extended 0.22 *with* a production function;
+    0.43 and 0.40 *without*. Label the block **"Global migration, CPC on the full matrix"**
+    and cite Table 3. Do **not** present them as USA or county-level figures — those live in
+    Table 2 and are roughly 3× higher (0.53–0.69). Only the two ML rows have a
+    without-production-function value; gravity and radiation cannot, because the production
+    function is what defines them.
+
+Still outstanding, and governed by §0.6 until the ledger says otherwise: the
+Sanderson–Scherbov Germany +11.3% / +49.2% figures. Render an em-dash until they are read
+out of the paper.
 
 ### §0.6 The rule that outranks every other rule
 
