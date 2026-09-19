@@ -1,0 +1,249 @@
+// Builds the snapshot from the REAL bilateral spine plus a REAL second model.
+// Deterministic: no Date.now(), no Math.random().
+import { createReadStream } from 'node:fs';
+import { createInterface } from 'node:readline';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { feature } from 'topojson-client';
+
+const RAW = '.cache/raw';
+const YEARS = Array.from({ length: 34 }, (_, i) => 1990 + i);     // 1990..2023, spine coverage
+const PERIOD_STARTS = [1990, 1995, 2000, 2005, 2010, 2015];        // the shared grid with Abel
+const TOP_PER_ORIGIN = 9;
+
+const lines = async function* (path) {
+  const rl = createInterface({ input: createReadStream(path), crlfDelay: Infinity });
+  for await (const l of rl) yield l;
+};
+
+// ---------- crosswalk, from the dataset's own lookup rather than hand-built ----------
+const m49 = {};
+const iso3Valid = new Set();
+{
+  let first = true;
+  for await (const l of lines(`${RAW}/Iso_code_lookup.csv`)) {
+    if (first) { first = false; continue; }
+    const p = l.split(',');
+    if (p.length < 4) continue;
+    const iso3 = p[p.length - 2].trim(), num = p[p.length - 1].trim();
+    if (iso3.length === 3 && num) { m49[String(Number(num))] = iso3; iso3Valid.add(iso3); }
+  }
+}
+
+// ---------- model A: Gaskin & Abel, annual ----------
+// Columns: ,orig,dest,year,stock_mean,stock_std,mig_prev,mig_prev_std,mig_brth,mig_brth_std
+const A = new Map();          // "O>D" -> Float64Array(34) of annual mig_prev
+const spread = new Map();     // "O>D" -> mean of mig_prev_std/mig_prev over the window
+const spreadN = new Map();
+{
+  let first = true, kept = 0, selfDrop = 0;
+  for await (const l of lines(`${RAW}/mig_bilateral.csv`)) {
+    if (first) { first = false; continue; }
+    const c = l.split(',');
+    const orig = c[1], dest = c[2];
+    if (orig === dest) { selfDrop++; continue; }            // self-flows are not corridors
+    const year = +c[3];
+    const yi = year - 1990;
+    if (yi < 0 || yi >= YEARS.length) continue;
+    const v = +c[6];                                        // mig_prev
+    if (!(v > 0)) continue;
+    const k = orig + '>' + dest;
+    let arr = A.get(k);
+    if (!arr) { arr = new Float64Array(YEARS.length); A.set(k, arr); }
+    arr[yi] = v;
+    const sd = +c[7];
+    if (year >= 2015 && v > 0 && sd >= 0) {
+      spread.set(k, (spread.get(k) ?? 0) + sd / v);
+      spreadN.set(k, (spreadN.get(k) ?? 0) + 1);
+    }
+    kept++;
+  }
+  console.log(`model A  rows kept=${kept}  self-flows dropped=${selfDrop}  corridors=${A.size}`);
+}
+
+// ---------- model B: Abel, 5-year periods ----------
+// Columns: year0,sex,orig,dest,type,da_min_open,da_min_closed,da_pb_closed
+// MUST sum across sex (there is no total row) and MUST filter type='outward'
+// (summing outward+return+transit triple-counts).
+const B = new Map();          // "O>D" -> Map(year0 -> value)
+{
+  let first = true, kept = 0, typeDrop = 0;
+  for await (const l of lines(`${RAW}/bilat_mig_sex_type.csv`)) {
+    if (first) { first = false; continue; }
+    const c = l.split(',');
+    if (c[4] !== 'outward') { typeDrop++; continue; }
+    const orig = c[2], dest = c[3];
+    if (orig === dest) continue;
+    const y0 = +c[0];
+    if (!PERIOD_STARTS.includes(y0)) continue;
+    const v = +c[7];                                        // da_pb_closed
+    if (!(v > 0)) continue;
+    const k = orig + '>' + dest;
+    let m = B.get(k);
+    if (!m) { m = new Map(); B.set(k, m); }
+    m.set(y0, (m.get(y0) ?? 0) + v);                        // sum male + female
+    kept++;
+  }
+  console.log(`model B  rows kept=${kept}  non-outward dropped=${typeDrop}  corridors=${B.size}`);
+}
+
+// ---------- geometry ----------
+const topo = JSON.parse(await readFile('/tmp/ne110.json', 'utf8'));
+const fc = feature(topo, topo.objects.countries);
+function ringCentroid(coords) {
+  let a = 0, cx = 0, cy = 0;
+  for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
+    const [x0, y0] = coords[j], [x1, y1] = coords[i];
+    const f = x0 * y1 - x1 * y0;
+    a += f; cx += (x0 + x1) * f; cy += (y0 + y1) * f;
+  }
+  a *= 0.5;
+  return Math.abs(a) < 1e-12 ? null : { c: [cx / (6 * a), cy / (6 * a)], a: Math.abs(a) };
+}
+function centroidOf(geom) {
+  const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
+  let best = null;
+  for (const p of polys) { const r = ringCentroid(p[0]); if (r && (!best || r.a > best.a)) best = r; }
+  if (!best) return null;
+  let [lon, lat] = best.c;
+  while (lon > 180) lon -= 360;
+  while (lon < -180) lon += 360;
+  return [lon, lat];
+}
+
+// ---------- World Bank context (already fetched, observed) ----------
+const load = async (k) => JSON.parse(await readFile(`.cache/${k}.json`, 'utf8'));
+const [pop, stock, unemp, gdppc] = await Promise.all(['pop','stock','unemp','gdppc'].map(load));
+const byIso = (rows) => {
+  const m = new Map();
+  for (const r of rows) {
+    const iso = r.countryiso3code; if (!iso || iso.length !== 3) continue;
+    if (!m.has(iso)) m.set(iso, new Map());
+    m.get(iso).set(+r.date, r.value);
+  }
+  return m;
+};
+const POP = byIso(pop), STOCK = byIso(stock), UNEMP = byIso(unemp), GDP = byIso(gdppc);
+const NAME = new Map();
+for (const r of pop) if (r.countryiso3code?.length === 3) NAME.set(r.countryiso3code, r.country.value);
+
+const places = [];
+const disputed = [];
+for (const f of fc.features) {
+  const iso = f.id == null ? null : m49[String(Number(f.id))];
+  if (!iso) { disputed.push(f.properties?.name ?? '?'); continue; }
+  const centroid = centroidOf(f.geometry);
+  if (!centroid) continue;
+  const latest = (m, yMax = 2023) => { for (let y = yMax; y >= 2000; y--) { const v = m?.get(iso)?.get(y); if (v != null) return { v, y }; } return null; };
+  const p = latest(POP), s = latest(STOCK, 2020), u = latest(UNEMP), g = latest(GDP);
+  const present = [p, s, u, g].filter(Boolean).length;
+  const staleness = s ? Math.max(0, (2023 - s.y) / 23) : 1;
+  places.push({
+    iso3: iso, name: NAME.get(iso) ?? f.properties?.name ?? iso, centroid,
+    pop: p?.v ?? null, popYear: p?.y ?? null,
+    stock: s?.v ?? null, stockYear: s?.y ?? null,
+    unemp: u?.v ?? null, unempYear: u?.y ?? null,
+    gdppc: g?.v ?? null, gdppcYear: g?.y ?? null,
+    coverage: +Math.max(0.04, (present / 4) * (1 - 0.45 * staleness)).toFixed(4),
+    indicatorsPresent: present,
+  });
+}
+places.sort((a, b) => a.iso3.localeCompare(b.iso3));
+const known = new Set(places.map((p) => p.iso3));
+const idx = new Map(places.map((p, i) => [p.iso3, i]));
+
+// ---------- select corridors: top-K per origin by mean 2015-2023 ----------
+const scored = [];
+for (const [k, arr] of A) {
+  const [o, d] = k.split('>');
+  if (!known.has(o) || !known.has(d)) continue;
+  let s = 0; for (let y = 2015; y <= 2023; y++) s += arr[y - 1990];
+  if (s > 0) scored.push({ k, o, d, score: s / 9 });
+}
+const perOrigin = new Map();
+for (const c of scored) {
+  if (!perOrigin.has(c.o)) perOrigin.set(c.o, []);
+  perOrigin.get(c.o).push(c);
+}
+const chosen = [];
+for (const [, list] of perOrigin) {
+  list.sort((x, y) => y.score - x.score);
+  chosen.push(...list.slice(0, TOP_PER_ORIGIN));
+}
+chosen.sort((x, y) => y.score - x.score);
+
+// ---------- disagreement on the shared period grid ----------
+// Both models are normalised to the same total over the shared grid first: otherwise the
+// "disagreement" is a difference of scale, which is not what the channel means.
+let sumA = 0, sumB = 0, pairCount = 0;
+for (const c of chosen) {
+  const bm = B.get(c.k); if (!bm) continue;
+  const arr = A.get(c.k);
+  for (const y0 of PERIOD_STARTS) {
+    const bv = bm.get(y0); if (!(bv > 0)) continue;
+    let av = 0; for (let y = y0; y < y0 + 5; y++) av += arr[y - 1990] ?? 0;
+    if (!(av > 0)) continue;
+    sumA += av; sumB += bv; pairCount++;
+  }
+}
+const scaleB = sumA / sumB;
+console.log(`shared period grid: ${pairCount} corridor-periods, scale B by ${scaleB.toFixed(4)}`);
+
+const corridors = [];
+let withDisagreement = 0;
+for (const c of chosen) {
+  const arr = A.get(c.k);
+  const bm = B.get(c.k);
+  // Disagreement is a step function: constant within each period, absent where the
+  // second model has nothing to say. Never interpolated across the gap.
+  const dpByPeriod = PERIOD_STARTS.map((y0) => {
+    if (!bm) return null;
+    const bv = bm.get(y0); if (!(bv > 0)) return null;
+    let av = 0; for (let y = y0; y < y0 + 5; y++) av += arr[y - 1990] ?? 0;
+    if (!(av > 0)) return null;
+    const b = bv * scaleB;
+    return +(Math.abs(av - b) / ((av + b) / 2)).toFixed(4);
+  });
+  if (dpByPeriod.some((x) => x != null)) withDisagreement++;
+  const n = spreadN.get(c.k) ?? 0;
+  corridors.push({
+    o: idx.get(c.o), d: idx.get(c.d),
+    v: Array.from(arr, (x) => Math.round(x)),
+    dpp: dpByPeriod,                                  // per-period cross-model disagreement
+    spread: n ? +((spread.get(c.k) ?? 0) / n).toFixed(4) : null,  // model-internal spread
+    cov: +Math.min(places[idx.get(c.o)].coverage, places[idx.get(c.d)].coverage).toFixed(4),
+  });
+}
+
+await mkdir('public/snapshot', { recursive: true });
+for (const f of fc.features) {
+  f.properties = { name: f.properties?.name ?? null, iso3: f.id == null ? null : (m49[String(Number(f.id))] ?? null) };
+}
+await writeFile('public/snapshot/places.json', JSON.stringify({ places }));
+await writeFile('public/snapshot/corridors.json', JSON.stringify({
+  years: YEARS, periodStarts: PERIOD_STARTS, corridors,
+}));
+await writeFile('public/snapshot/adm0.json', JSON.stringify(fc));
+await writeFile('public/snapshot/manifest.json', JSON.stringify({
+  builtFrom: 'Gaskin & Abel (spine) + Abel (second model) + World Bank WDI (context) + Natural Earth (geometry)',
+  corridorCount: corridors.length,
+  placeCount: places.length,
+  yearRange: [YEARS[0], YEARS.at(-1)],
+  periodStarts: PERIOD_STARTS,
+  corridorsWithSecondModel: withDisagreement,
+  disputedRenderedWithoutData: disputed,
+  sources: [
+    { id: 'gaskin-abel', title: 'Gaskin & Abel, bilateral migration flows', licence: 'CC BY-4.0', estimateKind: 'modelled', latencyClass: 'annual', vintage: '1990-2023',
+      note: 'Zenodo 17344747, mig_bilateral.csv. Deep recurrent network over 18 covariates, 230 countries. Column mig_prev. Self-flows dropped. THE SPINE.' },
+    { id: 'abel-figshare', title: 'Abel, bilateral flow estimates by sex and type', licence: 'CC BY-4.0', estimateKind: 'modelled', latencyClass: 'quinquennial', vintage: '1990-2020',
+      note: 'figshare 14579241, bilat_mig_sex_type.csv, estimator da_pb_closed. Summed across sex (no total row) and filtered to type=outward (summing types triple-counts). THE SECOND OPINION.' },
+    { id: 'wb-wdi', title: 'World Bank World Development Indicators', licence: 'CC BY-4.0', estimateKind: 'observed', latencyClass: 'annual', vintage: '2023',
+      note: 'SP.POP.TOTL, SM.POP.TOTL, SL.UEM.TOTL.ZS, NY.GDP.PCAP.PP.KD' },
+    { id: 'naturalearth', title: 'Natural Earth 110m Admin-0', licence: 'Public domain', estimateKind: 'observed', latencyClass: 'annual', vintage: 'v5',
+      note: 'geometry and centroids only' },
+  ],
+}, null, 2));
+
+const dps = corridors.flatMap((c) => c.dpp.filter((x) => x != null)).sort((a, b) => a - b);
+console.log(`places        ${places.length}   disputed (no data join) ${disputed.length}`);
+console.log(`corridors     ${corridors.length}   with a second model: ${withDisagreement}`);
+console.log(`disagreement  p50=${dps[dps.length >> 1]?.toFixed(3)} p90=${dps[Math.floor(dps.length * 0.9)]?.toFixed(3)} n=${dps.length}`);

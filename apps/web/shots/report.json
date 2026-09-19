@@ -3,9 +3,9 @@
     "canvas": true,
     "w": 960,
     "h": 950,
-    "sources": 3,
-    "figures": 0,
-    "emdash": 0
+    "sources": 4,
+    "figures": 8,
+    "emdash": 2
   },
   "errors": [
     "Failed to load resource: the server responded with a status of 404 (Not Found)"

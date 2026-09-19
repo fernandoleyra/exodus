@@ -1,17 +1,44 @@
 {
-  "builtFrom": "World Bank WDI (observed) + Natural Earth 110m (geometry)",
-  "corridorCount": 1279,
+  "builtFrom": "Gaskin & Abel (spine) + Abel (second model) + World Bank WDI (context) + Natural Earth (geometry)",
+  "corridorCount": 1548,
   "placeCount": 174,
+  "yearRange": [
+    1990,
+    2023
+  ],
+  "periodStarts": [
+    1990,
+    1995,
+    2000,
+    2005,
+    2010,
+    2015
+  ],
+  "corridorsWithSecondModel": 1098,
   "disputedRenderedWithoutData": [
     "N. Cyprus",
     "Somaliland",
     "Kosovo"
   ],
-  "yearRange": [
-    1990,
-    2023
-  ],
   "sources": [
+    {
+      "id": "gaskin-abel",
+      "title": "Gaskin & Abel, bilateral migration flows",
+      "licence": "CC BY-4.0",
+      "estimateKind": "modelled",
+      "latencyClass": "annual",
+      "vintage": "1990-2023",
+      "note": "Zenodo 17344747, mig_bilateral.csv. Deep recurrent network over 18 covariates, 230 countries. Column mig_prev. Self-flows dropped. THE SPINE."
+    },
+    {
+      "id": "abel-figshare",
+      "title": "Abel, bilateral flow estimates by sex and type",
+      "licence": "CC BY-4.0",
+      "estimateKind": "modelled",
+      "latencyClass": "quinquennial",
+      "vintage": "1990-2020",
+      "note": "figshare 14579241, bilat_mig_sex_type.csv, estimator da_pb_closed. Summed across sex (no total row) and filtered to type=outward (summing types triple-counts). THE SECOND OPINION."
+    },
     {
       "id": "wb-wdi",
       "title": "World Bank World Development Indicators",
@@ -29,15 +56,6 @@
       "latencyClass": "annual",
       "vintage": "v5",
       "note": "geometry and centroids only"
-    },
-    {
-      "id": "synthetic-grav",
-      "title": "Gravity fixture (M0)",
-      "licence": "n/a",
-      "estimateKind": "modelled",
-      "latencyClass": "modelled",
-      "vintage": "M0",
-      "note": "SYNTHETIC. Two friction exponents stand in for two models; their divergence is the disagreement channel. Not a published estimate."
     }
   ]
 }

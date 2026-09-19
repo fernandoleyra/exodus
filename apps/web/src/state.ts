@@ -3,6 +3,7 @@ import type { Corridor, Manifest, Place } from './types';
 
 interface S {
   year: number;
+  periodStarts: number[];
   places: Place[];
   corridors: Corridor[];
   adm0: GeoJSON.FeatureCollection | null;
@@ -17,7 +18,7 @@ interface S {
 }
 
 export const useStore = create<S>((set) => ({
-  year: 2019, places: [], corridors: [], adm0: null, manifest: null,
+  year: 2019, periodStarts: [], places: [], corridors: [], adm0: null, manifest: null,
   selected: null, hovered: null, ready: false,
   setYear: (year) => set({ year }),
   select: (selected) => set({ selected }),
@@ -29,6 +30,6 @@ export const useStore = create<S>((set) => ({
       fetch('/snapshot/adm0.json').then((r) => r.json()),
       fetch('/snapshot/manifest.json').then((r) => r.json()),
     ]);
-    set({ places: p.places, corridors: c.corridors, adm0: a, manifest: m, ready: true });
+    set({ places: p.places, corridors: c.corridors, periodStarts: c.periodStarts ?? [], adm0: a, manifest: m, ready: true });
   },
 }));

@@ -15,10 +15,14 @@ export interface Place {
 
 export interface Corridor {
   o: number; d: number;
-  /** One value per year, 1990..2023. A flipbook, not an interpolation. */
+  /** One value per year, 1990..2023, from the spine. A flipbook, not an interpolation. */
   v: number[];
-  /** Cross-model disagreement, |a−b| / mean. Rendered as the uncertainty envelope. */
-  dp: number;
+  /** Cross-model disagreement per 5-year period, |a−b| / mean.
+   *  null where the second model says nothing — never interpolated across that gap. */
+  dpp: (number | null)[];
+  /** Model-internal spread (the spine's own std/mean). A different thing from dpp;
+   *  never conflate them. */
+  spread: number | null;
   /** min(coverage_origin, coverage_dest). Rendered as opacity. */
   cov: number;
 }
@@ -30,6 +34,17 @@ export interface SourceRec {
 
 export interface Manifest {
   builtFrom: string; corridorCount: number; placeCount: number;
-  yearRange: [number, number]; sources: SourceRec[];
+  yearRange: [number, number]; periodStarts: number[];
+  corridorsWithSecondModel: number;
+  sources: SourceRec[];
   disputedRenderedWithoutData: string[];
+}
+
+/** Which 5-year period a year falls in, or -1 when the second model has no grid there. */
+export function periodIndex(periodStarts: number[], year: number): number {
+  for (let i = periodStarts.length - 1; i >= 0; i--) {
+    const s = periodStarts[i]!;
+    if (year >= s && year < s + 5) return i;
+  }
+  return -1;
 }

@@ -22,14 +22,14 @@ await shot('01-globe-2019');
 
 // Year 1995 — the flipbook
 const slider = page.locator('input[type=range]');
-await slider.fill('1995');
+await slider.fill('2015');
 await page.waitForTimeout(2200);
-await shot('02-year-1995');
+await shot('02-year-2015-corroborated');
 
 // Year 2023
-await slider.fill('2023');
+await slider.fill('2022');
 await page.waitForTimeout(2200);
-await shot('03-year-2023');
+await shot('03-year-2022-no-second-model');
 
 // Focus a high-coverage reporter, then a low-coverage one: the contrast in arc
 // opacity is the product's core claim, so it needs to be visible in a still.
@@ -38,8 +38,8 @@ const pick = async (iso) => { await page.evaluate((i) => window.__select(i), iso
 await pick('DEU');
 await shot('04-focus-germany-high-coverage');
 
-await pick('ETH');
-await shot('05-focus-ethiopia-low-coverage');
+await pick('IND');
+await shot('05-focus-india-disagreement');
 
 await pick(null);
 await page.waitForTimeout(1200);

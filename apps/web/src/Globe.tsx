@@ -7,6 +7,7 @@ import { greatCircle } from './greatcircle';
 import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
 import { SphereGeometry } from '@luma.gl/engine';
 import { useStore } from './state';
+import { periodIndex } from './types';
 
 /** Unit vector for a lon/lat, used to decide which hemisphere faces the camera. */
 function unit(lon: number, lat: number): [number, number, number] {
@@ -19,7 +20,7 @@ const dot = (p: [number, number, number], q: [number, number, number]) =>
 const INITIAL = { longitude: 14, latitude: 24, zoom: 1.65, pitch: 0, bearing: 0 };
 
 export function Globe() {
-  const { places, corridors, adm0, year, selected, hovered, select, hover } = useStore();
+  const { places, corridors, adm0, year, periodStarts, selected, hovered, select, hover } = useStore();
   const [view, setView] = useState(INITIAL);
   const yi = year - 1990;
 
@@ -29,14 +30,18 @@ export function Globe() {
     // the far hemisphere must be culled here instead. A corridor is drawn only when both
     // endpoints face the camera.
     const cam = unit(view.longitude, view.latitude);
+    const pi = periodIndex(periodStarts, year);
     return corridors.map((c) => {
       const o = places[c.o]!, d = places[c.d]!;
-      return { o, d, value: c.v[yi] ?? 0, dp: c.dp, cov: c.cov, path: greatCircle(o.centroid, d.centroid) };
+      // dp is null when the second model says nothing about this corridor-period. That is a
+      // different state from "the models agree", and it must not render the same way.
+      const dp = pi < 0 ? null : (c.dpp[pi] ?? null);
+      return { o, d, value: c.v[yi] ?? 0, dp, cov: c.cov, path: greatCircle(o.centroid, d.centroid) };
     }).filter((r) =>
       r.value > 0 &&
       dot(unit(r.o.centroid[0], r.o.centroid[1]), cam) > 0.08 &&
       dot(unit(r.d.centroid[0], r.d.centroid[1]), cam) > 0.08);
-  }, [corridors, places, yi, view.longitude, view.latitude]);
+  }, [corridors, places, yi, year, periodStarts, view.longitude, view.latitude]);
 
   const focus = selected ?? hovered;
   const related = (r: { o: Place; d: Place }) =>
@@ -77,13 +82,13 @@ export function Globe() {
     // two models argue about is visibly fuzzier than one they agree on.
     new PathLayer({
       id: 'corridor-envelope',
-      data: rows,
+      data: rows.filter((r: any) => r.dp != null),
       getPath: (r: any) => r.path,
-      getColor: (r: any) => { const e = emphasis(r); return [232, 163, 61, (e === 1 ? 52 : e === 0 ? 14 : 2) * (0.3 + 0.7 * r.cov)]; },
-      getWidth: (r: any) => width(r.value) * (1 + 14 * r.dp),
+      getColor: (r: any) => { const e = emphasis(r); return [232, 163, 61, (e === 1 ? 58 : e === 0 ? 16 : 2) * (0.3 + 0.7 * r.cov)]; },
+      getWidth: (r: any) => width(r.value) * (1 + 3.2 * Math.min(2, r.dp)),
       widthUnits: 'pixels', capRounded: true, jointRounded: true,
       parameters: { depthCompare: 'always', depthWriteEnabled: false },
-      updateTriggers: { getColor: [focus], getWidth: [yi] },
+      updateTriggers: { getColor: [focus, year], getWidth: [yi, year] },
     }),
     // The estimate itself. Opacity IS data coverage; the dash gaps widen with
     // disagreement, so a contested corridor reads as broken rather than solid.
@@ -91,15 +96,21 @@ export function Globe() {
       id: 'corridors',
       data: rows,
       getPath: (r: any) => r.path,
-      getColor: (r: any) => { const e = emphasis(r); return [96, 190, 214, (e === 1 ? 240 : e === 0 ? 46 : 8) * (0.3 + 0.7 * r.cov)]; },
+      getColor: (r: any) => {
+        const e = emphasis(r);
+        const a = (e === 1 ? 240 : e === 0 ? 46 : 8) * (0.3 + 0.7 * r.cov);
+        // No second model means nothing corroborates this arc. It must not borrow the
+        // confident colour of one that has been checked against an independent estimate.
+        return r.dp == null ? [126, 142, 158, a * 0.85] : [96, 190, 214, a];
+      },
       getWidth: (r: any) => width(r.value),
       widthUnits: 'pixels', capRounded: true, jointRounded: true,
-      getDashArray: (r: any) => [Math.max(2, 14 - 48 * r.dp), 1 + 34 * r.dp],
+      getDashArray: (r: any) => (r.dp == null ? [3, 5] : [Math.max(3, 18 - 7 * r.dp), 1 + 5 * r.dp]),
       dashJustified: true, dashGapPickable: false,
       extensions: [new PathStyleExtension({ dash: true })],
       parameters: { depthCompare: 'always', depthWriteEnabled: false },
       pickable: true,
-      updateTriggers: { getColor: [focus], getWidth: [yi], getDashArray: [yi] },
+      updateTriggers: { getColor: [focus, year], getWidth: [yi], getDashArray: [yi, year] },
     }),
   ];
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { Globe } from './Globe';
 import { useStore } from './state';
+import { periodIndex } from './types';
 import type { EstimateKind, Place } from './types';
 
 const nf = new Intl.NumberFormat('en-US');
@@ -33,19 +34,23 @@ function Legend() {
     <div className="sec">
       <h2>Reading the globe</h2>
       <div className="legend-row">
-        <span className="swatch" style={{ background: 'linear-gradient(90deg,#6ba8f5,#4dd4ac)', height: 3, alignSelf: 'center' }} />
-        <span className="desc"><b>Arc</b> — one modelled corridor. Blue end is origin, green is destination. Width is volume in the selected year.</span>
+        <span className="swatch" style={{ background: '#60bed6', height: 3, alignSelf: 'center' }} />
+        <span className="desc"><b>Arc</b> — one corridor, from the spine model. Width is that year&rsquo;s flow.</span>
       </div>
       <div className="legend-row">
         <span className="swatch" style={{ alignSelf: 'center' }}>
-          <span style={{ display: 'block', height: 3, background: '#4dd4ac', opacity: .15 }} />
-          <span style={{ display: 'block', height: 3, background: '#4dd4ac', opacity: .95, marginTop: 3 }} />
+          <span style={{ display: 'block', height: 3, background: '#60bed6', opacity: .18 }} />
+          <span style={{ display: 'block', height: 3, background: '#60bed6', opacity: .95, marginTop: 3 }} />
         </span>
-        <span className="desc"><b>Opacity = data coverage.</b> A corridor whose endpoints publish little statistics stays dim. It cannot borrow the authority of one that publishes a lot.</span>
+        <span className="desc"><b>Opacity = reporting completeness.</b> A corridor whose endpoints publish little cannot borrow the authority of one that publishes a lot.</span>
       </div>
       <div className="legend-row">
-        <span className="swatch" style={{ alignSelf: 'center', background: 'rgba(232,163,61,.22)', borderTop: '1px solid rgba(232,163,61,.5)', borderBottom: '1px solid rgba(232,163,61,.5)' }} />
-        <span className="desc"><b>Halo = model disagreement.</b> Two models of the same corridor disagree. The fuzzier the arc, the more they argue. No single number is the truth.</span>
+        <span className="swatch" style={{ alignSelf: 'center', background: 'rgba(232,163,61,.24)', borderTop: '1px solid rgba(232,163,61,.55)', borderBottom: '1px solid rgba(232,163,61,.55)' }} />
+        <span className="desc"><b>Halo = the two models disagree.</b> Wider halo, bigger argument. It is a step function on 5-year periods, because that is the only grid both models share.</span>
+      </div>
+      <div className="legend-row">
+        <span className="swatch" style={{ alignSelf: 'center', borderTop: '3px dotted #7e8e9e' }} />
+        <span className="desc"><b>Grey and dotted = nobody checked it.</b> The second model says nothing about this corridor-period, so there is no halo to draw. That is not agreement.</span>
       </div>
       <div className="legend-row">
         <span className="swatch" style={{ alignSelf: 'center', background: '#161f29', border: '1px solid #2e3e4e' }} />
@@ -61,17 +66,24 @@ function Inspector() {
   const p = useMemo(() => places.find((x) => x.iso3 === iso), [places, iso]);
   const yi = year - 1990;
 
+  const periodStarts = useStore((s) => s.periodStarts);
   const flows = useMemo(() => {
     if (!p) return null;
     const i = places.indexOf(p);
-    let inb = 0, out = 0, nIn = 0, nOut = 0;
+    const pi = periodIndex(periodStarts, year);
+    let inb = 0, out = 0, nIn = 0, nOut = 0, checked = 0, dpSum = 0, dpMax = 0;
     for (const c of corridors) {
       const v = c.v[yi] ?? 0;
+      const touches = c.d === i || c.o === i;
       if (c.d === i) { inb += v; nIn++; }
       if (c.o === i) { out += v; nOut++; }
+      if (touches && pi >= 0) {
+        const dp = c.dpp[pi];
+        if (dp != null) { checked++; dpSum += dp; if (dp > dpMax) dpMax = dp; }
+      }
     }
-    return { inb, out, nIn, nOut };
-  }, [p, places, corridors, yi]);
+    return { inb, out, nIn, nOut, checked, dpMean: checked ? dpSum / checked : null, dpMax };
+  }, [p, places, corridors, yi, year, periodStarts]);
 
   if (!p) {
     return <div className="empty">Hover or click a country to inspect what is actually known about it.<br /><br />
@@ -101,6 +113,24 @@ function Inspector() {
           </p>
         )}
         <div className="kv"><span className="k">corridors rendered</span><span className="v">{flows!.nIn} in · {flows!.nOut} out</span></div>
+      </div>
+      <div className="sec">
+        <h2>Do the models agree?</h2>
+        <Figure label="Median disagreement" kind="modelled"
+                value={flows!.dpMean == null ? null : `${(flows!.dpMean * 100).toFixed(0)}%`}
+                absentNote="not checked" />
+        <Figure label="Worst corridor" kind="modelled"
+                value={flows!.dpMax ? `${(flows!.dpMax * 100).toFixed(0)}%` : null}
+                absentNote="not checked" />
+        <div className="kv">
+          <span className="k">corridors with a second model</span>
+          <span className="v">{flows!.checked} of {flows!.nIn + flows!.nOut}</span>
+        </div>
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 0 }}>
+          Two independent published estimates of the same corridor, compared on the only grid
+          they share. A corridor nobody checked is drawn grey and dotted — that is not the
+          same as the models agreeing.
+        </p>
       </div>
       <div className="sec">
         <h2>How much to trust this</h2>
@@ -151,7 +181,7 @@ export function App() {
       <aside className="panel left">
         <div className="brand">
           <h1>Exodus</h1>
-          <div className="tag">Migration intelligence. Every number carries its source, its vintage and how much the evidence disagrees with itself.</div>
+          <div className="tag">Migration intelligence. Every number carries its source, its vintage, and how much the best available evidence disagrees with itself.</div>
         </div>
         <div className="panel-scroll">
           <Legend />
@@ -160,6 +190,7 @@ export function App() {
             <div className="kv"><span className="k">places</span><span className="v">{places.length}</span></div>
             <div className="kv"><span className="k">corridors</span><span className="v">{corridors.length}</span></div>
             <div className="kv"><span className="k">years</span><span className="v">1990–2023</span></div>
+            <div className="kv"><span className="k">with a second model</span><span className="v">{manifest?.corridorsWithSecondModel ?? 0}</span></div>
             <div className="kv"><span className="k">disputed, no data join</span><span className="v">{manifest?.disputedRenderedWithoutData.length ?? 0}</span></div>
           </div>
           <Sources />
@@ -169,7 +200,7 @@ export function App() {
       <main className="stage">
         <div className="topbar">
           <span className="pill">offline · committed snapshot</span>
-          <span className="pill warn">corridors are a SYNTHETIC M0 fixture — not a published estimate</span>
+          <span className="pill">every corridor is modelled — no bilateral flow on earth is observed</span>
           {!ready && <span className="pill">loading…</span>}
         </div>
         <Globe />
@@ -180,7 +211,11 @@ export function App() {
             onChange={(e) => setYear(+e.target.value)}
             aria-label="Year"
           />
-          <span className="hint">discrete annual frames — the data has no sub-annual resolution, so nothing is interpolated</span>
+          <span className="hint">
+            {periodIndex(useStore.getState().periodStarts, year) < 0
+              ? 'past 2019 · no second model exists here, so nothing is corroborated'
+              : 'discrete annual frames — nothing is interpolated'}
+          </span>
         </div>
       </main>
 
