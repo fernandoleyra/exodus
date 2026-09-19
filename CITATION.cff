@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: "Exodus — an open instrument for reading migration evidence"
+message: "If you use this software or its derived dataset, please cite it, and cite the upstream data sources it renders."
+type: software
+authors:
+  - name: "Exodus contributors"
+repository-code: "https://github.com/fernandoleyra/exodus"
+license: AGPL-3.0-or-later
+abstract: >-
+  A WebGL instrument for reading published migration research. It renders bilateral
+  migration estimates from two independently published models, shows how far they disagree,
+  and refuses to display a figure it cannot source. Built to make migration evidence legible
+  in a context where migration numbers are used as geopolitical pressure.
+keywords:
+  - migration
+  - open data
+  - data visualisation
+  - uncertainty
+references:
+  - type: article
+    title: "Deep learning four decades of human migration"
+    authors:
+      - family-names: Gaskin
+        given-names: Thomas
+      - family-names: Abel
+        given-names: "Guy J."
+    journal: Nature
+    volume: 655
+    issue: 8121
+    start: 148
+    end: 157
+    year: 2026
+    doi: 10.1038/s41586-026-10611-7
+  - type: data
+    title: "Bilateral international migration flow estimates by sex and type of move"
+    authors:
+      - family-names: Abel
+        given-names: Guy
+    doi: 10.6084/m9.figshare.14579241

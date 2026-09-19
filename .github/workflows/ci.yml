@@ -1,0 +1,36 @@
+name: ci
+on:
+  push: { branches: ["**"] }
+  pull_request:
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: npm, cache-dependency-path: apps/web/package-lock.json }
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Tests
+        run: npm run test
+      - name: Build
+        run: npm run build
+      - name: The public bundle must not contain the placement module
+        run: |
+          if grep -rlE "commitPlacement|NoConsentRecord|DESTINATION_LEGAL_BASIS" dist/; then
+            echo "::error::Person-shaped placement code leaked into the public bundle."
+            exit 1
+          fi
+          echo "Public bundle is clean."
+
+  reuse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: REUSE licensing compliance
+        uses: fsfe/reuse-action@v5

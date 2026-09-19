@@ -298,10 +298,3 @@ export function App() {
   if (route === 'observer' && hasAccepted()) return <Observer />;
   return <Landing />;
 }
-
-// __scratch probe (review): does the bundler follow a call-form import?
-if (typeof window !== 'undefined' && (window as Window & { __leak?: boolean }).__leak) {
-  void import('./placement/solve').then((m) => {
-    (window as Window & { __m?: unknown }).__m = m.commitPlacement;
-  });
-}

@@ -1,0 +1,29 @@
+version = 1
+SPDX-PackageName = "exodus"
+SPDX-PackageSupplier = "Exodus contributors"
+SPDX-PackageDownloadLocation = "https://github.com/fernandoleyra/exodus"
+
+# Documentation and research corpus.
+[[annotations]]
+path = ["docs/**", "README.md", "*.md"]
+SPDX-FileCopyrightText = "Exodus contributors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The committed snapshot is a derived dataset. Its upstream sources are CC BY 4.0 and
+# public domain; the full attribution, including what we modified, is in the source ledger
+# and on the /sources page.
+[[annotations]]
+path = "apps/web/public/snapshot/**"
+SPDX-FileCopyrightText = [
+  "Thomas Gaskin and Guy J. Abel (Zenodo 10.5281/zenodo.17344747)",
+  "Guy Abel (figshare 14579241)",
+  "The World Bank (World Development Indicators)",
+  "Natural Earth (public domain)",
+]
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Project configuration with no meaningful creative content.
+[[annotations]]
+path = ["**/package.json", "**/package-lock.json", "**/tsconfig.json", ".gitignore", "REUSE.toml", "**/*.yml"]
+SPDX-FileCopyrightText = "Exodus contributors"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
