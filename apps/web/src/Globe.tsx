@@ -8,6 +8,8 @@ import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
 import { SphereGeometry } from '@luma.gl/engine';
 import { useStore } from './state';
 import { periodIndex } from './types';
+import { NO_DATA_FILL, NO_DATA_LINE } from './layers';
+import { useSurface } from './useSurface';
 
 /** Unit vector for a lon/lat, used to decide which hemisphere faces the camera. */
 function unit(lon: number, lat: number): [number, number, number] {
@@ -20,9 +22,14 @@ const dot = (p: [number, number, number], q: [number, number, number]) =>
 const INITIAL = { longitude: 14, latitude: 24, zoom: 1.65, pitch: 0, bearing: 0 };
 
 export function Globe() {
-  const { places, corridors, adm0, year, periodStarts, selected, hovered, select, hover } = useStore();
+  const { places, corridors, adm0, year, periodStarts, selected, hovered, select, hover,
+          surface, overlays, filters } = useStore();
   const [view, setView] = useState(INITIAL);
   const yi = year - 1990;
+
+  const { spec, scale, valueFor } = useSurface();
+  const placeIndex = useMemo(
+    () => new Map(places.map((p, i) => [p.iso3, i])), [places]);
 
   const rows = useMemo(() => {
     if (!places.length) return [];
@@ -43,7 +50,19 @@ export function Globe() {
       dot(unit(r.d.centroid[0], r.d.centroid[1]), cam) > 0.08);
   }, [corridors, places, yi, year, periodStarts, view.longitude, view.latitude]);
 
+  const maxAll = useMemo(
+    () => Math.max(1, ...corridors.map((c) => c.v[yi] ?? 0)), [corridors, yi]);
+  const shown = useMemo(() => rows.filter((r) =>
+    r.value >= filters.minVolume * maxAll &&
+    (!filters.corroboratedOnly || r.dp != null)), [rows, filters, maxAll]);
+
   const focus = selected ?? hovered;
+  // When a surface layer is painted, the corridors recede automatically. Two full-strength
+  // encodings on one globe cannot both be read, and making the reader turn one off by hand
+  // is work the interface should have done.
+  const surfaceOn = spec.kind !== 'none';
+  const arcDim = surfaceOn ? 0.34 : 1;
+
   const related = (r: { o: Place; d: Place }) =>
     r.o.iso3 === focus || r.d.iso3 === focus;
   /** 0 = ambient (nothing selected), 1 = this corridor is the subject, -1 = pushed back. */
@@ -70,35 +89,43 @@ export function Globe() {
       id: 'countries',
       data: adm0 ?? { type: 'FeatureCollection', features: [] },
       stroked: true, filled: true,
-      getFillColor: (f: any) => (focus && f.properties?.iso3 === focus ? [30, 58, 52] : [22, 31, 41]),
-      getLineColor: [46, 62, 78],
+      getFillColor: (f: any) => {
+        const iso = f.properties?.iso3;
+        if (focus && iso === focus) return [34, 74, 66];
+        if (!scale || !iso) return NO_DATA_FILL;
+        const idx = placeIndex.get(iso);
+        // A country with no value gets the no-data fill, never the low end of the ramp:
+        // painting absence as "small" is the commonest lie a choropleth tells.
+        return (idx == null ? null : scale.color(valueFor(idx))) ?? NO_DATA_FILL;
+      },
+      getLineColor: overlays.borders ? NO_DATA_LINE : [0, 0, 0, 0],
       getLineWidth: 1, lineWidthUnits: 'pixels',
       pickable: true,
       onHover: (i: any) => hover(i.object?.properties?.iso3 ?? null),
       onClick: (i: any) => select(i.object?.properties?.iso3 ?? null),
-      updateTriggers: { getFillColor: [focus] },
+      updateTriggers: { getFillColor: [focus, surface, year, scale], getLineColor: [overlays.borders] },
     }),
     // The uncertainty envelope. Its width IS the cross-model disagreement: a corridor
     // two models argue about is visibly fuzzier than one they agree on.
     new PathLayer({
       id: 'corridor-envelope',
-      data: rows.filter((r: any) => r.dp != null),
+      data: overlays.halos ? shown.filter((r: any) => r.dp != null) : [],
       getPath: (r: any) => r.path,
-      getColor: (r: any) => { const e = emphasis(r); return [232, 163, 61, (e === 1 ? 58 : e === 0 ? 16 : 2) * (0.3 + 0.7 * r.cov)]; },
+      getColor: (r: any) => { const e = emphasis(r); return [232, 163, 61, (e === 1 ? 58 : e === 0 ? 16 : 2) * (0.3 + 0.7 * r.cov) * arcDim]; },
       getWidth: (r: any) => width(r.value) * (1 + 3.2 * Math.min(2, r.dp)),
       widthUnits: 'pixels', capRounded: true, jointRounded: true,
       parameters: { depthCompare: 'always', depthWriteEnabled: false },
-      updateTriggers: { getColor: [focus, year], getWidth: [yi, year] },
+      updateTriggers: { getColor: [focus, year, arcDim], getWidth: [yi, year] },
     }),
     // The estimate itself. Opacity IS data coverage; the dash gaps widen with
     // disagreement, so a contested corridor reads as broken rather than solid.
     new PathLayer({
       id: 'corridors',
-      data: rows,
+      data: overlays.corridors ? shown : [],
       getPath: (r: any) => r.path,
       getColor: (r: any) => {
         const e = emphasis(r);
-        const a = (e === 1 ? 240 : e === 0 ? 46 : 8) * (0.3 + 0.7 * r.cov);
+        const a = (e === 1 ? 240 : e === 0 ? 46 : 8) * (0.3 + 0.7 * r.cov) * arcDim;
         // No second model means nothing corroborates this arc. It must not borrow the
         // confident colour of one that has been checked against an independent estimate.
         return r.dp == null ? [126, 142, 158, a * 0.85] : [96, 190, 214, a];
@@ -110,7 +137,7 @@ export function Globe() {
       extensions: [new PathStyleExtension({ dash: true })],
       parameters: { depthCompare: 'always', depthWriteEnabled: false },
       pickable: true,
-      updateTriggers: { getColor: [focus, year], getWidth: [yi], getDashArray: [yi, year] },
+      updateTriggers: { getColor: [focus, year, arcDim], getWidth: [yi], getDashArray: [yi, year] },
     }),
   ];
 

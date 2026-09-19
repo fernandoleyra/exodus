@@ -8,6 +8,8 @@ import { Globe } from './Globe';
 import { useStore } from './state';
 import { periodIndex } from './types';
 import { headroom } from './kernel/headroom';
+import { LayerPanel } from './LayerPanel';
+import { useSurface } from './useSurface';
 import type { EstimateKind, Place } from './types';
 
 const nf = new Intl.NumberFormat('en-US');
@@ -35,37 +37,6 @@ function Figure({ label, value, vintage, kind = 'observed', absentNote = 'no dat
   );
 }
 
-function Legend() {
-  return (
-    <div className="sec">
-      <h2>Reading the globe</h2>
-      <div className="legend-row">
-        <span className="swatch" style={{ background: '#60bed6', height: 3, alignSelf: 'center' }} />
-        <span className="desc"><b>Arc</b> — one corridor, from the spine model. Width is that year&rsquo;s flow.</span>
-      </div>
-      <div className="legend-row">
-        <span className="swatch" style={{ alignSelf: 'center' }}>
-          <span style={{ display: 'block', height: 3, background: '#60bed6', opacity: .18 }} />
-          <span style={{ display: 'block', height: 3, background: '#60bed6', opacity: .95, marginTop: 3 }} />
-        </span>
-        <span className="desc"><b>Opacity = reporting completeness.</b> A corridor whose endpoints publish little cannot borrow the authority of one that publishes a lot.</span>
-      </div>
-      <div className="legend-row">
-        <span className="swatch" style={{ alignSelf: 'center', background: 'rgba(232,163,61,.24)', borderTop: '1px solid rgba(232,163,61,.55)', borderBottom: '1px solid rgba(232,163,61,.55)' }} />
-        <span className="desc"><b>Halo = the two models disagree.</b> Wider halo, bigger argument. It is a step function on 5-year periods, because that is the only grid both models share.</span>
-      </div>
-      <div className="legend-row">
-        <span className="swatch" style={{ alignSelf: 'center', borderTop: '3px dotted #7e8e9e' }} />
-        <span className="desc"><b>Grey and dotted = nobody checked it.</b> The second model says nothing about this corridor-period, so there is no halo to draw. That is not agreement.</span>
-      </div>
-      <div className="legend-row">
-        <span className="swatch" style={{ alignSelf: 'center', background: '#161f29', border: '1px solid #2e3e4e' }} />
-        <span className="desc"><b>Unfilled land</b> — disputed or unrecognised, rendered as geometry with no data join and no corridors.</span>
-      </div>
-    </div>
-  );
-}
-
 function Inspector() {
   const { places, corridors, selected, hovered, year } = useStore();
   const iso = selected ?? hovered;
@@ -73,6 +44,8 @@ function Inspector() {
   const yi = year - 1990;
 
   const periodStarts = useStore((s) => s.periodStarts);
+  const { spec: surfaceSpec, valueFor } = useSurface();
+  const surfaceValue = p ? valueFor(places.indexOf(p)) : null;
   const manifest = useStore((s) => s.manifest);
   const flows = useMemo(() => {
     if (!p) return null;
@@ -125,6 +98,15 @@ function Inspector() {
           </p>
         )}
         <div className="kv"><span className="k">corridors rendered</span><span className="v">{flows!.nIn} in · {flows!.nOut} out</span></div>
+      </div>
+      <div className="sec">
+        <h2>{surfaceSpec.name}</h2>
+        <Figure label={surfaceSpec.name} kind={surfaceSpec.estimate === 'observed' ? 'observed' : 'modelled'}
+                value={surfaceValue == null ? null : surfaceSpec.fmt(surfaceValue)}
+                absentNote="no value here" />
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, margin: '4px 0 0' }}>
+          {surfaceSpec.what}
+        </p>
       </div>
       <div className="sec">
         <h2>How many more could it hold?</h2>
@@ -252,7 +234,7 @@ export function Observer() {
           <div className="tag">Migration intelligence. Every number carries its source, its vintage, and how much the best available evidence disagrees with itself.</div>
         </div>
         <div className="panel-scroll">
-          <Legend />
+          <LayerPanel />
           <div className="sec">
             <h2>Coverage</h2>
             <div className="kv"><span className="k">places</span><span className="v">{places.length}</span></div>
