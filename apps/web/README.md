@@ -5,11 +5,15 @@ end to end, from source through the semantic layer to the globe and the inspecto
 
 ```bash
 npm install
-node scripts/fetch-wb.mjs      # real World Bank indicators -> .cache/
-node scripts/build-snapshot.mjs # -> public/snapshot/*.json
-npm run dev                     # http://127.0.0.1:5173
-node e2e/shoot.mjs              # screenshots -> shots/
+npm run fetch      # geometry + World Bank indicators + both bilateral models (~210 MB)
+npm run snapshot   # -> public/snapshot/*.json
+npm run dev        # http://127.0.0.1:5173
+npm run verify     # typecheck + 20 tests
+node e2e/shoot.mjs # screenshots -> shots/
 ```
+
+Everything after `npm install` is reproducible from a clean clone. Raw downloads are cached
+in `.cache/` and gitignored; only the built snapshot (872 kB) is committed.
 
 ## What is real and what is not
 
@@ -40,6 +44,14 @@ gap is the product.
 Only 1,098 of 1,548 corridors have a second opinion at all, and the shared grid stops at
 2019 — so from 2020 onward **nothing is corroborated**, and the globe renders every
 corridor grey and dotted to say so.
+
+## The placement solver
+
+`src/placement/` holds the allocation solver — see its own README. It is quarantined by
+test, not by convention: one test asserts that nothing outside that folder imports from it,
+and another builds the production bundle and asserts it contains no `commitPlacement`,
+`NoConsentRecord`, `DESTINATION_LEGAL_BASIS` or `non-refoulement` symbol. Person-shaped
+types never reach the public globe.
 
 ## Known limits of this slice
 

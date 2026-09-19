@@ -87,7 +87,7 @@ const B = new Map();          // "O>D" -> Map(year0 -> value)
 }
 
 // ---------- geometry ----------
-const topo = JSON.parse(await readFile('/tmp/ne110.json', 'utf8'));
+const topo = JSON.parse(await readFile(`${RAW}/../ne110.json`, 'utf8'));
 const fc = feature(topo, topo.objects.countries);
 function ringCentroid(coords) {
   let a = 0, cx = 0, cy = 0;
