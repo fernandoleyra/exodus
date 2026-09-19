@@ -8,6 +8,7 @@ interface S {
   places: Place[];
   corridors: Corridor[];
   adm0: GeoJSON.FeatureCollection | null;
+  adm0Outline: GeoJSON.FeatureCollection | null;
   manifest: Manifest | null;
   surface: SurfaceId;
   overlays: Overlays;
@@ -25,7 +26,7 @@ interface S {
 }
 
 export const useStore = create<S>((set) => ({
-  year: 2019, periodStarts: [], places: [], corridors: [], adm0: null, manifest: null,
+  year: 2019, periodStarts: [], places: [], corridors: [], adm0: null, adm0Outline: null, manifest: null,
   surface: 'inbound', overlays: DEFAULT_OVERLAYS, filters: DEFAULT_FILTERS,
   selected: null, hovered: null, ready: false,
   setYear: (year) => set({ year }),
@@ -35,12 +36,13 @@ export const useStore = create<S>((set) => ({
   select: (selected) => set({ selected }),
   hover: (hovered) => set({ hovered }),
   load: async () => {
-    const [p, c, a, m] = await Promise.all([
+    const [p, c, a, ao, m] = await Promise.all([
       fetch('/snapshot/places.json').then((r) => r.json()),
       fetch('/snapshot/corridors.json').then((r) => r.json()),
       fetch('/snapshot/adm0.json').then((r) => r.json()),
+      fetch('/snapshot/adm0_outline.json').then((r) => r.json()),
       fetch('/snapshot/manifest.json').then((r) => r.json()),
     ]);
-    set({ places: p.places, corridors: c.corridors, periodStarts: c.periodStarts ?? [], adm0: a, manifest: m, ready: true });
+    set({ places: p.places, corridors: c.corridors, periodStarts: c.periodStarts ?? [], adm0: a, adm0Outline: ao, manifest: m, ready: true });
   },
 }));

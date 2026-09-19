@@ -22,9 +22,12 @@ const dot = (p: [number, number, number], q: [number, number, number]) =>
 const INITIAL = { longitude: 14, latitude: 24, zoom: 1.65, pitch: 0, bearing: 0 };
 
 export function Globe() {
-  const { places, corridors, adm0, year, periodStarts, selected, hovered, select, hover,
+  const { places, corridors, adm0, adm0Outline, year, periodStarts, selected, hovered, select, hover,
           surface, overlays, filters } = useStore();
   const [view, setView] = useState(INITIAL);
+  // Test hook: park the camera over a known place deterministically.
+  (window as unknown as Record<string, unknown>).__setView =
+    (longitude: number, latitude: number) => setView((v) => ({ ...v, longitude, latitude, zoom: 2.1 }));
   const yi = year - 1990;
 
   const { spec, scale, valueFor } = useSurface();
@@ -88,7 +91,7 @@ export function Globe() {
     new GeoJsonLayer({
       id: 'countries',
       data: adm0 ?? { type: 'FeatureCollection', features: [] },
-      stroked: true, filled: true,
+      stroked: false, filled: true,
       getFillColor: (f: any) => {
         const iso = f.properties?.iso3;
         if (focus && iso === focus) return [34, 74, 66];
@@ -98,12 +101,22 @@ export function Globe() {
         // painting absence as "small" is the commonest lie a choropleth tells.
         return (idx == null ? null : scale.color(valueFor(idx))) ?? NO_DATA_FILL;
       },
-      getLineColor: overlays.borders ? NO_DATA_LINE : [0, 0, 0, 0],
-      getLineWidth: 1, lineWidthUnits: 'pixels',
       pickable: true,
       onHover: (i: any) => hover(i.object?.properties?.iso3 ?? null),
       onClick: (i: any) => select(i.object?.properties?.iso3 ?? null),
-      updateTriggers: { getFillColor: [focus, surface, year, scale], getLineColor: [overlays.borders] },
+      updateTriggers: { getFillColor: [focus, surface, year, scale] },
+    }),
+    // Borders are stroked from the ORIGINAL outlines. The fill geometry is cut on a grid so
+    // it hugs the sphere, and stroking that would draw every cut as a national boundary.
+    new GeoJsonLayer({
+      id: 'borders',
+      data: overlays.borders ? (adm0Outline ?? { type: 'FeatureCollection', features: [] })
+                             : { type: 'FeatureCollection', features: [] },
+      stroked: true, filled: false,
+      getLineColor: NO_DATA_LINE,
+      getLineWidth: 1, lineWidthUnits: 'pixels',
+      pickable: false,
+      parameters: { depthCompare: 'always', depthWriteEnabled: false },
     }),
     // The uncertainty envelope. Its width IS the cross-model disagreement: a corridor
     // two models argue about is visibly fuzzier than one they agree on.
@@ -147,6 +160,9 @@ export function Globe() {
       views={new GlobeView({ resolution: 12 })}
       initialViewState={INITIAL}
       controller={{ dragRotate: true, inertia: 250 }}
+      onClick={(info: any) => { if (!info?.object) select(null); }}
+      getCursor={({ isDragging, isHovering }: any) =>
+        isDragging ? 'grabbing' : isHovering ? 'pointer' : 'grab'}
       onViewStateChange={({ viewState }: any) => setView(viewState)}
       layers={layers}
     />

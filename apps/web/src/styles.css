@@ -19,8 +19,12 @@
 html, body, #root { height: 100%; margin: 0; }
 body {
   background: var(--bg); color: var(--text); font-family: var(--sans);
-  font-size: 13px; -webkit-font-smoothing: antialiased; overflow: hidden;
+  font-size: 13px; -webkit-font-smoothing: antialiased;
 }
+/* Only the Observer locks the viewport — it is a fixed three-pane layout. Everything else
+   scrolls. This was global, which silently made the landing unscrollable for real users
+   while programmatic scrolling in tests still worked. */
+body[data-route="observer"] { overflow: hidden; }
 .app { display: grid; grid-template-columns: 300px 1fr 340px; height: 100%; }
 
 .panel { background: var(--bg-panel); display: flex; flex-direction: column; min-height: 0; }
@@ -153,3 +157,17 @@ body {
 }
 .slider-val { font-family: var(--mono); font-size: 10.5px; color: var(--accent); }
 .slider input[type=range] { width: 100%; accent-color: var(--accent); height: 3px; cursor: pointer; }
+
+.sec-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.sec-head h2 { flex: 1; }
+.clear-sel {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+  background: transparent; border: 1px solid var(--border-strong); border-radius: 3px;
+  color: var(--text-muted); font-family: var(--sans); font-size: 10px;
+  letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px; cursor: pointer;
+}
+.clear-sel:hover { color: var(--accent); border-color: #1d5c4a; }
+.hover-hint {
+  flex: 0 0 auto; font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text-muted); padding-top: 3px;
+}

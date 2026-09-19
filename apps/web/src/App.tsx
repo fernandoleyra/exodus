@@ -38,7 +38,7 @@ function Figure({ label, value, vintage, kind = 'observed', absentNote = 'no dat
 }
 
 function Inspector() {
-  const { places, corridors, selected, hovered, year } = useStore();
+  const { places, corridors, selected, hovered, year, select } = useStore();
   const iso = selected ?? hovered;
   const p = useMemo(() => places.find((x) => x.iso3 === iso), [places, iso]);
   const yi = year - 1990;
@@ -69,14 +69,21 @@ function Inspector() {
   }, [p, places, corridors, yi, year, periodStarts]);
 
   if (!p) {
-    return <div className="empty">Hover or click a country to inspect what is actually known about it.<br /><br />
+    return <div className="empty">Hover or click a country to inspect what is actually known about it.
+      Click empty space or press <b>Esc</b> to come back out to the whole world.<br /><br />
       Every figure here carries its source year. Where the world has no data, this panel says so rather than showing a zero.</div>;
   }
 
   return (
     <>
-      <div className="sec">
+      <div className="sec sec-head">
         <h2>{p.name}</h2>
+        {selected && (
+          <button className="clear-sel" onClick={() => select(null)} title="Back to the whole world (Esc)">
+            Clear <span className="layerkey">Esc</span>
+          </button>
+        )}
+        {!selected && hovered && <span className="hover-hint">hovering &middot; click to pin</span>}
         <Figure label="Population" value={fmt(p.pop)} vintage={p.popYear} />
         <Figure label="Migrant stock" value={fmt(p.stock)} vintage={p.stockYear} kind="modelled" />
         <Figure label="GDP per capita (PPP)" value={p.gdppc == null ? null : `$${fmt(p.gdppc)}`} vintage={p.gdppcYear} />
@@ -222,7 +229,17 @@ function Sources() {
   );
 }
 
+function useEscapeClears() {
+  const select = useStore((s) => s.select);
+  useEffect(() => {
+    const on = (e: KeyboardEvent) => { if (e.key === 'Escape') select(null); };
+    window.addEventListener('keydown', on);
+    return () => window.removeEventListener('keydown', on);
+  }, [select]);
+}
+
 export function Observer() {
+  useEscapeClears();
   const { load, ready, year, setYear, manifest, corridors, places } = useStore();
   useEffect(() => { void load(); }, [load]);
 
@@ -279,6 +296,11 @@ export function Observer() {
 
 export function App() {
   const route = useRoute();
+  useEffect(() => {
+    document.body.dataset.route = route;
+    return () => { delete document.body.dataset.route; };
+  }, [route]);
+
   useEffect(() => {
     // The Observer is reachable only after the terms have been accepted. Deep links are
     // honoured, not discarded: an unaccepted visitor is sent to the landing, where the

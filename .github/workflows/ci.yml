@@ -39,6 +39,10 @@ jobs:
           npx wait-on http://127.0.0.1:4173 -t 60000
           VITE_BASE=http://127.0.0.1:4173 node e2e/no-external-requests.mjs
 
+      # The three bugs a real user hit. Each drives the app the way a person does.
+      - name: Interaction regressions
+        run: VITE_BASE=http://127.0.0.1:4173 node e2e/regressions.mjs
+
   reuse:
     runs-on: ubuntu-latest
     steps:

@@ -288,7 +288,86 @@ await writeFile('public/snapshot/places.json', JSON.stringify({ places }));
 await writeFile('public/snapshot/corridors.json', JSON.stringify({
   years: YEARS, periodStarts: PERIOD_STARTS, corridors,
 }));
+// Densify every ring before shipping. On a globe, a polygon edge is drawn as a straight
+// chord: an edge spanning 40 degrees of arc sags ~380 km BELOW the sphere surface, so the
+// middle of a large country sinks inside the globe and is hidden, punching black holes
+// through Brazil, Argentina, Algeria and the like. Splitting long edges keeps every chord
+// within metres of the surface. 110m geometry is coarse, which is why big countries broke
+// and small ones did not.
+// On a globe, deck.gl draws a polygon as flat triangles. It does NOT subdivide, so the
+// interior of a large country chords straight through the sphere: at a 40-degree span the
+// middle sags ~384 km below the surface, far past the ~36 km of clearance above the ocean
+// mesh, and the country is punched through with black holes. Densifying the outline does
+// not help, because the sag is in the interior triangulation, not the edges.
+//
+// So cut every country along a lat/lon grid. Each piece then spans at most CELL degrees and
+// sags under 9 km, which clears comfortably. Exactly one polygon in Natural Earth 110m has
+// an interior ring, and it is passed through uncut rather than risk filling its hole.
+const CELL = 6;
+
+// The cut is a rendering trick, not a fact about borders. Keep the original outlines and
+// stroke from those, or every grid cut shows up as a national boundary.
+const outlineFc = JSON.parse(JSON.stringify(fc));
+
+/** Sutherland–Hodgman against one edge of a convex window. */
+function clipEdge(poly, inside, intersect) {
+  if (!poly.length) return [];
+  const out = [];
+  for (let i = 0; i < poly.length; i++) {
+    const cur = poly[i], prev = poly[(i + poly.length - 1) % poly.length];
+    const cin = inside(cur), pin = inside(prev);
+    if (cin) {
+      if (!pin) out.push(intersect(prev, cur));
+      out.push(cur);
+    } else if (pin) {
+      out.push(intersect(prev, cur));
+    }
+  }
+  return out;
+}
+
+function clipToCell(ring, x0, y0, x1, y1) {
+  const ix = (a, b, x) => [x, a[1] + ((b[1] - a[1]) * (x - a[0])) / (b[0] - a[0])];
+  const iy = (a, b, y) => [a[0] + ((b[0] - a[0]) * (y - a[1])) / (b[1] - a[1]), y];
+  let r = ring;
+  r = clipEdge(r, (p) => p[0] >= x0, (a, b) => ix(a, b, x0));
+  r = clipEdge(r, (p) => p[0] <= x1, (a, b) => ix(a, b, x1));
+  r = clipEdge(r, (p) => p[1] >= y0, (a, b) => iy(a, b, y0));
+  r = clipEdge(r, (p) => p[1] <= y1, (a, b) => iy(a, b, y1));
+  return r.length >= 3 ? r : null;
+}
+
+function bounds(ring) {
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const [x, y] of ring) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  return [x0, y0, x1, y1];
+}
+
+let polysBefore = 0, polysAfter = 0, skipped = 0;
+for (const f of fc.features) {
+  const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+  const out = [];
+  for (const poly of polys) {
+    polysBefore++;
+    if (poly.length > 1) { out.push(poly); skipped++; continue; }   // has a hole: pass through
+    const ring = poly[0];
+    const [bx0, by0, bx1, by1] = bounds(ring);
+    // Small enough to be safe already — leave it whole and keep the vertex count down.
+    if (bx1 - bx0 <= CELL && by1 - by0 <= CELL) { out.push(poly); continue; }
+    for (let x = Math.floor(bx0 / CELL) * CELL; x < bx1; x += CELL) {
+      for (let y = Math.floor(by0 / CELL) * CELL; y < by1; y += CELL) {
+        const piece = clipToCell(ring, x, y, x + CELL, y + CELL);
+        if (piece) out.push([piece]);
+      }
+    }
+  }
+  polysAfter += out.length;
+  f.geometry = { type: 'MultiPolygon', coordinates: out };
+}
+console.log(`geometry      cut ${polysBefore} -> ${polysAfter} polygons on a ${CELL}deg grid (${skipped} with holes passed through)`);
+
 await writeFile('public/snapshot/adm0.json', JSON.stringify(fc));
+await writeFile('public/snapshot/adm0_outline.json', JSON.stringify(outlineFc));
 await writeFile('public/snapshot/manifest.json', JSON.stringify({
   builtFrom: 'Gaskin & Abel (spine) + Abel (second model) + World Bank WDI (context) + Natural Earth (geometry)',
   corridorCount: corridors.length,
