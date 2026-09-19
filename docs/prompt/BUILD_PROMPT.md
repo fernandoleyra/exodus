@@ -94,11 +94,54 @@ See `docs/review/contradictions.md` for the other ~30, including three snapshot 
 17. **Every version is an exact pin with no fallback, and install is the first thing that happens.** Add a blanket rule: *if an exact pin does not resolve, take the highest published version sharing the same major (same minor for `deck.gl`/`@luma.gl`/`@loaders.gl`, which peer-range in lockstep), record it in `DECISIONS.md` with the registry error, and continue.* Add a preflight that `npm view`s every pin before M0 command 1.
 18. **M0 as written cannot run** — it requires byte measurements and real feature counts from connectors that are M1 deliverables. Rewrite M0.3 as explicitly synthetic: the full r3 cell set comes from `h3-js` (`getRes0Cells()` → `cellToChildren(c, 3)` = exactly 41,162) and needs no data at all.
 
-### §0.5 Verify before you publish
+### §0.5 Verified — the ledger is binding
 
-These are rendered as product copy or drive a build decision, and **none is confirmed**. At M0, probe each one and either commit the evidence or render `—`:
+These were probed against primary sources and independently re-checked. The full evidence is
+in **`docs/verification/M0-LEDGER.md`, which overrides any figure stated elsewhere in this
+document.** Do not re-derive these; do not restore the originals.
 
-Gaskin & Abel's "73% test correlation" · UN DESA's "53% moved within their own region of origin" and the 83/73/63% breakdown · the WPP 2026-revision postponement · the GHS-POP archive size · the UN DESA xlsx byte count and its `User-Agent` 403 trap · GDELT GEO 2.0's documented-example 404 · CEPII Gravity's Etalab 2.0 licence · the UNHCR asterisk convention · **every figure in UN ESA/P/WP.160 Table 8, including the Republic of Korea 5.149-billion figure — the single most prominent number in the product** · Sanderson–Scherbov's Germany +11.3%/+49.2% · the `visgl:webgl-only` export condition, which must be resolved against the installed `package.json` exports map and never against the web.
+**Refuted — these would have shipped as false. Never render them:**
+
+1. **The intraregional share is 45%, not 53%.** UN DESA IMS 2024: *45% of international
+   migrants were living in their region of origin in 2024* — Europe 74%, Oceania 73%,
+   sub-Saharan Africa 64% (not 83/73/63). Also say **"living in"**, not "moved within": the
+   figure is a stock, and "moved" turns it into a flow claim the source does not make.
+2. **UNHCR does use a bare asterisk in numeric cells, and it does not mean 1–4.** The
+   Global Trends statelessness annex carries 84 cells whose entire value is `*`, meaning
+   *"information exists but no reliable data"*. A dash means zero, not available, or not
+   applicable. **Write the parsing.** Treating `*` as a number, or as 1–4, silently
+   fabricates data for exactly the populations least able to contest it.
+
+**Corrected — the substance holds, the specifics were wrong:**
+
+3. **There is no Table 8 in ESA/P/WP.160, and the Korea figure is not 5,149,000,000.** The
+   report's tables are Table 1, I.1–I.2, III.1, IV.1–IV.22 and A.1–A.20. Cite **Table 1
+   (report p. 2), Republic of Korea, scenario V, 2000–2050: 5,128,147 thousand**, or
+   Table IV.4 for the 1995–2050 window: 5,148,928 thousand. Note the unit is **thousands**.
+   This was the most prominent number in the product and every part of its citation was wrong.
+4. **WPP:** the postponement is real and sourced (E/CN.9/2026/CRP.1, 26 March 2026: *"the
+   release of the World Population Prospects has been postponed from 2026 to 2027"*), but the
+   delayed edition is the **2027 revision**, not "the 2026 revision". Latest published: WPP 2024.
+5. **GHS-POP 323,340,844 bytes is right only for a fully pinned product**: GHS-POP R2023A,
+   **epoch 2025, Mollweide, 1 km**. Never call it "the GHS-POP R2023A global archive" — that
+   name covers many files of different sizes and the assertion will fail against the wrong one.
+6. **JRC Atlas: "198 countries and territories"**, never "198 countries". The digits are
+   right; the noun is the JRC's own and the distinction is politically load-bearing.
+7. **`visgl:webgl-only` is published by deck.gl only** — `@deck.gl/core`, `layers`,
+   `aggregation-layers`, `geo-layers`, `mesh-layers` at 9.4.0. **luma.gl does not publish it.**
+
+**Confirmed verbatim — ship as written:**
+
+8. Gaskin & Abel **73%** — a Pearson R on held-out test flows (94% on training), fivefold
+   cross-validated. Render it as a test-set correlation, not as accuracy.
+9. UN DESA IMS XLSX **6,005,287 bytes**, and the 403-vs-200 user-agent gate is real (a
+   CloudFront edge block, so the connector must send a browser user-agent).
+10. **CEPII Gravity 202211 is Etalab 2.0**, stated on the dataset landing page.
+11. **GDELT GEO 2.0 returns HTTP 404** on its own documented example, while sibling APIs on
+    the same host answer normally. The trap copy is accurate.
+
+Still outstanding at the time of writing, and still governed by §0.6 until the ledger says
+otherwise: the Sanderson–Scherbov Germany figures, and the six CPC scoreboard digits.
 
 ### §0.6 The rule that outranks every other rule
 
