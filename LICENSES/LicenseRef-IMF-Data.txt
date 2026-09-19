@@ -1,0 +1,67 @@
+IMF terms for published statistical Data
+========================================
+
+IMF content is published "All Rights Reserved" and its general terms forbid
+redistribution and derivative works. Its published statistical Data are carved
+out of that prohibition by special terms, quoted below from
+https://www.imf.org/en/_site_imf/about/copyright-and-terms (effective
+11 October 2024) as retrieved on 2026-09-19. The canonical
+https://www.imf.org/external/terms.htm returns HTTP 403 to non-browser clients;
+the URL above serves the same notice with HTTP 200.
+
+Scope. "Data" is defined to include "Most statistical data available on
+www.IMF.org, www.data.IMF.org, or the iData Portal that explicitly identify the
+International Monetary Fund as the source", and names the World Economic Outlook
+database explicitly. The DataMapper API, from which Exodus reads, serves the WEO
+database.
+
+The grant:
+
+  "Notwithstanding the general prohibition on the commercial use of IMF Content,
+  with respect to published statistical data made available on IMF Sites, the
+  following special terms shall govern. [...] You may download, extract, copy,
+  create derivative works, publish, distribute, and use Data obtained from IMF
+  Sites, subject to the following conditions:
+
+    - Whether obtained directly from the IMF or another party, when Data is
+      distributed or reproduced in any manner, it must appear accurately with
+      attribution to the IMF as the source, e.g. 'Source: International Monetary
+      Fund, Database Name, <<link to the dataset>>.'
+
+    - Users shall not infringe upon the integrity of the Data and in particular
+      shall refrain from any act of alteration of the Data that intentionally
+      affects its nature or accuracy. If the Data is materially transformed by
+      the User, this must be stated explicitly along with the required source
+      citation.
+
+    - Users who make IMF Data available to other Users through any type of
+      distribution or download environment agree to take reasonable efforts to
+      communicate and promote compliance by their users with these terms.
+
+    - If IMF Data is sold by Users as a standalone product, sellers must inform
+      purchasers that the Data is available free of charge from the IMF. [...]"
+
+Two limits that remain in force
+-------------------------------
+
+The general terms state that "The IMF prohibits the bulk download of information
+by automated technology without explicit permission." Exodus reads three
+indicator series once and caches them; it does not mirror the database.
+
+The special terms close with "For any potential commercial reuse of IMF Data,
+please email copyright@imf.org to request permission." This sits awkwardly beside
+a grant that opens by setting aside the prohibition on commercial use. Exodus is
+a non-commercial open-source project, so the tension does not arise here — but
+anyone reusing this repository's snapshot commercially should resolve it with the
+IMF rather than rely on this file.
+
+How Exodus satisfies these
+--------------------------
+
+Attribution in the required form is carried on /#/sources and beside every IMF
+figure on /#/concordance.
+
+The transformation is material and is stated explicitly in the same place:
+regional aggregates are removed, the population series is rescaled from millions
+to people, and a single year is selected from a database that extends into
+projection years.

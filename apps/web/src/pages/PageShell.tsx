@@ -9,6 +9,7 @@ export function PageShell({ title, kicker, children }: { title: string; kicker: 
         <button className="wordmark-btn" onClick={() => navigate('landing')}>EXODUS</button>
         <nav>
           <a href="#/sources">Sources</a>
+          <a href="#/concordance">Concordance</a>
           <a href="#/methods">Methods</a>
           <a href="#/legal">Legal</a>
           <a href="#/observer">Observer</a>

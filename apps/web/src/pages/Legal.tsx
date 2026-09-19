@@ -102,11 +102,47 @@ export function Legal() {
         All application code is <b>AGPL-3.0-or-later</b>. Documentation is CC BY-4.0. Data
         remains under the licences of its original publishers, each named in the source
         ledger &mdash; note that Natural Earth is public domain and its authors expressly waive
-        any requirement to credit them; we credit them anyway. These terms supplement those
-        licences and do not restrict any right they grant you.
+        any requirement to credit them; we credit them anyway, and that Eurostat and the IMF
+        are governed by their own instruments rather than by Creative Commons, set out in
+        section 10. These terms supplement those licences and do not restrict any right they
+        grant you.
       </p>
 
-      <h2>10. Changes</h2>
+      <h2>10. Conditions two publishers place on us</h2>
+      <p>
+        Two of the sources are not under a Creative Commons licence and attach conditions of
+        their own, which we discharge here rather than bury.
+      </p>
+      <p>
+        <b>Eurostat.</b> Its statistical data are reusable with attribution under Commission
+        Decision 2011/833/EU. That decision requires that any modification be stated clearly
+        to the end user and that a disclaimer be carried: <b>Eurostat is not responsible for
+        any use made of the Eurostat data appearing in this application, nor for any
+        conclusion drawn from it.</b> What we changed to each Eurostat series is set out in
+        the <a href="#/sources">source ledger</a>. The decision also withholds{' '}
+        <em>commercial</em> reuse of Eurostat data covering countries outside the EU, EFTA and
+        the official acceding and candidate countries; every country we carry a Eurostat
+        figure for is inside that set, and a test in the repository fails the build if that
+        ever stops being true.
+      </p>
+      <p>
+        <b>International Monetary Fund.</b> IMF content is published all rights reserved; its
+        published statistical data are carved out by special terms that permit derivative
+        works and redistribution with attribution, on condition that the data are not altered
+        in a way that affects their accuracy and that any material transformation is stated.
+        We have materially transformed them &mdash; aggregates dropped, population rescaled
+        from millions to people, a single historical year selected from a database that runs
+        into projection years &mdash; and say so on the{' '}
+        <a href="#/sources">source ledger</a> and on the{' '}
+        <a href="#/concordance">concordance page</a>. Source: International Monetary Fund,
+        World Economic Outlook database,{' '}
+        <a href="https://www.imf.org/external/datamapper/api/v1/" target="_blank" rel="noreferrer noopener">
+          imf.org/external/datamapper
+        </a>. Both notices are reproduced in full in the repository under{' '}
+        <code>LICENSES/</code>.
+      </p>
+
+      <h2>11. Changes</h2>
       <p>
         These terms may change. The authoritative version is the one in the public repository,
         with its full revision history — you can read exactly what changed and when.

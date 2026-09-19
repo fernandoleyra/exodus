@@ -7175,3 +7175,110 @@ M9 was previously reserved for the optional live-signal sidecar. **That sidecar 
 
 ---
 
+
+---
+
+## §13 Concordance — comparing sources against each other
+
+Added after the MVP, in response to a direct request: *a function or place where we can
+compare same data from different sources to see how close or far they are*.
+
+### §13.1 The decision that shaped it
+
+Showing the spread is not enough, and a view that showed only the spread would mislead
+about as badly as one that hid it. Most apparent disagreement between data producers is
+**definitional** — a different base year, a different denominator, a different rule about
+who counts — and it appears as a level shift that is nearly identical for every country.
+Real disagreement appears as **scatter**: the sources argue about individual countries, not
+about units. A single "percent different" figure cannot tell those apart.
+
+So every pair is placed on two axes:
+
+| Axis | What it is | What it catches |
+|---|---|---|
+| dispersion | MAD of log(A/B), read back as a percentage | how much the gap varies country by country |
+| rank | Spearman's rho on the shared entries | whether the two even agree on the ordering |
+
+Working in log space is load-bearing, not stylistic: it makes A-twice-B and B-twice-A score
+the same distance, and it makes every statistic exactly symmetric under swapping the two
+sources. The first implementation took the median in ratio space and was asymmetric at the
+sixth decimal for even sample sizes; the test that caught it is still there.
+
+Thresholds, all in `src/concordance/stats.ts` and rendered onto the page from the same
+constants so the published table cannot come to describe rules the classifier no longer
+applies:
+
+| Verdict | Condition | Reading |
+|---|---|---|
+| `same` | spread < 2%, gap < 2% | **not** independent confirmation — one is derived from the other |
+| `offset` | spread < 4%, gap ≥ 2% | a definition, applied uniformly; convertible |
+| `residual` | spread < 8% | ordinary residual of two organisations compiling the same accounts |
+| `scatter` | spread < 50% | no single factor reconciles it |
+| `divergent` | spread ≥ 50% | two models, not two measurements |
+| `conflict` | ρ < 0.80 | the ordering itself is in dispute; no average is meaningful |
+
+`conflict` outranks every level statistic, because if the ordering is wrong the level
+statistics describe nothing.
+
+### §13.2 What it found
+
+| Pair | Verdict | The finding |
+|---|---|---|
+| Eurostat vs IMF, unemployment | `same` (spread 0.0%) | 26 of 34 identical to machine precision — the IMF republishes the LFS rate rather than collecting its own. Switzerland is the exception: 4.1% survey against 2.0% registered, a factor of two. |
+| World Bank vs IMF, population | `same` (±1.2%) | the floor under every per-capita figure in the app |
+| World Bank vs IMF, GDP per capita PPP | `residual` (±3.5%) | like-for-like on the 2021 ICP round. Comparing against a *constant*-price series instead opens a 10.6% gap that is pure definition — the trap this page exists to expose |
+| Eurostat vs modelled inflow | `scatter` (±31.7%, ρ 0.93) | the modelled spine against what national registers actually recorded |
+| Gaskin & Abel vs Abel, corridors | `divergent` (±211.7%, ρ 0.84) | the honest floor on how much of the migration picture is inference |
+
+### §13.3 Three defects this view had before it was any good
+
+Recorded because each one would have shipped a plausible-looking lie.
+
+1. **The outlier table ranked by near-zero denominators.** Sorted on |log ratio| it filled
+   with corridors where one model estimated 1 against the other's 59,000 — a 59,253×
+   "disagreement" that says only that one side rounded to zero. Those entries belong in the
+   spread statistic and stay in it; the table now draws from entries at or above each
+   series' own lower quartile on **both** sides, and says so. Post-fix the table reads
+   Pakistan→US 104k vs 1.14m, UAE→Nepal 99k vs 2,486 — real, large, published disagreements.
+2. **The ratio axis was blown out by its own tail.** Scaling to the extremes squashed 1,510
+   entries into a few centre pixels. Even the 98th percentile was too generous (380×). The
+   axis now spans the 95th percentile clamped to [4×, 32×], and entries past it are pinned
+   to the edge **and counted on the page**, never silently dropped.
+3. **The hover target was a 2.7px tick among 1,510.** Not something a hand can do. The whole
+   strip is now the hit area and the pointer selects the nearest entry.
+
+### §13.4 Licence work this forced
+
+Two new producers, neither under Creative Commons, both reproduced verbatim in `LICENSES/`:
+
+- **Eurostat** — its CC BY 4.0 licence covers the *editorial content of its website*, not its
+  statistical data. The data are reusable with attribution under **Commission Decision
+  2011/833/EU**, which additionally requires that modifications be stated to the end user and
+  that a non-responsibility disclaimer be carried. Labelling it CC BY would have repeated
+  exactly the Natural Earth error this project already corrected once. The decision also
+  withholds *commercial* reuse for countries outside EU/EFTA/candidate; a test asserts every
+  Eurostat entity shipped is inside that set, rather than the claim sitting in prose.
+- **IMF** — content is published all rights reserved, but published statistical **Data** are
+  carved out by special terms that expressly permit derivative works, publication and
+  distribution with attribution, on condition that accuracy is not impaired and that material
+  transformation is stated. Two limits survive and are recorded: the general prohibition on
+  bulk automated download, and a closing sentence asking that commercial reuse be cleared by
+  email — which sits awkwardly beside a grant that opens by setting the commercial
+  prohibition aside.
+
+### §13.5 An operational note worth keeping
+
+`imf.org` sits behind a WAF that rejects node's `fetch` outright and rejects a **browser**
+User-Agent with HTTP 403, while letting curl's own default UA straight through. This is the
+inverse of the usual advice and of what the research pack recommended. Do not "fix" it by
+adding a browser UA.
+
+### §13.6 What this pass also corrected elsewhere
+
+The Methods page claimed each model is normalised to a common total before comparison. The
+pipeline sets `scaleB = 1` and normalises nothing — the source ledger said so on another
+page. It also quoted three figures that had gone stale when the type-filter bug was fixed:
+1,098 corridors with a second opinion (really 1,538), 6,378 corroborated corridor-periods
+(really 8,854), median disagreement 80% (really 75%). Prose carrying computed numbers now has
+a test that reads the numbers back out of the page and recomputes them from the snapshot,
+because that is the only thing that stops them drifting again.

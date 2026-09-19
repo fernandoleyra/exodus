@@ -358,6 +358,7 @@ export function Landing() {
         <span className="wordmark">EXODUS</span>
         <nav>
           <a href="#/sources">Sources</a>
+          <a href="#/concordance">Concordance</a>
           <a href="#/methods">Methods</a>
           <a href="#/legal">Legal</a>
           <button className="nav-enter" onClick={() => (hasAccepted() ? navigate('observer') : setGate(true))}>

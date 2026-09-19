@@ -101,6 +101,8 @@ body[data-route="observer"] { overflow: hidden; }
 
 .pill-btn { cursor: pointer; font-family: var(--mono); }
 .pill-btn:hover { color: var(--accent); border-color: var(--accent); }
+.pill-link { text-decoration: none; font-family: var(--mono); color: var(--accent-3); border-color: #234465; }
+.pill-link:hover { color: var(--accent); border-color: var(--accent); }
 .brand-btn { background: none; border: 0; padding: 0; cursor: pointer; text-align: left; color: inherit; }
 .brand-btn:hover h1 { color: var(--accent); }
 

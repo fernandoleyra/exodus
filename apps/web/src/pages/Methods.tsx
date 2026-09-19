@@ -39,19 +39,29 @@ export function Methods() {
       <p>
         Two independently published estimates of the same corridor are compared only on the six
         five-year periods both cover, as a step function, never interpolated across the gaps.
-        Before comparison each model is normalised to a common total, because otherwise the
-        &ldquo;disagreement&rdquo; is merely a difference of scale.
+        Neither model is rescaled before the comparison. Summed correctly the two agree to
+        within 0.25% in aggregate volume, so there is no scale difference to normalise away
+        &mdash; and normalising anyway would quietly shrink a disagreement rather than report it.
       </p>
       <p>
         The measure is the symmetric relative difference, |a−b| divided by their mean, so it
         runs from <b>0 to 200%</b>. 200% means one model reports a substantial flow where the
-        other reports almost nothing. The median across 6,378 corroborated corridor-periods is
-        <b> 80%</b>.
+        other reports almost nothing. The median across <b>8,854</b> corroborated
+        corridor-periods is <b>75%</b>.
       </p>
       <p className="honest">
-        1,098 of 1,548 corridors have a second opinion at all, and the shared grid ends in
-        2019. From 2020 onward <b>nothing here is corroborated</b>, and the globe renders every
-        corridor grey and broken to say so. That is not the same as the models agreeing.
+        1,538 of 1,548 corridors have a second opinion in at least one period, and the shared
+        grid ends with the window that closes in 2020. From 2020 onward <b>nothing here is
+        corroborated</b>, and the globe renders every corridor grey and broken to say so. That
+        is not the same as the models agreeing.
+      </p>
+      <p>
+        That 75% is one number describing one pair. The{' '}
+        <a href="#/concordance">concordance page</a> does the same exercise across every
+        quantity in the application for which more than one organisation publishes a figure,
+        and classifies each gap rather than only measuring it: a gap that is one uniform shift
+        is a definition, a gap that varies country by country is a disagreement, and a pair
+        that matches exactly is usually not two sources at all.
       </p>
 
       <h2>Service-stock headroom</h2>

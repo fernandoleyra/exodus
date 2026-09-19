@@ -1,0 +1,49 @@
+Eurostat reuse terms for statistical data
+=========================================
+
+Eurostat's copyright notice distinguishes the editorial content of its website,
+which is licensed under Creative Commons Attribution 4.0 International, from its
+statistical data, which are not. This file records the terms that govern the
+statistical data, quoted from
+https://ec.europa.eu/eurostat/web/main/help/copyright-notice as retrieved on
+2026-09-19.
+
+The grant:
+
+  "Reuse of statistical data, metadata, publications, and other dissemination
+  tools published on this website for commercial or non-commercial purposes is
+  authorised provided the source is acknowledged. The reuse policy of the
+  European Commission is implemented by the Decision of 12 December 2011."
+
+That decision is Commission Decision 2011/833/EU on the reuse of Commission
+documents.
+
+The condition on modified data:
+
+  "When reuse involves translations of publications or modifications to the data
+  or text, this must be stated clearly to the end user of the information. A
+  disclaimer regarding the non-responsibility of Eurostat shall be included."
+
+The condition on country coverage:
+
+  "The following Eurostat data and documents may not be reused for commercial
+  purposes, but non-commercial reuse is possible without restriction: [...] Data
+  for countries other than: Member States of the European Union (EU); Member
+  States of the European Free Trade Association (EFTA); official EU acceding and
+  candidate countries. Examples are data for the United States of America, Japan
+  or China. In such cases, the user will need to eliminate these data from the
+  tables before reusing them commercially."
+
+How Exodus satisfies these
+--------------------------
+
+The source is acknowledged on /#/sources with the dataset code and access route,
+and on /#/concordance beside every figure drawn from it.
+
+The modifications are stated on /#/sources in the entry's own "Modified" line,
+and the Eurostat non-responsibility disclaimer is carried on /#/legal.
+
+The country condition is met rather than assumed: every entity Exodus ships a
+Eurostat value for is an EU Member State, an EFTA member, or an EU candidate
+country. This is checked by a test rather than asserted, so a later dataset that
+reached beyond that set would fail the build instead of shipping quietly.

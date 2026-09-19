@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 
-export type Route = 'landing' | 'observer' | 'sources' | 'legal' | 'methods';
+export type Route = 'landing' | 'observer' | 'sources' | 'legal' | 'methods' | 'concordance';
 
 const ROUTES: Record<string, Route> = {
   '': 'landing', '/': 'landing',
   '/observer': 'observer', '/sources': 'sources', '/legal': 'legal', '/methods': 'methods',
+  '/concordance': 'concordance',
 };
 
 export function parse(hash: string): Route {

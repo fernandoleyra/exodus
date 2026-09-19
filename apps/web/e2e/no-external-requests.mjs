@@ -5,7 +5,7 @@
 import { chromium } from 'playwright';
 
 const ORIGIN = process.env.VITE_BASE ?? 'http://127.0.0.1:5173';
-const ROUTES = ['/', '/#/sources', '/#/methods', '/#/legal', '/#/observer'];
+const ROUTES = ['/', '/#/sources', '/#/methods', '/#/legal', '/#/concordance', '/#/observer'];
 
 const browser = await chromium.launch({
   ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),

@@ -4,6 +4,7 @@ import { Landing } from './landing/Landing';
 import { Legal } from './pages/Legal';
 import { Sources as SourcesPage } from './pages/Sources';
 import { Methods } from './pages/Methods';
+import { ConcordancePage } from './concordance/Concordance';
 import { Globe } from './Globe';
 import { useStore } from './state';
 import { periodIndex } from './types';
@@ -269,6 +270,7 @@ export function Observer() {
           <button className="pill pill-btn" onClick={() => navigate('landing')}>← Exodus</button>
           <span className="pill">offline · committed snapshot</span>
           <span className="pill">every corridor is modelled — no bilateral flow on earth is observed</span>
+          <a className="pill pill-link" href="#/concordance">do the sources agree? →</a>
           {!ready && <span className="pill">loading…</span>}
         </div>
         <Globe />
@@ -311,6 +313,7 @@ export function App() {
   if (route === 'legal') return <Legal />;
   if (route === 'sources') return <SourcesPage />;
   if (route === 'methods') return <Methods />;
+  if (route === 'concordance') return <ConcordancePage />;
   if (route === 'observer' && hasAccepted()) return <Observer />;
   return <Landing />;
 }

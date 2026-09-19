@@ -45,6 +45,28 @@ const SOURCES: Src[] = [
     modified: 'Modified: latest non-null observation selected per country and its year retained and displayed; no interpolation, no imputation, no carry-forward beyond the stated year.',
   },
   {
+    id: 'eurostat',
+    title: 'Eurostat: immigration by citizenship (migr_imm1ctz) and unemployment (une_rt_a)',
+    author: 'Eurostat, European Commission',
+    licence: 'Reuse authorised under Commission Decision 2011/833/EU', licenceUrl: 'https://ec.europa.eu/eurostat/web/main/help/copyright-notice',
+    locator: 'dissemination API 1.0 \u00b7 migr_imm1ctz (2022, citizen TOTAL and FOR_STLS) \u00b7 une_rt_a (2023, Y15\u201374, PC_ACT)',
+    url: 'https://ec.europa.eu/eurostat/web/main/help/copyright-notice',
+    vintage: 'immigration 2022, published 2026-05-29 \u00b7 unemployment 2023, published 2026-09-10',
+    what: 'Reported counts, used only on the concordance page. Immigration is what national statistical institutes actually recorded, which is the nearest thing to ground truth the bilateral models can be checked against; the unemployment rate is the harmonised Labour Force Survey figure.',
+    modified: 'Modified: JSON-stat decoded across every dimension; the EU27_2020, EA20 and EA21 aggregates dropped; two-letter geo codes mapped to ISO-3166-1 alpha-3, including Eurostat\u2019s two departures from the standard (EL for Greece, UK for the United Kingdom).',
+  },
+  {
+    id: 'imf-weo',
+    title: 'World Economic Outlook database',
+    author: 'International Monetary Fund',
+    licence: 'IMF terms for statistical Data', licenceUrl: 'https://www.imf.org/en/_site_imf/about/copyright-and-terms',
+    locator: 'DataMapper API v1 \u00b7 PPPPC, LP, LUR',
+    url: 'https://www.imf.org/external/datamapper/api/v1/',
+    vintage: '2023 values read from a database running to 2031 \u2014 the upper years are projections',
+    what: 'A third opinion on unemployment, GDP per capita and population, used only on the concordance page. The IMF publishes what member authorities report to it, on a different schedule from the World Bank, which is exactly what makes the comparison worth drawing.',
+    modified: 'Modified: region aggregates (ADVEC, AS5, DA, EU, MECA, OEMDC, WE, WEOWORLD and the WEO regional codes) removed by intersecting with the API\u2019s own country list; LP rescaled from millions to people; the 2023 slice taken and nothing beyond it, because later years in this database are forecasts rather than outturns.',
+  },
+  {
     id: 'naturalearth',
     title: 'Natural Earth Admin 0 – Countries, 1:110m',
     author: 'Natural Earth (public domain)',
@@ -64,9 +86,12 @@ export function Sources() {
   return (
     <PageShell title="Where every number comes from" kicker="Source ledger">
       <p className="lede">
-        Four sources, all openly licensed, each with the attribution its licence requires and
-        an explicit statement of what we changed. Nothing here is scraped, purchased, private
-        or redistributed against its terms.
+        {SOURCES.length} sources, each with the attribution its own licence requires and an
+        explicit statement of what we changed. They are not all under the same licence, and
+        this page does not pretend otherwise: two of them are governed by instruments written
+        by the publisher rather than by Creative Commons, and those are reproduced in full in
+        the repository&rsquo;s <code>LICENSES/</code> directory. Nothing here is scraped,
+        purchased, private, or redistributed against its terms.
       </p>
 
       <h2>Credentials</h2>
