@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: Exodus contributors
+# SPDX-License-Identifier: AGPL-3.0-or-later
 name: ci
 on:
   push: { branches: ["**"] }
@@ -27,6 +29,15 @@ jobs:
             exit 1
           fi
           echo "Public bundle is clean."
+
+      # The badges page claims no third-party request is ever made. Test the claim rather
+      # than asserting it: this drives every route and fails on ANY cross-origin request.
+      - name: No third-party requests at runtime
+        run: |
+          npx playwright install --with-deps chromium
+          npm run preview &
+          npx wait-on http://127.0.0.1:4173 -t 60000
+          VITE_BASE=http://127.0.0.1:4173 node e2e/no-external-requests.mjs
 
   reuse:
     runs-on: ubuntu-latest

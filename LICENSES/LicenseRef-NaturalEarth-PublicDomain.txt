@@ -1,0 +1,18 @@
+Natural Earth — Terms of Use
+
+All versions of Natural Earth raster and vector map data found on the Natural Earth
+website are in the public domain. You may use the maps in any manner, including modifying
+the content and design, electronic dissemination, and offset printing. The primary authors,
+Tom Patterson and Nathaniel Vaughn Kelso, and all other contributors renounce all financial
+claim to the maps and invite you to use them for personal, educational, and commercial
+purposes.
+
+No permission is needed to use Natural Earth. Crediting the authors is unnecessary.
+
+Source: https://www.naturalearthdata.com/about/terms-of-use/
+
+--
+Note for this repository: Natural Earth asks for no attribution. Exodus credits it anyway,
+on its source ledger, because a reader is entitled to know where the geometry came from.
+That is a choice, not a licence obligation, and this file records the distinction so nobody
+later mistakes courtesy for a condition.

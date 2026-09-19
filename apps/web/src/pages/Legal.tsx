@@ -81,9 +81,15 @@ export function Legal() {
       <p>
         One item is stored in your browser&rsquo;s local storage: a timestamp recording that
         you accepted these terms, so you are not asked twice. It never leaves your device, is
-        readable only by you, and can be removed by clearing site data. Because it is strictly
-        necessary to provide a feature you explicitly requested, it does not require a consent
-        banner under the ePrivacy Directive.
+        readable only by you, and can be removed by clearing site data.
+      </p>
+      <p className="honest">
+        We think that falls under the &ldquo;strictly necessary&rdquo; exemption in Article
+        5(3) of the ePrivacy Directive, since it exists only to deliver something you asked
+        for. We will not overstate it: the Article 29 Working Party&rsquo;s guidance frames
+        that exemption around <i>session or short-term</i> storage, and this entry persists
+        until you clear it. If that distinction matters to you, clearing site data removes it
+        and the application works exactly as before.
       </p>
       <p className="muted">
         Whoever hosts a copy of this site may keep their own server logs, which can include IP
@@ -93,10 +99,11 @@ export function Legal() {
 
       <h2>9. Licence</h2>
       <p>
-        Application code: <b>AGPL-3.0-or-later</b>. Interface contracts and the connector
-        template: <b>Apache-2.0</b>. Data remains under the licences of its original
-        publishers, each named in the source ledger. These terms supplement those licences and
-        do not restrict any right they grant you.
+        All application code is <b>AGPL-3.0-or-later</b>. Documentation is CC BY-4.0. Data
+        remains under the licences of its original publishers, each named in the source
+        ledger &mdash; note that Natural Earth is public domain and its authors expressly waive
+        any requirement to credit them; we credit them anyway. These terms supplement those
+        licences and do not restrict any right they grant you.
       </p>
 
       <h2>10. Changes</h2>

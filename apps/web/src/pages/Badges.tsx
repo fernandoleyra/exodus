@@ -26,7 +26,7 @@ export const BADGES: Badge[] = [
   {
     id: 'no-tracking', name: 'No tracking, by construction', basis: 'earned',
     what: 'No cookies, no analytics, no telemetry, no accounts, no third-party requests at runtime.',
-    how: 'Verifiable by anyone: open developer tools, watch the network panel, inspect storage. The built bundle contains no analytics SDK. Nothing is sent anywhere.',
+    how: 'Verifiable by anyone: open developer tools, watch the network panel, inspect storage. The built bundle contains no analytics SDK, and an automated test fails if any request leaves this origin.',
   },
   {
     id: 'no-personal-data', name: 'No personal data processed', basis: 'earned',
@@ -47,7 +47,7 @@ export const BADGES: Badge[] = [
   {
     id: 'offline', name: 'Runs fully offline', basis: 'earned',
     what: 'After install, the whole world renders with networking disabled.',
-    how: 'All data ships as a committed static snapshot. No runtime API calls, so nothing about your session can leak to a data provider.',
+    how: 'All data ships as a committed static snapshot, and every fetch the application makes is same-origin, to a file it shipped with. Nothing about your session can reach a data provider because nothing is ever sent to one.',
   },
   {
     id: 'agpl', name: 'AGPL-3.0-or-later', basis: 'earned',

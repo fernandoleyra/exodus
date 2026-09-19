@@ -5,25 +5,43 @@ SPDX-PackageDownloadLocation = "https://github.com/fernandoleyra/exodus"
 
 # Documentation and research corpus.
 [[annotations]]
+path = ["**/package.json", "**/package-lock.json", "**/tsconfig.json", ".gitignore", "REUSE.toml",
+        "**/*.yml", "**/*.ts", "**/*.tsx", "**/*.mjs", "**/*.css", "**/*.html", "**/*.json",
+        "**/*.svg", "LICENSE", "CITATION.cff"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Exodus contributors"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+[[annotations]]
 path = ["docs/**", "README.md", "*.md"]
 SPDX-FileCopyrightText = "Exodus contributors"
 SPDX-License-Identifier = "CC-BY-4.0"
 
-# The committed snapshot is a derived dataset. Its upstream sources are CC BY 4.0 and
-# public domain; the full attribution, including what we modified, is in the source ledger
-# and on the /sources page.
+# The committed snapshot mixes sources under DIFFERENT licences, so it cannot carry one
+# identifier. The tabular derivatives are CC BY 4.0; the geometry is public domain and its
+# authors expressly waive attribution, so labelling it CC BY would impose a condition they
+# gave up. Splitting this was a real correction: the single blanket CC-BY-4.0 annotation
+# misstated a third party's licence.
 [[annotations]]
-path = "apps/web/public/snapshot/**"
+path = ["apps/web/public/snapshot/places.json", "apps/web/public/snapshot/corridors.json", "apps/web/public/snapshot/manifest.json"]
+precedence = "aggregate"
 SPDX-FileCopyrightText = [
-  "Thomas Gaskin and Guy J. Abel (Zenodo 10.5281/zenodo.17344747)",
-  "Guy Abel (figshare 14579241)",
-  "The World Bank (World Development Indicators)",
-  "Natural Earth (public domain)",
+  "Thomas Gaskin and Guy J. Abel (Zenodo 10.5281/zenodo.17344747), CC BY 4.0",
+  "Guy Abel (figshare 14579241), CC BY 4.0",
+  "The World Bank, World Development Indicators, CC BY 4.0",
 ]
 SPDX-License-Identifier = "CC-BY-4.0"
 
-# Project configuration with no meaningful creative content.
 [[annotations]]
-path = ["**/package.json", "**/package-lock.json", "**/tsconfig.json", ".gitignore", "REUSE.toml", "**/*.yml"]
+path = "apps/web/public/snapshot/adm0.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Natural Earth — public domain, no attribution required"
+SPDX-License-Identifier = "LicenseRef-NaturalEarth-PublicDomain"
+
+# Project configuration with no meaningful creative content.
+
+# Package-level docs that the broad markdown rule does not reach.
+[[annotations]]
+path = ["apps/web/README.md", "apps/web/src/placement/README.md"]
+precedence = "aggregate"
 SPDX-FileCopyrightText = "Exodus contributors"
-SPDX-License-Identifier = "AGPL-3.0-or-later"
+SPDX-License-Identifier = "CC-BY-4.0"
