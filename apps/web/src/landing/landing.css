@@ -36,20 +36,24 @@
 /* Each act is a full viewport. The inner block is the only thing that moves, which keeps
    the reading line steady while the globe turns underneath. */
 .acts { position: relative; z-index: 10; }
-.act { min-height: 118vh; display: grid; align-items: center; padding: 0 34px; }
+/* Top padding clears the fixed nav; an act that is taller than the viewport would
+   otherwise slide its first line under the wordmark. */
+.act { min-height: 100vh; display: grid; align-items: center; padding: 15vh 34px 8vh; }
 .act-inner {
-  max-width: 560px;
-  animation: rise linear both;
+  max-width: 480px;
+  /* A full life cycle, not just an entrance: rise, hold, recede. Holding at full opacity
+     after entry left the previous act legible under the next one. */
+  animation: actlife linear both;
   animation-timeline: view();
-  animation-range: entry 14% cover 34%;
+  animation-range: cover 0% cover 100%;
   will-change: opacity, transform;
 }
-@keyframes rise {
-  from { opacity: 0; transform: translate3d(0, 40px, -120px); }
-  to   { opacity: 1; transform: none; }
+@keyframes actlife {
+  0%   { opacity: 0; transform: translate3d(0, 54px, -150px); }
+  20%  { opacity: 1; transform: none; }
+  68%  { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translate3d(0, -34px, -110px); }
 }
-/* Fade the act back out as it leaves, so two are never legible at once. */
-.act-inner { view-timeline-name: --act; }
 @media (prefers-reduced-motion: reduce) { .act-inner { animation: none; } }
 
 /* Alternate sides so the eye traverses the globe rather than sitting on one edge. */
@@ -69,7 +73,7 @@
   color: var(--accent); margin-bottom: 20px;
 }
 .act-title {
-  margin: 0 0 22px; font-size: clamp(34px, 5.4vw, 67px); line-height: 1.02;
+  margin: 0 0 20px; font-size: clamp(30px, 4.3vw, 54px); line-height: 1.04;
   font-weight: 600; letter-spacing: -.028em;
 }
 .act-title span { display: block; }
@@ -158,4 +162,84 @@
   .landing-nav nav a { display: none; }
   .act { padding: 0 18px; }
   .gate-panel { padding: 28px 22px 24px; }
+}
+
+/* ---------- data readouts: a number that arrives is remembered ---------- */
+.metrics { display: flex; flex-wrap: wrap; gap: 34px; margin: 26px 0 0; }
+.act:nth-child(even) .metrics { justify-content: flex-end; }
+.metric { display: flex; flex-direction: column; gap: 5px; }
+.counter {
+  font-family: var(--mono); font-size: clamp(28px, 3.4vw, 44px); line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: -.02em; color: var(--accent);
+  text-shadow: 0 0 30px rgba(77,212,172,.32);
+}
+.tone-warm .counter { color: var(--accent-2); text-shadow: 0 0 30px rgba(232,163,61,.32); }
+.tone-dim .counter { color: var(--text-muted); text-shadow: none; }
+.metric-label {
+  font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted);
+  max-width: 18ch; line-height: 1.45;
+}
+
+.fig { margin-top: 30px; }
+@keyframes grow { from { width: 0 } to { width: var(--w) } }
+@keyframes pop  { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+
+/* Divergence: two bars that visibly fail to agree. */
+.fig-div { max-width: 400px; }
+.act:nth-child(even) .fig-div { margin-left: auto; }
+.divrow { display: grid; grid-template-columns: 82px 1fr; gap: 12px; align-items: center; margin-bottom: 11px; }
+.divname { font-family: var(--mono); font-size: 10.5px; color: var(--text-muted); letter-spacing: .04em; }
+.divbars { display: grid; gap: 3px; }
+.divbars i { display: block; height: 7px; border-radius: 1px; width: var(--w); animation: grow .9s cubic-bezier(.2,.8,.3,1) both; }
+.bar-a { background: linear-gradient(90deg, #4bb8d8, #6ee0c8); }
+.bar-b { background: linear-gradient(90deg, #e8923d, #f2604e); animation-delay: .22s !important; }
+.divkey { display: flex; gap: 18px; margin-top: 14px; font-size: 10px; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; }
+.divkey span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 13px; height: 3px; border-radius: 1px; display: inline-block; }
+.sw-a { background: #6ee0c8; } .sw-b { background: #f2604e; }
+
+/* Coverage: the shared grid, and where it stops. */
+.fig-cov { display: flex; flex-wrap: wrap; gap: 6px; max-width: 470px; }
+.act:nth-child(even) .fig-cov { margin-left: auto; justify-content: flex-end; }
+.fig-cov .cell {
+  display: flex; flex-direction: column; gap: 3px; padding: 9px 11px; border-radius: 3px;
+  border: 1px solid var(--border-strong); min-width: 76px;
+  animation: pop .5s ease both; animation-delay: var(--d);
+}
+.fig-cov .cell b { font-family: var(--mono); font-size: 12px; font-weight: 500; }
+.fig-cov .cell span { font-size: 8.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); }
+.fig-cov .cell.on { border-color: #1d5c4a; background: rgba(77,212,172,.07); }
+.fig-cov .cell.on b { color: var(--accent); }
+.fig-cov .cell.off { border-style: dashed; opacity: .6; }
+.fig-cov .cell.off b { color: var(--text-muted); }
+
+/* 34 cells, one per year. */
+.fig-grid { display: flex; flex-wrap: wrap; gap: 4px; max-width: 390px; }
+.act:nth-child(even) .fig-grid { margin-left: auto; justify-content: flex-end; }
+.fig-grid i {
+  width: 16px; height: 16px; border-radius: 2px; background: rgba(77,212,172,.16);
+  border: 1px solid rgba(77,212,172,.3); animation: pop .4s ease both; animation-delay: var(--d);
+}
+.gridlabel { flex-basis: 100%; margin-top: 10px; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); }
+
+/* Relative scale. */
+.fig-scale { max-width: 400px; }
+.act:nth-child(even) .fig-scale { margin-left: auto; }
+.scalerow { display: grid; grid-template-columns: 136px 1fr; gap: 12px; align-items: center; margin-bottom: 9px; }
+.scalename { font-size: 11px; color: var(--text-dim); }
+.scalebar { height: 9px; background: rgba(255,255,255,.05); border-radius: 1px; overflow: hidden; }
+.scalebar i {
+  display: block; height: 100%; width: var(--w);
+  background: linear-gradient(90deg, rgba(77,212,172,.5), var(--accent));
+  animation: grow 1s cubic-bezier(.2,.8,.3,1) both; animation-delay: var(--d);
+}
+.scalenote { display: block; margin-top: 12px; font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .divbars i, .fig-cov .cell, .fig-grid i, .scalebar i { animation: none !important; width: var(--w); opacity: 1; }
+}
+@media (max-width: 720px) {
+  .metrics { gap: 20px; }
+  .act:nth-child(even) .metrics, .act:nth-child(even) .fig-cov { justify-content: flex-start; }
+  .act:nth-child(even) .fig-div, .act:nth-child(even) .fig-scale, .act:nth-child(even) .fig-grid { margin-left: 0; }
 }

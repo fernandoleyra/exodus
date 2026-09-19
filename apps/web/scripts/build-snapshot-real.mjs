@@ -241,8 +241,20 @@ for (const c of chosen) {
     return +(Math.abs(av - b) / ((av + b) / 2)).toFixed(4);
   });
   if (dpByPeriod.some((x) => x != null)) withDisagreement++;
+  // Ship BOTH models' period values, not just their divergence: the landing draws the two
+  // estimates simultaneously so a viewer sees the disagreement rather than being told it.
+  const aPeriods = PERIOD_STARTS.map((y0) => {
+    let av = 0; for (let y = y0; y < y0 + 5; y++) av += arr[y - 1990] ?? 0;
+    return av > 0 ? Math.round(av) : null;
+  });
+  const bPeriods = PERIOD_STARTS.map((y0) => {
+    const bv = bm?.get(y0);
+    return bv > 0 ? Math.round(bv * scaleB) : null;
+  });
   const n = spreadN.get(c.k) ?? 0;
   corridors.push({
+    a5: aPeriods,
+    b5: bPeriods,
     o: idx.get(c.o), d: idx.get(c.d),
     // Round to 2dp, not to an integer: rounding a real 0.4-person modelled flow to 0
     // deletes the arc and renders an absence as a zero, which is the one thing forbidden.

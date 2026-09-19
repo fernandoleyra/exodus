@@ -7,8 +7,10 @@
 export interface SceneData {
   /** lon, lat, weight per populated cell */
   points: Float32Array;
-  /** origin lon/lat, dest lon/lat, volume, disagreement */
+  /** olon, olat, dlon, dlat, volume, disagreement — model A */
   arcs: Float32Array;
+  /** same corridors, model B's volume and a flag for "B says nothing here" */
+  arcsB: Float32Array;
   /** lon, lat, height for volumetric hotspot columns */
   columns: Float32Array;
 }
@@ -142,6 +144,64 @@ void main() {
   frag = vec4(c * 1.3, (1.0 - vEnd * 0.7) * uReveal);
 }`;
 
+const VERT_QUAD = `#version 300 es
+precision highp float;
+out vec2 vUv;
+void main() {
+  // Fullscreen triangle: no vertex buffer needed.
+  vec2 p = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
+  vUv = p;
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+const FRAG_BRIGHT = `#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform sampler2D uTex;
+uniform float uThreshold;
+out vec4 frag;
+void main() {
+  vec3 c = texture(uTex, vUv).rgb;
+  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+  // Soft knee so the bloom grows with brightness instead of switching on.
+  float k = smoothstep(uThreshold, uThreshold + 0.28, l);
+  frag = vec4(c * k, 1.0);
+}`;
+
+const FRAG_BLUR = `#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform sampler2D uTex;
+uniform vec2 uDir;          // texel-sized step, horizontal or vertical
+out vec4 frag;
+void main() {
+  // 9-tap separable gaussian.
+  float w[5]; w[0]=0.227027; w[1]=0.1945946; w[2]=0.1216216; w[3]=0.054054; w[4]=0.016216;
+  vec3 sum = texture(uTex, vUv).rgb * w[0];
+  for (int i = 1; i < 5; i++) {
+    sum += texture(uTex, vUv + uDir * float(i)).rgb * w[i];
+    sum += texture(uTex, vUv - uDir * float(i)).rgb * w[i];
+  }
+  frag = vec4(sum, 1.0);
+}`;
+
+const FRAG_COMPOSITE = `#version 300 es
+precision highp float;
+in vec2 vUv;
+uniform sampler2D uScene, uBloom;
+uniform float uBloomAmount, uVignette;
+out vec4 frag;
+void main() {
+  vec3 scene = texture(uScene, vUv).rgb;
+  vec3 bloom = texture(uBloom, vUv).rgb;
+  vec3 c = scene + bloom * uBloomAmount;
+  // Filmic-ish shoulder: keeps the hot cores from clipping to flat white.
+  c = c / (c + vec3(0.72)) * 1.38;
+  vec2 d = vUv - 0.5;
+  c *= 1.0 - uVignette * dot(d, d) * 1.5;
+  frag = vec4(c, 1.0);
+}`;
+
 function compile(gl: WebGL2RenderingContext, vs: string, fs: string): WebGLProgram {
   const mk = (type: number, src: string) => {
     const s = gl.createShader(type)!;
@@ -200,6 +260,32 @@ export function createScene(canvas: HTMLCanvasElement, data: SceneData): SceneHa
   const pGlobe = compile(gl, VERT_GLOBE, FRAG_GLOBE);
   const pArc = compile(gl, VERT_ARC, FRAG_ARC);
   const pCol = compile(gl, VERT_COL, FRAG_COL);
+  const pBright = compile(gl, VERT_QUAD, FRAG_BRIGHT);
+  const pBlur = compile(gl, VERT_QUAD, FRAG_BLUR);
+  const pComp = compile(gl, VERT_QUAD, FRAG_COMPOSITE);
+  gl.getExtension('EXT_color_buffer_float');
+
+  // --- offscreen targets: scene at full res, bloom chain at half ---
+  const mkTarget = () => {
+    const fb = gl.createFramebuffer()!;
+    const tex = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    return { fb, tex, w: 0, h: 0 };
+  };
+  const tScene = mkTarget(), tBrightA = mkTarget(), tBrightB = mkTarget();
+  const sizeTarget = (t: { fb: WebGLFramebuffer; tex: WebGLTexture; w: number; h: number }, w: number, h: number) => {
+    if (t.w === w && t.h === h) return;
+    t.w = w; t.h = h;
+    gl.bindTexture(gl.TEXTURE_2D, t.tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null);
+  };
+  const vaoQuad = gl.createVertexArray()!;
 
   // --- globe points ---
   const vaoG = gl.createVertexArray()!;
@@ -232,6 +318,23 @@ export function createScene(canvas: HTMLCanvasElement, data: SceneData): SceneHa
   gl.vertexAttribDivisor(2, 1);
   const nArcs = data.arcs.length / 6;
 
+  // Model B, same corridors, drawn simultaneously in the divergence act.
+  const vaoB = gl.createVertexArray()!;
+  gl.bindVertexArray(vaoB);
+  gl.bindBuffer(gl.ARRAY_BUFFER, tBuf);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 1, gl.FLOAT, false, 4, 0);
+  const odBufB = gl.createBuffer()!;
+  gl.bindBuffer(gl.ARRAY_BUFFER, odBufB);
+  gl.bufferData(gl.ARRAY_BUFFER, data.arcsB, gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(1);
+  gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 24, 0);
+  gl.vertexAttribDivisor(1, 1);
+  gl.enableVertexAttribArray(2);
+  gl.vertexAttribPointer(2, 2, gl.FLOAT, false, 24, 16);
+  gl.vertexAttribDivisor(2, 1);
+  const nArcsB = data.arcsB.length / 6;
+
   // --- volumetric columns ---
   const vaoC = gl.createVertexArray()!;
   gl.bindVertexArray(vaoC);
@@ -256,6 +359,12 @@ export function createScene(canvas: HTMLCanvasElement, data: SceneData): SceneHa
     c: { proj: u(pCol, 'uProj'), view: u(pCol, 'uView'), time: u(pCol, 'uTime'), rad: u(pCol, 'uRadius'), grow: u(pCol, 'uGrow'), rev: u(pCol, 'uReveal'), lo: u(pCol, 'uColLo'), hi: u(pCol, 'uColHi') },
   };
 
+  const Upost = {
+    bright: { tex: u(pBright, 'uTex'), thr: u(pBright, 'uThreshold') },
+    blur: { tex: u(pBlur, 'uTex'), dir: u(pBlur, 'uDir') },
+    comp: { scene: u(pComp, 'uScene'), bloom: u(pComp, 'uBloom'), amt: u(pComp, 'uBloomAmount'), vig: u(pComp, 'uVignette') },
+  };
+
   let progress = 0, raf = 0, t0 = 0;
   const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
@@ -272,22 +381,22 @@ export function createScene(canvas: HTMLCanvasElement, data: SceneData): SceneHa
     if (!t0) t0 = now;
     const time = reduced ? 0 : (now - t0) / 1000;
     resize();
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(0.027, 0.039, 0.055, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);       // additive: data reads as emitted light
-    gl.disable(gl.DEPTH_TEST);
+    const W = canvas.width, H = canvas.height;
+    const bw = Math.max(1, W >> 1), bh = Math.max(1, H >> 1);
+    sizeTarget(tScene, W, H);
+    sizeTarget(tBrightA, bw, bh);
+    sizeTarget(tBrightB, bw, bh);
 
     const p = progress;
-    const assemble = seg(p, 0.00, 0.20);
-    const arcs = seg(p, 0.26, 0.46);
-    const cols = seg(p, 0.52, 0.70);
-    const dive = seg(p, 0.74, 1.00);          // the frontal push THROUGH the globe
+    const assemble = seg(p, 0.00, 0.17);
+    const arcsIn = seg(p, 0.22, 0.38);
+    const diverge = seg(p, 0.40, 0.54);        // model B fades in beside model A
+    const cols = seg(p, 0.58, 0.72);
+    const wall = seg(p, 0.74, 0.86);           // the 2019 evidence wall
+    const dive = seg(p, 0.88, 1.00);
 
-    // Camera: orbits, then drives straight at the viewer's eye through the sphere.
     const R = 100;
-    const dist = 640 - 150 * seg(p, 0.0, 0.72) - 400 * dive;
+    const dist = 640 - 150 * seg(p, 0.0, 0.72) - 430 * dive;
     const yaw = 0.35 + p * 2.3 + (reduced ? 0 : time * 0.035);
     const pitch = 0.30 - 0.36 * dive;
     const eye = [
@@ -295,8 +404,17 @@ export function createScene(canvas: HTMLCanvasElement, data: SceneData): SceneHa
       Math.sin(pitch) * dist,
       Math.sin(yaw) * Math.cos(pitch) * dist,
     ];
-    const proj = perspective((38 + 26 * dive) * Math.PI / 180, canvas.width / canvas.height, 1, 4000);
+    const proj = perspective((38 + 26 * dive) * Math.PI / 180, W / H, 1, 4000);
     const view = lookAt(eye, [0, 0, 0], [0, 1, 0]);
+
+    // ---------- pass 1: the scene, into a float target ----------
+    gl.bindFramebuffer(gl.FRAMEBUFFER, tScene.fb);
+    gl.viewport(0, 0, W, H);
+    gl.clearColor(0.016, 0.024, 0.035, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    gl.disable(gl.DEPTH_TEST);
 
     gl.useProgram(pGlobe);
     gl.uniformMatrix4fv(U.g.proj, false, proj);
@@ -309,18 +427,31 @@ export function createScene(canvas: HTMLCanvasElement, data: SceneData): SceneHa
     gl.bindVertexArray(vaoG);
     gl.drawArrays(gl.POINTS, 0, nPoints);
 
-    if (arcs > 0.001) {
+    if (arcsIn > 0.001) {
       gl.useProgram(pArc);
       gl.uniformMatrix4fv(U.a.proj, false, proj);
       gl.uniformMatrix4fv(U.a.view, false, view);
       gl.uniform1f(U.a.time, time);
-      gl.uniform1f(U.a.rev, arcs);
       gl.uniform1f(U.a.rad, R);
       gl.uniform1f(U.a.lift, 1.0);
-      gl.uniform3f(U.a.lo, 0.38, 0.78, 0.88);
-      gl.uniform3f(U.a.hi, 0.95, 0.62, 0.20);
+
+      // Model A, the spine. Cool.
+      gl.uniform1f(U.a.rev, arcsIn * (1.0 - 0.18 * wall));
+      gl.uniform3f(U.a.lo, 0.38, 0.78, 0.92);
+      gl.uniform3f(U.a.hi, 0.42, 0.86, 0.96);
       gl.bindVertexArray(vaoA);
       gl.drawArraysInstanced(gl.LINE_STRIP, 0, ARC_SEGMENTS + 1, nArcs);
+
+      // Model B, the second opinion, lifted onto a different altitude so the two are
+      // visibly separate objects. Where they disagree the gap is the picture.
+      if (diverge > 0.001) {
+        gl.uniform1f(U.a.rev, diverge);
+        gl.uniform1f(U.a.lift, 1.0 + 0.62 * diverge);
+        gl.uniform3f(U.a.lo, 0.98, 0.58, 0.16);
+        gl.uniform3f(U.a.hi, 0.99, 0.36, 0.30);
+        gl.bindVertexArray(vaoB);
+        gl.drawArraysInstanced(gl.LINE_STRIP, 0, ARC_SEGMENTS + 1, nArcsB);
+      }
     }
 
     if (cols > 0.001) {
@@ -337,6 +468,46 @@ export function createScene(canvas: HTMLCanvasElement, data: SceneData): SceneHa
       gl.drawArraysInstanced(gl.LINES, 0, 2, nCols);
     }
 
+    // ---------- pass 2: bright extract ----------
+    gl.disable(gl.BLEND);
+    gl.bindVertexArray(vaoQuad);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, tBrightA.fb);
+    gl.viewport(0, 0, bw, bh);
+    gl.useProgram(pBright);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tScene.tex);
+    gl.uniform1i(Upost.bright.tex, 0);
+    gl.uniform1f(Upost.bright.thr, 0.30);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+    // ---------- pass 3: separable blur, two ping-pong rounds ----------
+    gl.useProgram(pBlur);
+    gl.uniform1i(Upost.blur.tex, 0);
+    for (let i = 0; i < 2; i++) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, tBrightB.fb);
+      gl.bindTexture(gl.TEXTURE_2D, tBrightA.tex);
+      gl.uniform2f(Upost.blur.dir, (1.6 + i * 2.2) / bw, 0);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, tBrightA.fb);
+      gl.bindTexture(gl.TEXTURE_2D, tBrightB.tex);
+      gl.uniform2f(Upost.blur.dir, 0, (1.6 + i * 2.2) / bh);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    // ---------- pass 4: composite to screen ----------
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, W, H);
+    gl.useProgram(pComp);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tScene.tex);
+    gl.uniform1i(Upost.comp.scene, 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, tBrightA.tex);
+    gl.uniform1i(Upost.comp.bloom, 1);
+    gl.uniform1f(Upost.comp.amt, 1.15 + 0.7 * diverge);
+    gl.uniform1f(Upost.comp.vig, 0.55);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+
     gl.bindVertexArray(null);
     raf = requestAnimationFrame(frame);
   }
@@ -346,9 +517,10 @@ export function createScene(canvas: HTMLCanvasElement, data: SceneData): SceneHa
     setProgress(v) { progress = Math.max(0, Math.min(1, v)); },
     destroy() {
       cancelAnimationFrame(raf);
-      [pGlobe, pArc, pCol].forEach((p) => gl.deleteProgram(p));
-      [bufG, tBuf, odBuf, endBuf, colBuf].forEach((b) => gl.deleteBuffer(b));
-      [vaoG, vaoA, vaoC].forEach((v) => gl.deleteVertexArray(v));
+      [pGlobe, pArc, pCol, pBright, pBlur, pComp].forEach((x) => gl.deleteProgram(x));
+      [bufG, tBuf, odBuf, odBufB, endBuf, colBuf].forEach((b) => gl.deleteBuffer(b));
+      [vaoG, vaoA, vaoB, vaoC, vaoQuad].forEach((v) => gl.deleteVertexArray(v));
+      [tScene, tBrightA, tBrightB].forEach((t) => { gl.deleteFramebuffer(t.fb); gl.deleteTexture(t.tex); });
     },
   };
 }

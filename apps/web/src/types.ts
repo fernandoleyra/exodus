@@ -22,6 +22,10 @@ export interface Corridor {
   o: number; d: number;
   /** One value per year, 1990..2023, from the spine. A flipbook, not an interpolation. */
   v: number[];
+  /** Model A and model B period totals, on the shared 5-year grid. null where that model
+   *  says nothing. The landing renders both so divergence is seen, not asserted. */
+  a5: (number | null)[];
+  b5: (number | null)[];
   /** Cross-model disagreement per 5-year period, |a−b| / mean.
    *  null where the second model says nothing — never interpolated across that gap. */
   dpp: (number | null)[];
