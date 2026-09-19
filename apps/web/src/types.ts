@@ -11,6 +11,11 @@ export interface Place {
   /** Real: share of indicators this country reports, discounted by staleness. Drives arc opacity. */
   coverage: number;
   indicatorsPresent: number;
+  /** Service stocks for the headroom model, each with its own observation year. */
+  beds: number | null; bedsYear: number | null;
+  phys: number | null; physYear: number | null;
+  emp: number | null; empYear: number | null;
+  ptr: number | null; ptrYear: number | null;
 }
 
 export interface Corridor {

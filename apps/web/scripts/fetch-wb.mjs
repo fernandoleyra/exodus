@@ -5,7 +5,12 @@ const IND = {
   stock:    'SM.POP.TOTL',      // international migrant stock, total
   unemp:    'SL.UEM.TOTL.ZS',   // unemployment, % of labour force
   gdppc:    'NY.GDP.PCAP.PP.KD',// GDP per capita, PPP constant
-  refugees: 'SM.POP.REFG',      // refugee population by country of asylum
+  // service stocks, for the headroom model
+  beds:     'SH.MED.BEDS.ZS',   // hospital beds per 1,000
+  phys:     'SH.MED.PHYS.ZS',   // physicians per 1,000
+  emp:      'SL.EMP.TOTL.SP.ZS',// employment to population ratio, 15+, %
+  ptr:      'SE.PRM.ENRL.TC.ZS',// pupil-teacher ratio, primary
+  urbpop:   'SP.URB.TOTL.IN.ZS',// urban population, % (proxy for settlement pressure)
 };
 await mkdir('.cache', { recursive: true });
 for (const [key, code] of Object.entries(IND)) {

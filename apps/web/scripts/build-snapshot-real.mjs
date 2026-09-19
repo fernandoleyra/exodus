@@ -112,7 +112,7 @@ function centroidOf(geom) {
 
 // ---------- World Bank context (already fetched, observed) ----------
 const load = async (k) => JSON.parse(await readFile(`.cache/${k}.json`, 'utf8'));
-const [pop, stock, unemp, gdppc] = await Promise.all(['pop','stock','unemp','gdppc'].map(load));
+const [pop, stock, unemp, gdppc, beds, phys, emp, ptr] = await Promise.all(['pop','stock','unemp','gdppc','beds','phys','emp','ptr'].map(load));
 const byIso = (rows) => {
   const m = new Map();
   for (const r of rows) {
@@ -123,6 +123,7 @@ const byIso = (rows) => {
   return m;
 };
 const POP = byIso(pop), STOCK = byIso(stock), UNEMP = byIso(unemp), GDP = byIso(gdppc);
+const BEDS = byIso(beds), PHYS = byIso(phys), EMP = byIso(emp), PTR = byIso(ptr);
 const NAME = new Map();
 for (const r of pop) if (r.countryiso3code?.length === 3) NAME.set(r.countryiso3code, r.country.value);
 
@@ -135,6 +136,7 @@ for (const f of fc.features) {
   if (!centroid) continue;
   const latest = (m, yMax = 2023) => { for (let y = yMax; y >= 2000; y--) { const v = m?.get(iso)?.get(y); if (v != null) return { v, y }; } return null; };
   const p = latest(POP), s = latest(STOCK, 2020), u = latest(UNEMP), g = latest(GDP);
+  const bd = latest(BEDS), ph = latest(PHYS), em = latest(EMP), pt = latest(PTR);
   const present = [p, s, u, g].filter(Boolean).length;
   const staleness = s ? Math.max(0, (2023 - s.y) / 23) : 1;
   places.push({
@@ -145,6 +147,11 @@ for (const f of fc.features) {
     gdppc: g?.v ?? null, gdppcYear: g?.y ?? null,
     coverage: +Math.max(0.04, (present / 4) * (1 - 0.45 * staleness)).toFixed(4),
     indicatorsPresent: present,
+    // service stocks for the headroom model, each with its own observation year
+    beds: bd?.v ?? null, bedsYear: bd?.y ?? null,
+    phys: ph?.v ?? null, physYear: ph?.y ?? null,
+    emp: em?.v ?? null, empYear: em?.y ?? null,
+    ptr: pt?.v ?? null, ptrYear: pt?.y ?? null,
   });
 }
 places.sort((a, b) => a.iso3.localeCompare(b.iso3));

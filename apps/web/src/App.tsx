@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { Globe } from './Globe';
 import { useStore } from './state';
 import { periodIndex } from './types';
+import { headroom } from './kernel/headroom';
 import type { EstimateKind, Place } from './types';
 
 const nf = new Intl.NumberFormat('en-US');
@@ -113,6 +114,51 @@ function Inspector() {
           </p>
         )}
         <div className="kv"><span className="k">corridors rendered</span><span className="v">{flows!.nIn} in · {flows!.nOut} out</span></div>
+      </div>
+      <div className="sec">
+        <h2>How many more could it hold?</h2>
+        {(() => {
+          const h = headroom(p);
+          if (h.kind === 'refusal') {
+            return (
+              <>
+                <div className="figure">
+                  <span className="lbl">Binding constraint</span>
+                  <span><span className="val absent">—</span>
+                    <span className="badge absent" style={{ marginLeft: 8 }}>can&rsquo;t say</span></span>
+                </div>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, margin: '6px 0 10px' }}>
+                  {h.reason}
+                </p>
+                {h.perIndicator.map((row) => (
+                  <div className="kv" key={row.id}>
+                    <span className="k">{row.label}</span>
+                    <span className="v">{row.observed == null ? '— not published' : `${row.observed.toFixed(1)} ${row.unit}`}</span>
+                  </div>
+                ))}
+              </>
+            );
+          }
+          return (
+            <>
+              <Figure label={`Headroom (${h.bindingLabel.toLowerCase()} binds)`} kind="modelled"
+                      value={`${nf.format(h.headroomPersonsPerYear)} / yr`} />
+              {h.perIndicator.map((row) => (
+                <div className="kv" key={row.id}>
+                  <span className="k">{row.label}{row.id === h.bindingIndicator ? ' ←' : ''}</span>
+                  <span className="v">
+                    {row.observed == null ? '— not published'
+                      : `${row.observed.toFixed(1)} vs ${row.target} ${row.unit}`}
+                    {row.observedYear ? ` · ${row.observedYear}` : ''}
+                  </span>
+                </div>
+              ))}
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 0 }}>
+                {h.caveat}
+              </p>
+            </>
+          );
+        })()}
       </div>
       <div className="sec">
         <h2>Do the models agree?</h2>
