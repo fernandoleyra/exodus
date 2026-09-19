@@ -5,11 +5,15 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173",
     "build": "tsc -b && vite build",
-    "preview": "vite preview --host 127.0.0.1 --port 4173"
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "test": "vitest run",
+    "placement:demo": "vite-node src/placement/demo.ts",
+    "snapshot": "node --max-old-space-size=4096 scripts/build-snapshot-real.mjs"
   },
   "dependencies": {
     "@deck.gl/extensions": "^9.4.0",
     "deck.gl": "^9.1.0",
+    "highs": "^1.15.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "zustand": "^5.0.0"
@@ -21,6 +25,7 @@
     "playwright": "^1.63.0",
     "topojson-client": "^3.1.0",
     "typescript": "^5.7.0",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "vitest": "^5.0.1"
   }
 }
