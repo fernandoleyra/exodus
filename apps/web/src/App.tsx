@@ -73,6 +73,7 @@ function Inspector() {
   const yi = year - 1990;
 
   const periodStarts = useStore((s) => s.periodStarts);
+  const manifest = useStore((s) => s.manifest);
   const flows = useMemo(() => {
     if (!p) return null;
     const i = places.indexOf(p);
@@ -104,21 +105,23 @@ function Inspector() {
       <div className="sec">
         <h2>{p.name}</h2>
         <Figure label="Population" value={fmt(p.pop)} vintage={p.popYear} />
-        <Figure label="Migrant stock" value={fmt(p.stock)} vintage={p.stockYear} />
+        <Figure label="Migrant stock" value={fmt(p.stock)} vintage={p.stockYear} kind="modelled" />
         <Figure label="GDP per capita (PPP)" value={p.gdppc == null ? null : `$${fmt(p.gdppc)}`} vintage={p.gdppcYear} />
-        <Figure label="Unemployment" value={p.unemp == null ? null : `${p.unemp.toFixed(1)}%`} vintage={p.unempYear} />
+        <Figure label="Unemployment" value={p.unemp == null ? null : `${p.unemp.toFixed(1)}%`}
+                vintage={p.unempYear} kind="modelled" />
       </div>
       <div className="sec">
         <h2>Corridors in {year}</h2>
         <Figure label="Inbound (modelled)" value={flows!.nIn ? fmt(flows!.inb) : null}
-                kind="modelled" absentNote="none in fixture" />
+                kind="modelled" absentNote="not in the top-9 set" />
         <Figure label="Outbound (modelled)" value={flows!.nOut ? fmt(flows!.out) : null}
-                kind="modelled" absentNote="none in fixture" />
+                kind="modelled" absentNote="not in the top-9 set" />
         {!flows!.nIn && (
           <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, margin: '6px 0 0' }}>
-            The M0 gravity fixture only generates corridors toward higher-income destinations,
-            so low-income origins have no inbound arcs. That is a limit of the fixture, not a
-            finding about this country.
+            The snapshot keeps only each origin&rsquo;s nine largest destinations, and this
+            country is nobody&rsquo;s top nine. People do arrive here; those corridors are
+            below the cut we ship. That is a limit of this snapshot, not a finding about this
+            country.
           </p>
         )}
         <div className="kv"><span className="k">corridors rendered</span><span className="v">{flows!.nIn} in · {flows!.nOut} out</span></div>
@@ -126,7 +129,30 @@ function Inspector() {
       <div className="sec">
         <h2>How many more could it hold?</h2>
         {(() => {
-          const h = headroom(p);
+          const h = headroom(p, manifest?.benchmarks ?? null);
+          const rows = h.perIndicator.map((row) => (
+            <div key={row.id} style={{ padding: '5px 0', borderBottom: '1px solid var(--border)' }}>
+              <div className="kv">
+                <span className="k">
+                  {row.label}
+                  {h.kind === 'ok' && row.id === h.bindingIndicator ? ' ←' : ''}
+                  {row.estimateKind === 'modelled' && (
+                    <span className="badge modelled" style={{ marginLeft: 6 }}>modelled</span>
+                  )}
+                </span>
+                <span className="v">
+                  {row.observed == null ? '— not published'
+                    : `${row.observed.toFixed(1)} vs ${row.target ?? '—'} ${row.unit}`}
+                  {row.observedYear ? ` · ${row.observedYear}` : ''}
+                </span>
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', lineHeight: 1.5, marginTop: 2 }}>
+                {row.excludedBecause
+                  ? <>Context only — {row.excludedBecause}.</>
+                  : <>Benchmark: {row.basis}.</>}
+              </div>
+            </div>
+          ));
           if (h.kind === 'refusal') {
             return (
               <>
@@ -138,12 +164,7 @@ function Inspector() {
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, margin: '6px 0 10px' }}>
                   {h.reason}
                 </p>
-                {h.perIndicator.map((row) => (
-                  <div className="kv" key={row.id}>
-                    <span className="k">{row.label}</span>
-                    <span className="v">{row.observed == null ? '— not published' : `${row.observed.toFixed(1)} ${row.unit}`}</span>
-                  </div>
-                ))}
+                {rows}
               </>
             );
           }
@@ -151,17 +172,8 @@ function Inspector() {
             <>
               <Figure label={`Headroom (${h.bindingLabel.toLowerCase()} binds)`} kind="modelled"
                       value={`${nf.format(h.headroomPersonsPerYear)} / yr`} />
-              {h.perIndicator.map((row) => (
-                <div className="kv" key={row.id}>
-                  <span className="k">{row.label}{row.id === h.bindingIndicator ? ' ←' : ''}</span>
-                  <span className="v">
-                    {row.observed == null ? '— not published'
-                      : `${row.observed.toFixed(1)} vs ${row.target} ${row.unit}`}
-                    {row.observedYear ? ` · ${row.observedYear}` : ''}
-                  </span>
-                </div>
-              ))}
-              <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 0 }}>
+              {rows}
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, margin: '10px 0 0' }}>
                 {h.caveat}
               </p>
             </>

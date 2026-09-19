@@ -62,15 +62,22 @@ const spreadN = new Map();
 
 // ---------- model B: Abel, 5-year periods ----------
 // Columns: year0,sex,orig,dest,type,da_min_open,da_min_closed,da_pb_closed
-// MUST sum across sex (there is no total row) and MUST filter type='outward'
-// (summing outward+return+transit triple-counts).
+// Sum across BOTH sex and type. There is no total row for either.
+//
+// The three types are DISJOINT COMPONENTS of one flow, not three estimates of it:
+// 'return' is people going back to their country of birth, which is still migration along
+// this corridor. Filtering to 'outward' was a real defect — it kept 7% of USA->MEX and 96%
+// of MEX->USA, and 83.6% of corridor-periods have no outward component at all and vanished
+// entirely. The giveaway is the scale check below: summed correctly the two independent
+// models agree to a fraction of a percent in aggregate and need no normalisation.
 const B = new Map();          // "O>D" -> Map(year0 -> value)
 {
   let first = true, kept = 0, typeDrop = 0;
   for await (const l of lines(`${RAW}/bilat_mig_sex_type.csv`)) {
     if (first) { first = false; continue; }
     const c = l.split(',');
-    if (c[4] !== 'outward') { typeDrop++; continue; }
+    const type = c[4];
+    if (type !== 'outward' && type !== 'return' && type !== 'transit') { typeDrop++; continue; }
     const orig = c[2], dest = c[3];
     if (orig === dest) continue;
     const y0 = +c[0];
@@ -83,7 +90,7 @@ const B = new Map();          // "O>D" -> Map(year0 -> value)
     m.set(y0, (m.get(y0) ?? 0) + v);                        // sum male + female
     kept++;
   }
-  console.log(`model B  rows kept=${kept}  non-outward dropped=${typeDrop}  corridors=${B.size}`);
+  console.log(`model B  rows kept=${kept}  unknown-type dropped=${typeDrop}  corridors=${B.size}`);
 }
 
 // ---------- geometry ----------
@@ -206,8 +213,17 @@ for (const c of chosen) {
     sumA += av; sumB += bv; pairCount++;
   }
 }
-const scaleB = sumA / sumB;
-console.log(`shared period grid: ${pairCount} corridor-periods, scale B by ${scaleB.toFixed(4)}`);
+// Two independently built models of the same quantity should already be on the same scale.
+// If this ratio is not near 1, something upstream is being dropped or double-counted, and a
+// global fudge factor would hide it rather than fix it.
+const scaleRatio = sumA / sumB;
+const scaleB = 1;
+console.log(`shared period grid: ${pairCount} corridor-periods`);
+console.log(`scale check       A/B = ${scaleRatio.toFixed(4)}  (near 1.0 means the two models agree in aggregate)`);
+if (Math.abs(scaleRatio - 1) > 0.15) {
+  console.warn(`WARNING: the two models differ by ${((scaleRatio - 1) * 100).toFixed(1)}% in total volume. ` +
+    `That is a pipeline problem, not a finding. Do not normalise it away.`);
+}
 
 const corridors = [];
 let withDisagreement = 0;
@@ -228,12 +244,29 @@ for (const c of chosen) {
   const n = spreadN.get(c.k) ?? 0;
   corridors.push({
     o: idx.get(c.o), d: idx.get(c.d),
-    v: Array.from(arr, (x) => Math.round(x)),
+    // Round to 2dp, not to an integer: rounding a real 0.4-person modelled flow to 0
+    // deletes the arc and renders an absence as a zero, which is the one thing forbidden.
+    v: Array.from(arr, (x) => (x > 0 && x < 1 ? +x.toFixed(2) : Math.round(x))),
     dpp: dpByPeriod,                                  // per-period cross-model disagreement
     spread: n ? +((spread.get(c.k) ?? 0) / n).toFixed(4) : null,  // model-internal spread
     cov: +Math.min(places[idx.get(c.o)].coverage, places[idx.get(c.d)].coverage).toFixed(4),
   });
 }
+
+// Benchmarks are the MEDIAN of countries that actually report each stock, computed here and
+// shipped, so the UI can state the basis and the count rather than asserting an "EU median"
+// that nobody can check.
+function median(xs) {
+  const v = xs.filter((x) => x != null && isFinite(x)).sort((a, b) => a - b);
+  return v.length ? { value: +v[v.length >> 1].toFixed(2), n: v.length } : null;
+}
+const benchmarks = {
+  beds: median(places.map((p) => p.beds)),
+  phys: median(places.map((p) => p.phys)),
+  emp: median(places.map((p) => p.emp)),
+  ptr: median(places.map((p) => p.ptr)),
+};
+console.log('benchmarks (median of reporters):', JSON.stringify(benchmarks));
 
 await mkdir('public/snapshot', { recursive: true });
 for (const f of fc.features) {
@@ -251,14 +284,20 @@ await writeFile('public/snapshot/manifest.json', JSON.stringify({
   yearRange: [YEARS[0], YEARS.at(-1)],
   periodStarts: PERIOD_STARTS,
   corridorsWithSecondModel: withDisagreement,
+  modelScaleRatio: +scaleRatio.toFixed(4),
+  benchmarks,
   disputedRenderedWithoutData: disputed,
   sources: [
     { id: 'gaskin-abel', title: 'Gaskin & Abel, bilateral migration flows', licence: 'CC BY-4.0', estimateKind: 'modelled', latencyClass: 'annual', vintage: '1990-2023',
       note: 'Zenodo 17344747, mig_bilateral.csv. Deep recurrent network over 18 covariates, 230 countries. Column mig_prev. Self-flows dropped. THE SPINE.' },
     { id: 'abel-figshare', title: 'Abel, bilateral flow estimates by sex and type', licence: 'CC BY-4.0', estimateKind: 'modelled', latencyClass: 'quinquennial', vintage: '1990-2020',
-      note: 'figshare 14579241, bilat_mig_sex_type.csv, estimator da_pb_closed. Summed across sex (no total row) and filtered to type=outward (summing types triple-counts). THE SECOND OPINION.' },
-    { id: 'wb-wdi', title: 'World Bank World Development Indicators', licence: 'CC BY-4.0', estimateKind: 'observed', latencyClass: 'annual', vintage: '2023',
-      note: 'SP.POP.TOTL, SM.POP.TOTL, SL.UEM.TOTL.ZS, NY.GDP.PCAP.PP.KD' },
+      note: 'figshare 14579241, bilat_mig_sex_type.csv, estimator da_pb_closed. Summed across BOTH sex and type, neither of which ships a total row: outward, return and transit are disjoint components of one flow, not three estimates of it. THE SECOND OPINION.' },
+    { id: 'wb-reported', title: 'World Bank WDI — reported series', licence: 'CC BY-4.0', estimateKind: 'observed', latencyClass: 'annual', vintage: 'per-country, shown with each figure',
+      note: 'SP.POP.TOTL (population), NY.GDP.PCAP.PP.KD (GDP per capita PPP), SH.MED.BEDS.ZS (hospital beds), SH.MED.PHYS.ZS (physicians), SE.PRM.ENRL.TC.ZS (pupil-teacher ratio). National reporting compiled by the World Bank.' },
+    { id: 'wb-ilo-modelled', title: 'World Bank WDI — modelled ILO estimates', licence: 'CC BY-4.0', estimateKind: 'modelled', latencyClass: 'annual', vintage: 'per-country, shown with each figure',
+      note: 'SL.UEM.TOTL.ZS and SL.EMP.TOTL.SP.ZS are labelled by their publisher as MODELLED ILO ESTIMATES, not national reporting. They are badged modelled here for that reason.' },
+    { id: 'wb-un-stock', title: 'World Bank WDI — migrant stock (UN estimates)', licence: 'CC BY-4.0', estimateKind: 'modelled', latencyClass: 'quinquennial', vintage: '2010 / 2015 / 2020 only',
+      note: 'SM.POP.TOTL originates as UN DESA quinquennial estimates. It is not annual and it is not observed; the year shown with each figure is the true observation year.' },
     { id: 'naturalearth', title: 'Natural Earth 110m Admin-0', licence: 'Public domain', estimateKind: 'observed', latencyClass: 'annual', vintage: 'v5',
       note: 'geometry and centroids only' },
   ],

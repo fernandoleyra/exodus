@@ -14,7 +14,26 @@
     2010,
     2015
   ],
-  "corridorsWithSecondModel": 1098,
+  "corridorsWithSecondModel": 1538,
+  "modelScaleRatio": 0.9975,
+  "benchmarks": {
+    "beds": {
+      "value": 2.16,
+      "n": 154
+    },
+    "phys": {
+      "value": 1.69,
+      "n": 166
+    },
+    "emp": {
+      "value": 58.19,
+      "n": 168
+    },
+    "ptr": {
+      "value": 21.74,
+      "n": 154
+    }
+  },
   "disputedRenderedWithoutData": [
     "N. Cyprus",
     "Somaliland",
@@ -37,16 +56,34 @@
       "estimateKind": "modelled",
       "latencyClass": "quinquennial",
       "vintage": "1990-2020",
-      "note": "figshare 14579241, bilat_mig_sex_type.csv, estimator da_pb_closed. Summed across sex (no total row) and filtered to type=outward (summing types triple-counts). THE SECOND OPINION."
+      "note": "figshare 14579241, bilat_mig_sex_type.csv, estimator da_pb_closed. Summed across BOTH sex and type, neither of which ships a total row: outward, return and transit are disjoint components of one flow, not three estimates of it. THE SECOND OPINION."
     },
     {
-      "id": "wb-wdi",
-      "title": "World Bank World Development Indicators",
+      "id": "wb-reported",
+      "title": "World Bank WDI — reported series",
       "licence": "CC BY-4.0",
       "estimateKind": "observed",
       "latencyClass": "annual",
-      "vintage": "2023",
-      "note": "SP.POP.TOTL, SM.POP.TOTL, SL.UEM.TOTL.ZS, NY.GDP.PCAP.PP.KD"
+      "vintage": "per-country, shown with each figure",
+      "note": "SP.POP.TOTL (population), NY.GDP.PCAP.PP.KD (GDP per capita PPP), SH.MED.BEDS.ZS (hospital beds), SH.MED.PHYS.ZS (physicians), SE.PRM.ENRL.TC.ZS (pupil-teacher ratio). National reporting compiled by the World Bank."
+    },
+    {
+      "id": "wb-ilo-modelled",
+      "title": "World Bank WDI — modelled ILO estimates",
+      "licence": "CC BY-4.0",
+      "estimateKind": "modelled",
+      "latencyClass": "annual",
+      "vintage": "per-country, shown with each figure",
+      "note": "SL.UEM.TOTL.ZS and SL.EMP.TOTL.SP.ZS are labelled by their publisher as MODELLED ILO ESTIMATES, not national reporting. They are badged modelled here for that reason."
+    },
+    {
+      "id": "wb-un-stock",
+      "title": "World Bank WDI — migrant stock (UN estimates)",
+      "licence": "CC BY-4.0",
+      "estimateKind": "modelled",
+      "latencyClass": "quinquennial",
+      "vintage": "2010 / 2015 / 2020 only",
+      "note": "SM.POP.TOTL originates as UN DESA quinquennial estimates. It is not annual and it is not observed; the year shown with each figure is the true observation year."
     },
     {
       "id": "naturalearth",

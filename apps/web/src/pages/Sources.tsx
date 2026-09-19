@@ -31,7 +31,7 @@ const SOURCES: Src[] = [
     url: 'https://doi.org/10.6084/m9.figshare.14579241',
     vintage: '5-year periods, 1990–2020',
     what: 'The second opinion. An independent demographic-accounting estimate of the same corridors, used to show how far two competent models disagree.',
-    modified: 'Modified: summed across sex, because the file ships no total row; filtered to type=outward, because summing outward, return and transit triple-counts; estimator da_pb_closed; normalised to a common total before comparison.',
+    modified: 'Modified: summed across BOTH sex and type, neither of which ships a total row. Outward, return and transit are disjoint components of one flow \u2014 return is people going back to their country of birth, which is still migration along this corridor \u2014 so all three are added. Estimator da_pb_closed. No rescaling is applied: summed correctly the two models agree to 0.25% in aggregate.',
   },
   {
     id: 'wb-wdi',

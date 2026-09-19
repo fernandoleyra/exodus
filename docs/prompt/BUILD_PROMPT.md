@@ -172,6 +172,50 @@ document.** Do not re-derive these; do not restore the originals.
 
 Nothing remains outstanding. Every figure §0.5 opened with has been adjudicated.
 
+### §0.5b Correction found by building it — the "triple-counts" rule is FALSE
+
+The research corpus, this prompt, and five design documents all state that Abel's
+`bilat_mig_sex_type.csv` must be **filtered to `type='outward'`** because "summing outward,
+return and transit triple-counts". Several of those statements are marked `[verified]`.
+
+**It is wrong, and it was implemented, shipped, and caught only by adversarially reviewing
+the running product.**
+
+The three types are **disjoint components of one flow**, not three estimates of it. `return`
+is people going back to their country of birth — which is still migration along that
+corridor. The evidence, from the file itself:
+
+| Check | Result |
+|---|---|
+| `sum / outward` ratio across 313,736 corridor-periods | p10 **1.00**, p50 **1.26**, p90 **7.68**, max 89,801 |
+| If they were three estimates of one quantity | the ratio would cluster at **3.0** |
+| Corridor-periods with **zero** outward | **262,133 of 313,736 (83.6%)** — the filter deleted them outright |
+| USA→MEX 2010, kept by the filter | 103,727 of 1,419,224 people (**7.3%**) |
+| MEX→USA, kept by the same filter | **96%** — so it is not even a uniform rescale |
+
+**The decisive test.** Summed across all three types, the two independent models agree to
+**0.25%** in aggregate (A/B = 0.9975) and need no normalisation whatever. Under the filter, a
+global 1.2991 factor was required — which was not correcting a difference between two models,
+it was compensating for the pipeline's own discarded data, with one constant that is right
+for no corridor in particular.
+
+**What it cost.** USA→MEX 2010 rendered as a 163% argument between the models where they
+actually agree to 6.5%. ARE→IND 2000 rendered 1.90 where the truth is 0.05. And 2,620
+corridor-periods rendered grey and dotted under the legend "nobody checked it" while the
+second model did in fact have a value for them.
+
+**Do this instead:** sum across **both** sex and type. Assert that the aggregate ratio between
+the two models is near 1.0, and if it is not, treat that as a pipeline defect to find — never
+as a scale factor to divide out. If a birthplace-restricted comparison is genuinely wanted,
+compare model B's `outward` against model A's `mig_brth`, not `mig_prev`, which is the total.
+
+**The general lesson, which matters more than the instance:** a claim can survive a research
+pass, an adversarial fact-check, a design synthesis and four critics, be stamped `[verified]`,
+and still be false. It was refuted in ten minutes by opening the file. When a rule tells you
+to discard data, check what you are discarding before you trust the rule.
+
+---
+
 ### §0.6 The rule that outranks every other rule
 
 **Never publish a number this document does not support.** If you need a figure and cannot trace it to a committed fixture, a probed endpoint or a cited table, render `—` and a refusal. A dashboard that admits what it does not know is the entire product thesis; a dashboard that quietly fills a gap with a plausible number is the thing this project exists to argue against.

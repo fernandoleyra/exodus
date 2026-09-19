@@ -37,7 +37,11 @@ export interface SourceRec {
   estimateKind: EstimateKind; latencyClass: LatencyClass; vintage: string; note: string;
 }
 
+export interface Benchmark { value: number; n: number }
+
 export interface Manifest {
+  benchmarks?: { beds: Benchmark | null; phys: Benchmark | null; emp: Benchmark | null; ptr: Benchmark | null };
+  modelScaleRatio?: number;
   builtFrom: string; corridorCount: number; placeCount: number;
   yearRange: [number, number]; periodStarts: number[];
   corridorsWithSecondModel: number;
