@@ -47,6 +47,9 @@ describe('gates remove options rather than pricing them', () => {
     const r = generateCandidates(C, L, { K: 8, advisories: [{ state: 'ST-B', source: 'UNHCR position' }] });
     expect(r.kind).toBe('ok');
     if (r.kind !== 'ok') return;
+    // A generator that returned nothing at all would also satisfy "no blocked locality".
+    const total = [...r.value.byCase.values()].reduce((n, ids) => n + ids.length, 0);
+    expect(total).toBeGreaterThan(0);
     for (const [, ids] of r.value.byCase) {
       for (const id of ids) expect(blocked).not.toContain(id);
     }
@@ -108,6 +111,9 @@ describe('the solver explains itself', () => {
     const cd = cand();
     const r = await solve(C, L, cd, [], { timeLimitSec: 8 });
     if (r.kind !== 'ok') throw new Error();
+    // Without this the test passes vacuously against a solver that places nobody.
+    const placedCount = r.value.results.filter((x) => !x.unplaced).length;
+    expect(placedCount).toBeGreaterThan(C.length * 0.5);
     const load = new Map<string, number>();
     for (const res of r.value.results) {
       if (res.unplaced) continue;
@@ -126,6 +132,36 @@ describe('the solver explains itself', () => {
     const r = await solve(C, L, cand(), [], { key, timeLimitSec: 8 });
     if (r.kind !== 'ok') throw new Error();
     expect(Object.keys(r.value.keyDeviation).length).toBeGreaterThan(0);
+  }, 60_000);
+});
+
+describe('the solver does not report outcomes it did not produce', () => {
+  it('names no deciding term for an unplaced case', async () => {
+    const r = await solve(C, L, cand(), [], { timeLimitSec: 8 });
+    if (r.kind !== 'ok') throw new Error();
+    for (const res of r.value.results) {
+      if (res.unplaced) {
+        expect(res.decidedBy).toBeNull();
+        expect(res.runnerUpGap).toBeNull();
+      }
+    }
+  }, 60_000);
+
+  it('excludes unplaced cases from group outcome means and counts them separately', async () => {
+    const r = await solve(C, L, cand(), [], { timeLimitSec: 8 });
+    if (r.kind !== 'ok') throw new Error();
+    expect(r.value.fairness.unplacedByGroup).toBeDefined();
+    const totalUnplaced = Object.values(r.value.fairness.unplacedByGroup).reduce((a, b) => a + b, 0);
+    expect(totalUnplaced).toBe(r.value.unplacedCount);
+  }, 60_000);
+
+  it('refuses rather than returning an empty result when the model cannot be solved', async () => {
+    // An anti-dumping floor larger than the whole cohort cannot be satisfied.
+    const impossible = L.map((l) => ({ ...l, pledge: 9999 }));
+    const cd = generateCandidates(C, impossible, { K: 8, advisories: [] });
+    if (cd.kind !== 'ok') throw new Error();
+    const r = await solve(C, impossible, cd.value, [], { timeLimitSec: 8 });
+    expect(r.kind).toBe('refusal');
   }, 60_000);
 });
 

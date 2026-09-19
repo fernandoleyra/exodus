@@ -49,7 +49,7 @@ export interface SolveReport {
   readonly mipGap: number | null;
   readonly objective: number | null;
   readonly unplacedCount: number;
-  readonly fairness: { floor: number | null; byGroup: Record<string, number> };
+  readonly fairness: { floor: number | null; byGroup: Record<string, number>; unplacedByGroup: Record<string, number> };
   readonly priceOfFairness: number | null;
   readonly keyDeviation: Record<string, number>;
   readonly preferenceCoverage: number;
@@ -58,6 +58,19 @@ export interface SolveReport {
 }
 
 const v = (i: number, j: number) => `x_${i}_${j}`;
+
+/** LP names cannot carry punctuation, but stripping it collides 'ST-A' with 'STA'. Index
+ *  the tag so two distinct states can never share one deviation variable. */
+const tagOf = new Map<string, string>();
+function stateTag(state: string): string {
+  let t = tagOf.get(state);
+  if (!t) { t = `s${tagOf.size}`; tagOf.set(state, t); }
+  return t;
+}
+export function stateForTag(tag: string): string | undefined {
+  for (const [k, v2] of tagOf) if (v2 === tag) return k;
+  return undefined;
+}
 
 function buildLp(
   cases: readonly Case[], localities: readonly Locality[], cand: Candidates,
@@ -159,7 +172,7 @@ function buildLp(
       const share = key[st];
       if (share == null || !terms.length) continue;
       const target = (share * totalPersons).toFixed(4);
-      const tag = st.replace(/\W/g, '');
+      const tag = stateTag(st);
       cons.push(`c8a_${tag}: ${terms.join(' ')} - d_${tag} <= ${target}`);
       cons.push(`c8b_${tag}: ${terms.join(' ')} + d_${tag} >= ${target}`);
       gens.push(`d_${tag}`);
@@ -212,6 +225,16 @@ export async function solve(
   });
   const solveMs = performance.now() - t0;
 
+  // HiGHS reports its status in the result. Not reading it meant an INFEASIBLE or UNBOUNDED
+  // model returned as a clean solve with nobody placed, which reads as "no match found".
+  const status = String((sol as { Status?: string }).Status ?? 'Unknown');
+  if (status !== 'Optimal') {
+    return new Refusal('NoLegalBasis',
+      `The solver returned ${status}, not Optimal. No shortlist can be produced from a model `
+      + `that was not solved. Most often this means the constraints conflict — an anti-dumping `
+      + `floor larger than the cohort, or a capacity that no candidate set can satisfy.`);
+  }
+
   const chosen = new Map<number, number>();
   for (const [name, col] of Object.entries(sol.Columns ?? {})) {
     const c = col as { Primal?: number };
@@ -237,31 +260,48 @@ export async function solve(
     const displaced = picked && picked.score < bestScore - 1e-9
       ? { bestLocalityId: cs.find((x) => x.score === bestScore)!.localityId, scoreGivenUp: bestScore - picked.score }
       : null;
+    const placed = chosen.has(ci);
     let decidedBy: Term | null = null, gap: number | null = null;
-    if (!displaced && shortlist.length >= 2) {
+    // Nothing decided anything for a case that was not placed. Reporting a deciding term
+    // there invents a rationale for a decision that was never taken.
+    if (placed && !displaced && shortlist.length >= 2) {
       const [a, b] = shortlist as [Recommendation, Recommendation];
       gap = a.score - b.score;
-      let best = -Infinity;
-      for (const t of Object.keys(a.contributions) as Term[]) {
-        const diff = a.contributions[t] - b.contributions[t];
-        if (diff > best) { best = diff; decidedBy = t; }
+      // An exact tie was decided by nothing. Say so rather than naming a term.
+      if (gap > 1e-9) {
+        let best = -Infinity;
+        for (const t of Object.keys(a.contributions) as Term[]) {
+          const diff = a.contributions[t] - b.contributions[t];
+          if (diff > best) { best = diff; decidedBy = t; }
+        }
+      } else {
+        gap = 0;
       }
     }
-    return { caseId: c.id, shortlist, decidedBy, runnerUpGap: gap, displaced, unplaced: !chosen.has(ci) };
+    return { caseId: c.id, shortlist, decidedBy, runnerUpGap: gap, displaced, unplaced: !placed };
   });
 
-  const byGroup: Record<string, { s: number; n: number }> = {};
+  // Only PLACED cases have an outcome. Averaging in the score of a locality an unplaced
+  // case never went to inflates exactly the groups that were failed by the allocation.
+  const byGroup: Record<string, { s: number; n: number; unplaced: number }> = {};
   for (const c of cases) {
     const r = results.find((x) => x.caseId === c.id)!;
-    const e = r.shortlist[0]?.terms.E ?? 0;
-    byGroup[c.auditGroup] ??= { s: 0, n: 0 };
-    byGroup[c.auditGroup]!.s += e; byGroup[c.auditGroup]!.n += 1;
+    byGroup[c.auditGroup] ??= { s: 0, n: 0, unplaced: 0 };
+    if (r.unplaced) { byGroup[c.auditGroup]!.unplaced += 1; continue; }
+    byGroup[c.auditGroup]!.s += r.shortlist[0]?.terms.E ?? 0;
+    byGroup[c.auditGroup]!.n += 1;
   }
-  const groupMeans = Object.fromEntries(Object.entries(byGroup).map(([g, x]) => [g, x.s / x.n]));
+  const groupMeans = Object.fromEntries(
+    Object.entries(byGroup).map(([g, x]) => [g, x.n ? x.s / x.n : Number.NaN]));
+  const groupUnplaced = Object.fromEntries(Object.entries(byGroup).map(([g, x]) => [g, x.unplaced]));
 
   const keyDeviation: Record<string, number> = {};
   for (const [name, col] of Object.entries(sol.Columns ?? {})) {
-    if (name.startsWith('d_')) keyDeviation[name.slice(2)] = (col as { Primal?: number }).Primal ?? 0;
+    // Report deviations under the caller's own state names, not the internal LP tags.
+    if (name.startsWith('d_')) {
+      const st = stateForTag(name.slice(2)) ?? name.slice(2);
+      keyDeviation[st] = (col as { Primal?: number }).Primal ?? 0;
+    }
   }
 
   const ranked = cases.filter((c) => c.preference.ranked.length >= 3).length;
@@ -270,7 +310,7 @@ export async function solve(
     mipGap: (sol as { MipGap?: number }).MipGap ?? null,
     objective: (sol as { ObjectiveValue?: number }).ObjectiveValue ?? null,
     unplacedCount: results.filter((r) => r.unplaced).length,
-    fairness: { floor: (sol.Columns as Record<string, { Primal?: number }>)?.t?.Primal ?? null, byGroup: groupMeans },
+    fairness: { floor: (sol.Columns as Record<string, { Primal?: number }>)?.t?.Primal ?? null, byGroup: groupMeans, unplacedByGroup: groupUnplaced },
     priceOfFairness: null,
     keyDeviation,
     preferenceCoverage: cases.length ? ranked / cases.length : 0,

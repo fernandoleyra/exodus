@@ -72,7 +72,8 @@ function Inspector() {
     if (!p) return null;
     const i = places.indexOf(p);
     const pi = periodIndex(periodStarts, year);
-    let inb = 0, out = 0, nIn = 0, nOut = 0, checked = 0, dpSum = 0, dpMax = 0;
+    let inb = 0, out = 0, nIn = 0, nOut = 0, dpMax = 0;
+    const dps: number[] = [];
     for (const c of corridors) {
       const v = c.v[yi] ?? 0;
       const touches = c.d === i || c.o === i;
@@ -80,10 +81,12 @@ function Inspector() {
       if (c.o === i) { out += v; nOut++; }
       if (touches && pi >= 0) {
         const dp = c.dpp[pi];
-        if (dp != null) { checked++; dpSum += dp; if (dp > dpMax) dpMax = dp; }
+        if (dp != null) { dps.push(dp); if (dp > dpMax) dpMax = dp; }
       }
     }
-    return { inb, out, nIn, nOut, checked, dpMean: checked ? dpSum / checked : null, dpMax };
+    dps.sort((a, b) => a - b);
+    const median = dps.length ? dps[dps.length >> 1]! : null;
+    return { inb, out, nIn, nOut, checked: dps.length, dpMedian: median, dpMax };
   }, [p, places, corridors, yi, year, periodStarts]);
 
   if (!p) {
@@ -163,7 +166,7 @@ function Inspector() {
       <div className="sec">
         <h2>Do the models agree?</h2>
         <Figure label="Median disagreement" kind="modelled"
-                value={flows!.dpMean == null ? null : `${(flows!.dpMean * 100).toFixed(0)}%`}
+                value={flows!.dpMedian == null ? null : `${(flows!.dpMedian * 100).toFixed(0)}%`}
                 absentNote="not checked" />
         <Figure label="Worst corridor" kind="modelled"
                 value={flows!.dpMax ? `${(flows!.dpMax * 100).toFixed(0)}%` : null}
@@ -174,8 +177,10 @@ function Inspector() {
         </div>
         <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 0 }}>
           Two independent published estimates of the same corridor, compared on the only grid
-          they share. A corridor nobody checked is drawn grey and dotted — that is not the
-          same as the models agreeing.
+          they share. The measure is the symmetric relative difference, |a−b| ÷ their mean,
+          so it runs <b>0 to 200%</b>, not 0 to 100: 200% means one model says a number and
+          the other says roughly nothing. A corridor nobody checked is drawn grey and
+          dotted — that is not the same as the models agreeing.
         </p>
       </div>
       <div className="sec">

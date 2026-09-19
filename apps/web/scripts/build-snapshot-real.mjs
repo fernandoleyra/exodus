@@ -89,25 +89,39 @@ const B = new Map();          // "O>D" -> Map(year0 -> value)
 // ---------- geometry ----------
 const topo = JSON.parse(await readFile(`${RAW}/../ne110.json`, 'utf8'));
 const fc = feature(topo, topo.objects.countries);
-function ringCentroid(coords) {
-  let a = 0, cx = 0, cy = 0;
+// A planar centroid is meaningless for a ring that crosses the antimeridian (Russia, Fiji,
+// New Zealand), and wrapping the result afterwards does not repair it — the average was
+// already taken across a 360-degree seam. Average on the sphere instead.
+function ringArea(coords) {
+  let a = 0;
   for (let i = 0, j = coords.length - 1; i < coords.length; j = i++) {
     const [x0, y0] = coords[j], [x1, y1] = coords[i];
-    const f = x0 * y1 - x1 * y0;
-    a += f; cx += (x0 + x1) * f; cy += (y0 + y1) * f;
+    a += x0 * y1 - x1 * y0;
   }
-  a *= 0.5;
-  return Math.abs(a) < 1e-12 ? null : { c: [cx / (6 * a), cy / (6 * a)], a: Math.abs(a) };
+  return Math.abs(a / 2);
 }
 function centroidOf(geom) {
   const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.coordinates;
   let best = null;
-  for (const p of polys) { const r = ringCentroid(p[0]); if (r && (!best || r.a > best.a)) best = r; }
+  for (const p of polys) {
+    const a = ringArea(p[0]);
+    if (!best || a > best.a) best = { a, ring: p[0] };
+  }
   if (!best) return null;
-  let [lon, lat] = best.c;
-  while (lon > 180) lon -= 360;
-  while (lon < -180) lon += 360;
-  return [lon, lat];
+  // Mean of the vertices as unit vectors, then back to lon/lat. Seam-safe by construction.
+  let x = 0, y = 0, z = 0, n = 0;
+  for (const [lon, lat] of best.ring) {
+    const la = (lat * Math.PI) / 180, lo = (lon * Math.PI) / 180;
+    x += Math.cos(la) * Math.cos(lo);
+    y += Math.cos(la) * Math.sin(lo);
+    z += Math.sin(la);
+    n++;
+  }
+  if (!n) return null;
+  x /= n; y /= n; z /= n;
+  const hyp = Math.hypot(x, y);
+  if (hyp < 1e-12 && Math.abs(z) < 1e-12) return null;
+  return [(Math.atan2(y, x) * 180) / Math.PI, (Math.atan2(z, hyp) * 180) / Math.PI];
 }
 
 // ---------- World Bank context (already fetched, observed) ----------
