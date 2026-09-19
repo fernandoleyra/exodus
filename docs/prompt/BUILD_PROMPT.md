@@ -352,8 +352,13 @@ number per arc is lying. So:
 
 ### What this is not
 
-Not a decision system. There is no allocation solver, no placement shortlist, no departure
-forecast, no origin-side pressure index, and no person-shaped type anywhere in the schema.
+Not a decision system. There is no departure forecast, no origin-side pressure index, and no
+person-shaped type anywhere in **the core packages or the six core routes**.
+
+> **Amended by §0.3.** The allocation solver and its placement shortlist *are* built, as §12,
+> in a separate workspace package with its own schema, route tree and auth scope, excluded
+> from the public build. Person-shaped types exist there and only there. The paragraph below
+> describes the core product, which is unchanged: it still contains none of this.
 `/solve` redirects to `/methods#allocation`, where the thing we did not build is described
 in full. See [ETHICS.md](./ETHICS.md).
 
@@ -1893,7 +1898,7 @@ export type Namespace = (typeof NAMESPACES)[number];
 export function resolvePlace(ns: Namespace, code: string, onDate: string): string | null;
 ```
 
-Returning `null` is an **ingest-time failure**, not a runtime `Refusal`. `RefusalCode` is closed at the five codes §5 names; ontology resolution failures throw named ingest errors (`CrosswalkMiss`, `UnknownIndicator`, `ReservedTypeHasRows`) that print observed-vs-expected and stop the build. Do not add a sixth `RefusalCode`.
+Returning `null` is an **ingest-time failure**, not a runtime `Refusal`. `RefusalCode` is closed at the **eight** codes §5 and §12.6.1 name — five core plus the three §12 adds; ontology resolution failures throw named ingest errors (`CrosswalkMiss`, `UnknownIndicator`, `ReservedTypeHasRows`) that print observed-vs-expected and stop the build. Do not add a ninth `RefusalCode`.
 
 Golden rows that must be unit-tested at M1, because each one silently corrupts a corridor otherwise:
 
@@ -2146,7 +2151,7 @@ export const refuse = (
 ): Refusal => ({ kind: 'refusal', code, reason, sourceIds });
 ```
 
-The `RefusalCode` union is closed at five members. You do not add a sixth. Where a new failure mode appears, map it to the nearest existing code and distinguish it by `reason`; §5.3 lists the four distinct `reason` strings that share `NonMonotoneBisection`.
+The `RefusalCode` union is closed at **eight** members: the five named here plus the three §12.6.1 adds (`NoConsentRecord`, `NoPreferenceCoverage`, `NoLegalBasis`). You do not add a ninth. Where a new failure mode appears, map it to the nearest existing code and distinguish it by `reason`; §5.3 lists the four distinct `reason` strings that share `NonMonotoneBisection`.
 
 `erasableSyntaxOnly` is on. `enum` and `namespace` are TS1294 errors. Every closed set in this section is a `readonly` tuple plus a `typeof[number]` union, as above. Do not deviate.
 
@@ -6972,7 +6977,7 @@ Do not let the UI promise choice it cannot deliver. It offers a **menu and a vet
 10. **No individual-level export, ever.** The API emits opaque pseudonyms. Public aggregates suppress cells with **k < 10**. *Accept:* a request for any cell with n < 10 returns `SUPPRESSED`, not a number. No individual tracks, no vessel-level or person-level trajectories, anywhere, ever.
 11. **Simulation and operations are physically separated** — §12.2.
 12. **EU AI Act posture — state it accurately or not at all.** An allocation tool used by a public authority sits **adjacent to**, and not squarely inside, Annex III point 7 of Regulation (EU) 2024/1689, whose four limbs cover polygraphs, risk assessment of a natural person entering a Member State, assisting authorities examining asylum/visa/residence applications, and person detection or identification in the migration context. A placement optimiser for people already admitted is not plainly any of them. **Get a legal opinion; do not assert the classification in either direction.** Annex III high-risk obligations now apply from **2 December 2027** following Regulation (EU) 2026/1744 (Digital Omnibus on AI, OJ 24 July 2026). Build the Art. 9–15 artefacts now, as files: `/compliance/ai-act/{risk-management,data-governance,technical-documentation,logging,human-oversight,accuracy-robustness}.md`, plus a GDPR Art. 35 DPIA template pre-filled for this processing.
-13. **Licensing honesty.** Apache-2.0, for its patent grant. Say plainly in `GOVERNANCE.md` that OSI-approved licences **cannot** restrict fields of use (Open Source Definition clause 6) and that ethical-source licences such as Hippocratic are not OSI-approved — **governance is the real control, not licence text**. Name an ethics board and a documented deployment-support-revocation process.
+13. **Licensing honesty.** This module follows the repository's licence split (§9/§10): **AGPL-3.0-or-later**, like all other application code, with only `contracts` and `connectors/_template` under Apache-2.0 for the patent grant. Do not license `@corridor/placement` permissively — the network-use clause is the point for a module institutions will self-host. Say plainly in `GOVERNANCE.md` that OSI-approved licences **cannot** restrict fields of use (Open Source Definition clause 6) and that ethical-source licences such as Hippocratic are not OSI-approved — **governance is the real control, not licence text**. Name an ethics board and a documented deployment-support-revocation process.
 14. **Contestability.** Every placed case gets a human-readable reason sheet and a named route to challenge it. Log challenges; publish the challenge-and-reversal rate. *A system that can allocate but cannot be appealed is a containment planner regardless of its objective function.*
 
 #### 12.6.1 The three new refusal codes
