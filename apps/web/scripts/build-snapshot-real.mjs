@@ -301,13 +301,138 @@ await writeFile('public/snapshot/corridors.json', JSON.stringify({
 // not help, because the sag is in the interior triangulation, not the edges.
 //
 // So cut every country along a lat/lon grid. Each piece then spans at most CELL degrees and
-// sags under 9 km, which clears comfortably. Exactly one polygon in Natural Earth 110m has
-// an interior ring, and it is passed through uncut rather than risk filling its hole.
+// sags under 9 km, which clears comfortably.
+//
+// Exactly one polygon in Natural Earth 110m has an interior ring: South Africa, whose hole is
+// Lesotho. It used to be passed through uncut rather than risk filling that hole in, which
+// quietly left the very defect the cut exists to prevent — South Africa spans 16.4 degrees of
+// arc and sags 65 km, against 36 km of clearance above the ocean mesh, so it was punched
+// through exactly like the countries this code was written for. It is now cut like everything
+// else, with the hole clipped to each cell alongside the outer ring, so Lesotho stays a hole
+// instead of being painted over.
 const CELL = 6;
 
+// ---------------------------------------------------------------- the antimeridian
+// Four rings in this dataset cross the antimeridian INSIDE a single ring, with a 360-degree
+// jump between consecutive vertices: Fiji, Russia's main body, one Russian island ring, and
+// Antarctica. Drawn as they are stored, that jump is interpolated the long way round and the
+// country is painted as a band wrapping the entire planet. The fix is to walk each ring
+// accumulating longitude so the path is continuous, cut it at the antimeridian, and shift
+// each piece back into range. 180 is a multiple of CELL, so no grid cell ever straddles the
+// seam and every piece shifts by one whole multiple of 360.
+//
+// Antarctica has a second and separate defect. Its ring winds a full 360 degrees around the
+// south pole, but its southernmost vertex is at -85.6: the pole is not inside the polygon.
+// In lon/lat space that is a strip rather than a cap, so on the globe it leaves a circular
+// hole centred on the pole. A ring that winds all the way round has to be sealed over the
+// pole it encircles before anything else is done to it.
+
+/** Accumulate longitude along a ring so it is continuous, removing the 360-degree jumps. */
+function unwrapRing(ring) {
+  const out = [[...ring[0]]];
+  let lon = ring[0][0];
+  for (let i = 1; i < ring.length; i++) {
+    let d = ring[i][0] - ring[i - 1][0];
+    if (d > 180) d -= 360;
+    else if (d < -180) d += 360;
+    lon += d;
+    out.push([lon, ring[i][1]]);
+  }
+  return out;
+}
+
+/** Total longitude travelled. +-360 means the ring goes all the way round, enclosing a pole. */
+const windingOf = (u) => u[u.length - 1][0] - u[0][0];
+
+/**
+ * Shift a piece back into [-180, 180]. Safe only because every piece it is given lies inside
+ * one CELL-degree cell or one 360-degree band, so the whole piece moves together and the
+ * midpoint cannot pick the wrong multiple.
+ */
+function normaliseLon(piece) {
+  let sum = 0;
+  for (const p of piece) sum += p[0];
+  const k = Math.round(sum / piece.length / 360);
+  return k === 0 ? piece : piece.map(([x, y]) => [x - k * 360, y]);
+}
+
+/**
+ * Close a pole-encircling ring over the pole it encloses, so the polar cap is inside the
+ * polygon instead of being a hole in it. Vertices are laid along the pole every CELL degrees
+ * so the grid cut below has something to bite on right at the pole.
+ */
+function sealPole(u) {
+  let sumLat = 0;
+  for (const [, y] of u) sumLat += y;
+  const south = sumLat < 0;
+  const lat = south ? -90 : 90;
+  // A ring that reached past the equator could not be closed over one pole unambiguously.
+  for (const [, y] of u) {
+    if (south ? y > 0 : y < 0) throw new Error('pole-encircling ring crosses the equator; cannot seal');
+  }
+  const first = u[0], last = u[u.length - 1];
+  const out = u.slice();
+  const step = last[0] > first[0] ? -CELL : CELL;
+  out.push([last[0], lat]);
+  for (let x = last[0] + step; step < 0 ? x > first[0] : x < first[0]; x += step) out.push([x, lat]);
+  out.push([first[0], lat]);
+  out.push([first[0], first[1]]);
+  return { ring: out, pole: south ? 'south' : 'north' };
+}
+
+/**
+ * Cut a polyline wherever it leaves one 360-degree band, and bring each piece back into
+ * range. Deciding by band rather than by "does this segment strictly cross 180" matters:
+ * Fiji's ring has vertices sitting exactly ON the antimeridian, so a strict crossing test
+ * finds nothing and the ring is normalised as one unit, leaving vertices past 180.
+ */
+function splitAtAntimeridian(u) {
+  const band = (x) => Math.round(x / 360);
+  const pieces = [];
+  let cur = [u[0]];
+  for (let i = 1; i < u.length; i++) {
+    const a = u[i - 1], b = u[i];
+    let ba = band(a[0]);
+    const bb = band(b[0]);
+    while (ba !== bb) {
+      const dir = bb > ba ? 1 : -1;
+      const x = 180 + 360 * (dir > 0 ? ba : ba - 1);
+      const y = b[0] === a[0] ? a[1] : a[1] + ((b[1] - a[1]) * (x - a[0])) / (b[0] - a[0]);
+      cur.push([x, y]);
+      pieces.push(cur);
+      cur = [[x, y]];
+      ba += dir;
+    }
+    cur.push(b);
+  }
+  pieces.push(cur);
+  // Every piece now sits inside one band, so the mean picks that band and the whole piece
+  // shifts together.
+  return pieces.filter((p) => p.length >= 2).map(normaliseLon);
+}
+
 // The cut is a rendering trick, not a fact about borders. Keep the original outlines and
-// stroke from those, or every grid cut shows up as a national boundary.
+// stroke from those, or every grid cut shows up as a national boundary. They still need the
+// antimeridian handled, or the stroke draws a hairline straight across the planet, which is
+// how this was first noticed.
 const outlineFc = JSON.parse(JSON.stringify(fc));
+let outlineSplit = 0;
+for (const f of outlineFc.features) {
+  const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
+  const lines = [];
+  for (const poly of polys) {
+    for (const ring of poly) {
+      const u = unwrapRing(ring);
+      const parts = splitAtAntimeridian(u);
+      if (parts.length > 1) outlineSplit++;
+      // A ring is closed, so its pieces are strokable as they stand. No pole seal here: the
+      // coastline is the border, and a segment along latitude -90 is not a coastline.
+      for (const part of parts) lines.push(part);
+    }
+  }
+  f.geometry = { type: 'MultiLineString', coordinates: lines };
+}
+console.log(`outlines      ${outlineSplit} rings cut at the antimeridian, emitted as MultiLineString`);
 
 /** Sutherland–Hodgman against one edge of a convex window. */
 function clipEdge(poly, inside, intersect) {
@@ -343,28 +468,75 @@ function bounds(ring) {
   return [x0, y0, x1, y1];
 }
 
-let polysBefore = 0, polysAfter = 0, skipped = 0;
+let polysBefore = 0, polysAfter = 0, skipped = 0, wrapped = 0, sealed = [];
 for (const f of fc.features) {
   const polys = f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates;
   const out = [];
   for (const poly of polys) {
     polysBefore++;
-    if (poly.length > 1) { out.push(poly); skipped++; continue; }   // has a hole: pass through
-    const ring = poly[0];
+
+    // Everything below happens in unwrapped longitude, where a ring that crosses the
+    // antimeridian is a normal ring that happens to sit outside [-180, 180]. The pieces come
+    // back into range one at a time at the end.
+    let ring = unwrapRing(poly[0]);
+    const holes = poly.slice(1).map(unwrapRing);
+    if (holes.length) skipped++;
+    const wrap = Math.abs(windingOf(ring)) > 350;
+    if (wrap) {
+      const s = sealPole(ring);
+      ring = s.ring;
+      sealed.push(`${f.properties.iso3} (${s.pole})`);
+    }
     const [bx0, by0, bx1, by1] = bounds(ring);
-    // Small enough to be safe already — leave it whole and keep the vertex count down.
-    if (bx1 - bx0 <= CELL && by1 - by0 <= CELL) { out.push(poly); continue; }
+    if (bx0 < -180 || bx1 > 180) wrapped++;
+
+    // Small enough to be safe already — leave it whole and keep the vertex count down. Only
+    // when it is already inside range, though: a small ring that straddles the seam still has
+    // to be cut, and Fiji is exactly that case.
+    if (bx1 - bx0 <= CELL && by1 - by0 <= CELL && bx0 >= -180 && bx1 <= 180) { out.push(poly); continue; }
+
     for (let x = Math.floor(bx0 / CELL) * CELL; x < bx1; x += CELL) {
       for (let y = Math.floor(by0 / CELL) * CELL; y < by1; y += CELL) {
         const piece = clipToCell(ring, x, y, x + CELL, y + CELL);
-        if (piece) out.push([piece]);
+        if (!piece) continue;
+        // Clip each hole to the same cell. Both rings are cut against the same convex
+        // window, so a hole that survives is still inside the outer piece it came from.
+        const cut = [normaliseLon(piece)];
+        for (const h of holes) {
+          const hp = clipToCell(h, x, y, x + CELL, y + CELL);
+          if (hp) cut.push(normaliseLon(hp));
+        }
+        out.push(cut);
       }
     }
   }
   polysAfter += out.length;
   f.geometry = { type: 'MultiPolygon', coordinates: out };
 }
-console.log(`geometry      cut ${polysBefore} -> ${polysAfter} polygons on a ${CELL}deg grid (${skipped} with holes passed through)`);
+console.log(`geometry      cut ${polysBefore} -> ${polysAfter} polygons on a ${CELL}deg grid (${skipped} with an interior ring, cut with it)`);
+console.log(`              ${wrapped} rings crossed the antimeridian; sealed over a pole: ${sealed.join(', ') || 'none'}`);
+
+// Assert rather than hope. Both defects this pass fixes are invisible in the data and obvious
+// only on the globe, which is a bad way to find out.
+{
+  let bad = 0, offRange = 0;
+  for (const f of fc.features) {
+    for (const poly of f.geometry.coordinates) {
+      for (const ring of poly) {
+        for (let i = 1; i < ring.length; i++) if (Math.abs(ring[i][0] - ring[i - 1][0]) > 180) bad++;
+        for (const [x, y] of ring) if (x < -180.001 || x > 180.001 || y < -90.001 || y > 90.001) offRange++;
+      }
+    }
+  }
+  for (const f of outlineFc.features) {
+    for (const line of f.geometry.coordinates) {
+      for (let i = 1; i < line.length; i++) if (Math.abs(line[i][0] - line[i - 1][0]) > 180) bad++;
+      for (const [x, y] of line) if (x < -180.001 || x > 180.001 || y < -90.001 || y > 90.001) offRange++;
+    }
+  }
+  if (bad || offRange) throw new Error(`geometry check failed: ${bad} antimeridian jumps, ${offRange} out-of-range vertices`);
+  console.log('              check: no fill or outline ring jumps the antimeridian, every vertex in range');
+}
 
 await writeFile('public/snapshot/adm0.json', JSON.stringify(fc));
 await writeFile('public/snapshot/adm0_outline.json', JSON.stringify(outlineFc));

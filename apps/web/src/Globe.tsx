@@ -25,9 +25,17 @@ export function Globe() {
   const { places, corridors, adm0, adm0Outline, year, periodStarts, selected, hovered, select, hover,
           surface, overlays, filters } = useStore();
   const [view, setView] = useState(INITIAL);
-  // Test hook: park the camera over a known place deterministically.
+  // The camera is CONTROLLED: deck.gl reports every change through onViewStateChange and we
+  // hand the result straight back. It used to be uncontrolled, with only initialViewState,
+  // which meant the test hook below silently did nothing to the camera — it moved the
+  // hemisphere-culling maths and nothing else, so a test that thought it was looking at
+  // Russia was looking wherever the globe happened to be.
+  //
+  // Test hooks: park the camera over a known place, and focus a country, deterministically.
+  // Clicking a 9-vertex island through a rotating globe is not a test, it is a coin flip.
   (window as unknown as Record<string, unknown>).__setView =
-    (longitude: number, latitude: number) => setView((v) => ({ ...v, longitude, latitude, zoom: 2.1 }));
+    (longitude: number, latitude: number, zoom = 2.1) => setView((v) => ({ ...v, longitude, latitude, zoom }));
+  (window as unknown as Record<string, unknown>).__select = (iso3: string | null) => select(iso3);
   const yi = year - 1990;
 
   const { spec, scale, valueFor } = useSurface();
@@ -158,7 +166,7 @@ export function Globe() {
     <DeckGL
       id="deck-canvas"
       views={new GlobeView({ resolution: 12 })}
-      initialViewState={INITIAL}
+      viewState={view}
       controller={{ dragRotate: true, inertia: 250 }}
       onClick={(info: any) => { if (!info?.object) select(null); }}
       getCursor={({ isDragging, isHovering }: any) =>

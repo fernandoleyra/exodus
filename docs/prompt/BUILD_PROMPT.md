@@ -7282,3 +7282,77 @@ page. It also quoted three figures that had gone stale when the type-filter bug 
 (really 8,854), median disagreement 80% (really 75%). Prose carrying computed numbers now has
 a test that reads the numbers back out of the page and recomputes them from the snapshot,
 because that is the only thing that stops them drifting again.
+
+
+---
+
+## §14 Three geometry defects a user saw before any test did
+
+Reported from the running app: *"fiji and russian federation has this weird rings across the
+planet... antartica has a hole."* A third was found while fixing those, by computing rather
+than looking.
+
+### §14.1 What was actually wrong
+
+| Defect | Cause | Affected |
+|---|---|---|
+| A band painted right around the planet | The ring crosses the antimeridian **inside a single ring**, with a 360° step between consecutive vertices. deck.gl interpolates that step the long way. | Fiji, Russia's main body, one Russian island ring, Antarctica |
+| A circular hole at the south pole | Antarctica's ring winds a full 360° around the pole but its southernmost vertex is at **−85.6**. In lon/lat that is a strip, not a cap: the pole was outside the polygon. | Antarctica |
+| A country punched through the sphere | The one polygon with an interior ring was passed through the grid cut **uncut**, so it kept the exact defect the cut exists to prevent: 16.4° of arc sagging **65 km** against **36 km** of clearance. | South Africa |
+
+The third had been sitting in a code comment the whole time — *"Exactly one polygon in Natural
+Earth 110m has an interior ring, and it is passed through uncut rather than risk filling its
+hole"* — written as a considered trade-off and never checked against the sag arithmetic that
+justified the rest of the function.
+
+### §14.2 The fix
+
+Everything happens in **unwrapped longitude**, where a ring crossing the antimeridian is just a
+ring that happens to sit outside [−180, 180]:
+
+1. Walk each ring accumulating longitude, removing the 360° jumps.
+2. If |winding| ≈ 360 the ring encircles a pole — seal it over that pole with vertices every
+   `CELL` degrees, so the cap is inside the polygon.
+3. Grid-cut as before, now in unwrapped space, cutting interior rings against the same cell as
+   their outer ring so a hole stays a hole.
+4. Shift each piece back into range. Safe because 180 is a multiple of `CELL`, so no cell ever
+   straddles the seam and the whole piece moves by one multiple of 360.
+
+Outlines get steps 1 and 4 only and ship as `MultiLineString`: a coastline is a border, a
+segment along latitude −90 is not, and closing the split rings would draw a fake seam down the
+Pacific.
+
+**Splitting must be decided by band, not by "does this segment strictly cross 180".** Fiji has
+vertices sitting exactly *on* the antimeridian, so a strict crossing test finds nothing, the
+ring is normalised as one unit, and vertices are left past 180. `Math.round(x / 360)` changes
+exactly at the seam and gets it right.
+
+### §14.3 The latent defect found while building the test
+
+`window.__setView`, the existing test hook, carried the comment *"park the camera over a known
+place deterministically"* — and did nothing of the kind. `<DeckGL>` had only
+`initialViewState`, so it was **uncontrolled**: the hook moved the hemisphere-culling maths and
+left the camera where it was. Every pixel measurement came back at roughly 1% no matter which
+country was focused or where the camera was pointed, which is what exposed it. The view is now
+controlled (`viewState={view}` fed from `onViewStateChange`) and the same hook moves the camera
+for real — Russia went from 0.45% of the frame to 5.99%.
+
+A test hook that silently does nothing is worse than no hook, because every test written on top
+of it passes.
+
+### §14.4 How these are held
+
+None of the three is visible in the GeoJSON; all three are obvious on a sphere. So they are
+checked twice:
+
+- `src/geometry.test.ts` asserts the data-level invariants — no ring jumps the antimeridian,
+  every vertex is in range in the outlines too, Antarctica reaches −90, no polygon's chord sags
+  past the clearance, Lesotho is still a hole, and Russia and Fiji still have pieces on **both**
+  sides of the seam. That last one matters: clamping longitudes instead of splitting would lose
+  Chukotka and half of Fiji, and every other check would still pass.
+- `e2e/geometry.mjs` asserts the same things in pixels, by focusing a country and counting the
+  focus fill. The sharpest check is the simplest: **park the camera on a country's antipode and
+  assert its colour is absent.** A polygon that wraps the planet is painted on the far side, so
+  that one assertion catches the whole class.
+- `scripts/build-snapshot-real.mjs` now fails the build outright on a jump or an out-of-range
+  vertex, rather than shipping and waiting to be noticed.
