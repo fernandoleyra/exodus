@@ -7356,3 +7356,112 @@ checked twice:
   that one assertion catches the whole class.
 - `scripts/build-snapshot-real.mjs` now fails the build outright on a jump or an out-of-range
   vertex, rather than shipping and waiting to be noticed.
+
+
+---
+
+## §15 Tier 1: making the platform current
+
+The spine cannot move past 2023 — §13's research established that, and
+`.cache/raw/mig_bilateral.csv` proves both halves of it from one file: at 2024 there are 53,284
+rows with a stock and **zero** with a flow. So currency had to come from everywhere that is not
+the spine. Seven adapters, one agent each, every one adversarially re-verified by a second
+agent whose only job was to refute it.
+
+**Fifty layers, eight producers, five licences, eight of them bilateral.**
+
+| Producer | Newest | Cadence | Layers |
+|---|---|---|---|
+| Statistics Netherlands (CBS) | 2026-07 | monthly | 2 |
+| IRCC Canada | 2026-07 | monthly | 2 |
+| Eurostat | 2026-07 | monthly → annual | 25 (4 bilateral) |
+| IMF Balance of Payments | 2026-Q1 | quarterly | 2 |
+| World Bank | 2025 | annual | 10 |
+| Destatis / ISTAT | 2025 | annual | 6 (2 bilateral) |
+| Gaskin & Abel | 2024 | quinquennial | 3 (1 bilateral) |
+
+### §15.1 Time stops being a number
+
+One integer year axis ending at 2023 cannot carry a monthly Dutch register beside a
+quinquennial stock table. `src/vintage.ts` gives every layer a `periodEnd`, `periodLabel`,
+`cadence`, `estimateKind`, `provisional`, `breaks`, `reporters`, `producer`, `licenceId` and
+`commercialUseClear`.
+
+**`latencyDays` is never stored, and the builder rejects it if present.** Every latency figure
+in the research behind this was measured to a publisher's `updated` stamp and was wrong the day
+after it was written. Age is a function of now, so it is computed from now.
+
+A layer paints the newest period it has **at or before** the cursor and names it in the panel.
+Never interpolated, never carried forward, never resampled onto the spine's grid. One with
+nothing at the cursor paints nothing and says so. This is the rule `NO_DATA_FILL` already
+encoded in space, moved into time: **absent at this instant is not zero at this instant.**
+
+### §15.2 The bug that shipped a silent lie
+
+The protection layers loaded, validated on every other axis, and painted an **entirely empty
+world** — keyed by Eurostat's two-letter `geo` codes while `places.json` and the globe are keyed
+by ISO3. Every lookup missed and every country fell through to the no-data fill, which is
+pixel-identical to what this app draws on purpose when a source genuinely has nothing. No
+throw, no warning.
+
+The fix is structural, not a patch to one adapter: `build-layers.mjs` rejects a country layer
+whose keys are not ISO3 and a corridor layer whose keys are not ISO3 pairs, and the crosswalk
+moved to `scripts/adapters/_iso3.mjs`, shared rather than present in one adapter and absent from
+the other.
+
+### §15.3 What the verifiers refuted
+
+Fifty-five claims across seven briefs. The ones that changed shipped code or text:
+
+- **CBS's `Herkomstland` is not a bilateral dimension.** It is the migration-background
+  definition — the person's own country of birth, *or their parents'* if they were born in the
+  Netherlands. 14.1% of July 2026's 23,148 "immigration" registrations were of people born in
+  the Netherlands, and the table records nothing about where anyone travelled from. The build
+  agent caught it before shipping corridors off it.
+- **`api.imf.org` does not share `www.imf.org`'s WAF behaviour.** All four combinations of
+  {curl, fetch} × {default UA, Chrome UA} return 200. The contract said it flatly of "imf.org".
+- **Eurostat's status flags are compound** — 42 codes, and the interesting ones combine: `ep`,
+  `bep`, `bdep`, `ip`. Testing `flag === 'p'` misses most provisional values.
+- **The Destatis licence variant is settled, not inferred.** On both the English and German Open
+  Data pages the licence name is a hyperlink and both hrefs are `govdata.de/dl-de/by-2-0` — the
+  Namensnennung variant, whose own text grants commercial use expressly.
+- **`migr_asytpsm`'s own `OBS_PERIOD_OVERALL_LATEST` reads 2026-08**, and 2026-08 returns HTTP
+  200 with real numbers from twelve reporters. 2026-07 is simply the newest period that survives
+  the reporter gate — the gate doing exactly what it exists for.
+
+### §15.4 The ledger has to keep up
+
+Six producers were shipping data with **no row on `/#/sources`**. Every one of their licences
+requires attribution and two are not Creative Commons, so that is a compliance failure rather
+than a documentation gap. A test now joins the ledger to the layer index, and a second asserts
+the page and the adapters agree about who grants commercial reuse. The IMF is the one that does
+not — its terms permit derivative works and redistribution, then close by asking that commercial
+reuse be cleared by email — so its layers are badged separately rather than mixed in.
+
+Two source descriptions had also gone stale as the app grew around them: the World Bank entry
+still said its figures were "the only observed figures in the application" (they are not, and
+two of its own series are modelled), and the Eurostat entry still said "used only on the
+concordance page" while shipping twenty-five layers to the globe.
+
+### §15.5 Three ceilings that had been typed in rather than derived
+
+`fetch-wb.mjs` pinned `date=2010:2023`, so nothing it cached could ever be newer however often
+it ran. `build-snapshot-real.mjs` capped context at 2023, migrant stock at 2020, and measured
+staleness against 2023. The app was drawing figures two to four years older than what was
+already published:
+
+| | was | now |
+|---|---|---|
+| population | 2023 | **2025** |
+| unemployment | 2023 | **2025** |
+| GDP per capita | 2023 | **2025** |
+| migrant stock | 2020 | **2024** |
+
+The manifest also claimed `SM.POP.TOTL` was "2010 / 2015 / 2020 only" — wrong in both
+directions — and badged `SP.POP.TOTL` as *observed*, when its own metadata names UN World
+Population Prospects first among its sources and its note reads "The values shown are midyear
+estimates". The vintage string is now read off the data; the population series is badged
+modelled with the reason.
+
+And `npm run snapshot` did not build the layers at all. Nothing in the declared scripts produced
+`public/snapshot/layers/`.
