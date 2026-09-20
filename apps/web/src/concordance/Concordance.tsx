@@ -31,6 +31,7 @@ const DOT_LABEL: Record<string, string> = {
   'unemployment-0': 'unemployment: WB vs Eurostat',
   'unemployment-1': 'unemployment: WB vs IMF',
   'unemployment-2': 'unemployment: Eurostat vs IMF',
+  'stock-0': 'foreign-born stock',
   'gdppc-0': 'GDP per capita',
   'population-0': 'population',
 };

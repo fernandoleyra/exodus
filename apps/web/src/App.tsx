@@ -39,6 +39,79 @@ function Figure({ label, value, vintage, kind = 'observed', absentNote = 'no dat
   );
 }
 
+/**
+ * Where a country's foreign-born population came from, and where its own emigrants went.
+ *
+ * This is corridor data, so it cannot be a globe surface — the globe paints countries, and a
+ * corridor is a pair. It belongs here, next to the country the reader already has selected.
+ * The layer is fetched on demand rather than on load: it is half a megabyte and most visitors
+ * never select a country at all.
+ */
+function StockOrigins({ iso3, name }: { iso3: string; name: string }) {
+  const { layerIndex, layerRows, loadLayer, places } = useStore();
+  const meta = layerIndex.find((l) => l.id === 'stock-corridor');
+  useEffect(() => { if (meta) void loadLayer(meta.id); }, [meta, loadLayer]);
+  const rows = meta ? layerRows[meta.id] : undefined;
+
+  const nameOf = useMemo(() => new Map(places.map((p) => [p.iso3, p.name])), [places]);
+
+  const { into, outOf, period } = useMemo(() => {
+    if (!rows || !meta) return { into: [], outOf: [], period: null };
+    const at = meta.vintage.periodLabel;
+    const into: { iso: string; v: number }[] = [];
+    const outOf: { iso: string; v: number }[] = [];
+    for (const [key, byPeriod] of Object.entries(rows)) {
+      const v = byPeriod[at];
+      if (v == null || !(v > 0)) continue;
+      const [o, d] = key.split('>');
+      if (!o || !d) continue;
+      if (d === iso3) into.push({ iso: o, v });
+      else if (o === iso3) outOf.push({ iso: d, v });
+    }
+    into.sort((a, b) => b.v - a.v);
+    outOf.sort((a, b) => b.v - a.v);
+    return { into: into.slice(0, 6), outOf: outOf.slice(0, 6), period: at };
+  }, [rows, meta, iso3]);
+
+  if (!meta) return null;
+  const fmt = (v: number) => (v >= 1e6 ? `${(v / 1e6).toFixed(2)}m` : v >= 1e4 ? `${Math.round(v / 1e3)}k` : Math.round(v).toLocaleString('en-US'));
+  const max = Math.max(1, ...into.map((r) => r.v), ...outOf.map((r) => r.v));
+
+  return (
+    <div className="sec">
+      <h2>Who is here, and where they went</h2>
+      {!rows && <div className="kv"><span className="k">loading the corridor matrix&hellip;</span></div>}
+      {rows && into.length === 0 && outOf.length === 0 && (
+        <div className="kv"><span className="k">no corridor reaches the size this layer ships</span><span className="v">&mdash;</span></div>
+      )}
+      {(['into', 'outOf'] as const).map((dir) => {
+        const list = dir === 'into' ? into : outOf;
+        if (!list.length) return null;
+        return (
+          <div key={dir} className="origins">
+            <div className="origins-head">
+              {dir === 'into' ? <>Born elsewhere, living in {name}</> : <>Born in {name}, living elsewhere</>}
+              <span>{period}</span>
+            </div>
+            {list.map((r) => (
+              <div className="origin-row" key={r.iso}>
+                <span className="origin-name">{nameOf.get(r.iso) ?? r.iso}</span>
+                <span className="origin-bar"><i style={{ width: `${(r.v / max) * 100}%` }} /></span>
+                <span className="origin-val">{fmt(r.v)}</span>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 0 }}>
+        Modelled stock at <b>{period}</b>, a year fresher than any flow in this app, and a
+        standing population rather than a movement. The six largest each way, out of the
+        corridors this layer ships &mdash; smaller ones exist and are not drawn here.
+      </p>
+    </div>
+  );
+}
+
 function Inspector() {
   const { places, corridors, selected, hovered, year, select } = useStore();
   const iso = selected ?? hovered;
@@ -191,6 +264,7 @@ function Inspector() {
           dotted — that is not the same as the models agreeing.
         </p>
       </div>
+      <StockOrigins iso3={p.iso3} name={p.name} />
       <div className="sec">
         <h2>How much to trust this</h2>
         <div className="kv"><span className="k">reporting completeness</span><span className="v">{(p.coverage * 100).toFixed(0)}%</span></div>
@@ -200,7 +274,7 @@ function Inspector() {
         </div>
         <div className="kv">
           <span className="k">migrant stock vintage</span>
-          <span className="v">{p.stockYear ?? '—'}{p.stockYear ? ` · ${2023 - p.stockYear}y old` : ''}</span>
+          <span className="v">{p.stockYear ?? '—'}{p.stockYear ? ` · ${new Date().getUTCFullYear() - p.stockYear}y old` : ''}</span>
         </div>
         <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.55, marginBottom: 0 }}>
           Computed from what this country actually reports to the World Bank, not asserted. It

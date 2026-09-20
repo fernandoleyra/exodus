@@ -102,7 +102,28 @@ body[data-route="observer"] { overflow: hidden; }
 .pill-btn { cursor: pointer; font-family: var(--mono); }
 .pill-btn:hover { color: var(--accent); border-color: var(--accent); }
 
+/* ---------- corridor detail in the inspector ---------- */
+.origins { margin-bottom: 14px; }
+.origins-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  font-size: 11px; color: var(--text-dim); margin-bottom: 7px;
+}
+.origins-head span { font-family: var(--mono); font-size: 9.5px; color: var(--text-muted); }
+.origin-row { display: grid; grid-template-columns: 1fr 58px 52px; gap: 8px; align-items: center; margin-bottom: 4px; }
+.origin-name { font-size: 11.5px; color: var(--text-dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.origin-bar { height: 5px; background: var(--bg-raised); border-radius: 2px; overflow: hidden; }
+.origin-bar i { display: block; height: 100%; background: var(--accent-3); border-radius: 2px; }
+.origin-val { font-family: var(--mono); font-size: 10.5px; color: var(--text); text-align: right; }
+
 /* ---------- data layers ---------- */
+.layergroup { margin-bottom: 10px; }
+.layergroup-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  font-family: var(--mono); font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-muted); padding: 7px 0 6px; border-bottom: 1px solid var(--border);
+  margin-bottom: 5px;
+}
+.layergroup-head span:last-child { letter-spacing: .04em; text-transform: none; opacity: .75; }
 .seclede { font-size: 11.5px; color: var(--text-muted); line-height: 1.6; margin: 0 0 11px; }
 .layervintage {
   display: block; margin-top: 4px; font-family: var(--mono); font-size: 9.5px;

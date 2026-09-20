@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: Exodus contributors
 // SPDX-License-Identifier: AGPL-3.0-or-later
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useStore } from './state';
 import { SURFACES, type Overlays } from './layers';
 import { layerSurfaceId, surfaceLayerId, useSurface } from './useSurface';
@@ -25,6 +25,20 @@ export function LayerPanel() {
   // matrices; they belong to the inspector and the concordance page, and offering them here
   // as a surface would promise something the globe cannot draw.
   const countryLayers = layerIndex.filter((l) => l.entity === 'country');
+
+  // Twenty-odd layers in one flat list is a wall. Group by producer, freshest first inside
+  // each group and groups ordered by their own freshest member, so the thing that moved most
+  // recently is the thing nearest the top.
+  const grouped = useMemo(() => {
+    const m = new Map<string, typeof countryLayers>();
+    for (const l of countryLayers) {
+      const k = l.vintage.producer;
+      (m.get(k) ?? m.set(k, []).get(k))!.push(l);
+    }
+    for (const g of m.values()) g.sort((a, b) => Date.parse(b.vintage.periodEnd) - Date.parse(a.vintage.periodEnd));
+    return [...m.entries()].sort(
+      (a, b) => Date.parse(b[1][0]!.vintage.periodEnd) - Date.parse(a[1][0]!.vintage.periodEnd));
+  }, [countryLayers]);
 
   // Fetch the rows the moment a layer becomes the active surface, not on page load: these
   // files are much larger than the index and most visitors will never open most of them.
@@ -80,7 +94,13 @@ export function LayerPanel() {
             are on says so rather than guessing.
           </p>
           <div className="layerlist" role="radiogroup" aria-label="Data layers">
-            {countryLayers.map((l) => {
+            {grouped.map(([producer, group]) => (
+              <div key={producer} className="layergroup">
+                <div className="layergroup-head">
+                  <span>{producer}</span>
+                  <span>{group.length} &middot; freshest {group[0]!.vintage.periodLabel}</span>
+                </div>
+                {group.map((l) => {
               const id = layerSurfaceId(l.id);
               const on = surface === id;
               const loading = layerPending[l.id] && !layerRows[l.id];
@@ -105,8 +125,10 @@ export function LayerPanel() {
                   </span>
                   {!l.vintage.commercialUseClear && <span className="badge absent" title="This producer does not clearly grant commercial reuse">terms</span>}
                 </button>
-              );
-            })}
+                );
+                })}
+              </div>
+            ))}
           </div>
           {layer && (
             <p className="layernote">

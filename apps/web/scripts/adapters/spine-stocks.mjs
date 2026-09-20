@@ -131,7 +131,10 @@ export async function load() {
   const NOTE_MODEL =
     'Modelled, not counted. These are the migrant-stock estimates the flow model is fitted ' +
     'against, and they reach a year further than the flows do because the flow for a year is ' +
-    'inferred from the change between two stock anchors.';
+    'inferred from the change between two stock anchors. The model also fills in corridors the ' +
+    'underlying tables never observed, so a corridor can carry a confident-looking number that ' +
+    'nobody counted \u2014 the concordance page measures how large that filling-in is, country by ' +
+    'country, against the UN DESA figures the model was fitted to.';
 
   return {
     layers: [

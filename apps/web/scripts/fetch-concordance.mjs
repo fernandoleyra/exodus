@@ -80,6 +80,8 @@ for (const [name, code] of Object.entries({
   wb_gdppc_ppp_cd: 'NY.GDP.PCAP.PP.CD',
   wb_pop: 'SP.POP.TOTL',
   wb_unemp: 'SL.UEM.TOTL.ZS',
+  // The migrant-stock anchor, for the pair against the flow model's own stock matrix.
+  wb_stock_anchor: 'SM.POP.TOTL',
 })) {
   const j = await getJson(`https://api.worldbank.org/v2/country/all/indicator/${code}?format=json&per_page=20000&date=2015:2024`);
   const rows = (j[1] ?? []).filter(d => d.value !== null)

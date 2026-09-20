@@ -126,6 +126,21 @@ const imfPPPPC = await j('imf_PPPPC');
 const imfLP = await j('imf_LP');
 const imfLUR = await j('imf_LUR');
 
+// The flow model is fitted against UN DESA's bilateral stock tables, and the World Bank
+// republishes those same UN DESA estimates as SM.POP.TOTL. So at a shared anchor year the two
+// are not independent measurements — one is a model of the other's source. Comparing them
+// does not ask who is right; it measures how much of the model's stock is imputation over
+// corridors UN DESA never observed.
+const spineStocks = (await import('./adapters/spine-stocks.mjs')).load;
+const stockLayers = (await spineStocks()).layers;
+const foreignBorn = stockLayers.find((l) => l.id === 'stock-foreign-born');
+const STOCK_ANCHOR = '2020';
+const gaskinStock = new Map();
+for (const [iso, byYear] of Object.entries(foreignBorn.rows)) {
+  const v = byYear[STOCK_ANCHOR];
+  if (v > 0 && REAL.has(iso)) gaskinStock.set(iso, v);
+}
+
 const MEASURES = [
   {
     id: 'inflow',
@@ -163,6 +178,28 @@ const MEASURES = [
     ],
     data: { 'gaskin-abel': corridorA, abel: corridorB },
     pairs: [['gaskin-abel', 'abel']],
+  },
+  {
+    id: 'stock',
+    title: 'Foreign-born population',
+    question: 'How many people living here were born somewhere else?',
+    year: +STOCK_ANCHOR,
+    unit: 'people',
+    entity: 'country',
+    scope: 'Every country both sources cover at the 2020 stock anchor.',
+    note: 'These are not two independent measurements. The World Bank republishes UN DESA\u2019s ' +
+          'migrant-stock estimates, and the flow model is trained to reproduce the same UN DESA ' +
+          'bilateral tables \u2014 so one is a model of the other\u2019s source. What the gap measures ' +
+          'is how much of the model\u2019s stock is imputed across corridors UN DESA never observed. ' +
+          'The anchor year 2020 is used rather than the model\u2019s newest 2024 because it is the ' +
+          'newest year both carry; comparing 2024 against 2020 would report four years of real ' +
+          'migration as a disagreement between producers.',
+    series: [
+      { id: 'wb', label: 'World Bank WDI, UN DESA estimates', producer: 'World Bank', kind: 'modelled', method: 'SM.POP.TOTL \u2014 UN DESA quinquennial migrant-stock estimates, republished by the World Bank.' },
+      { id: 'gaskin', label: 'Gaskin & Abel, summed over origins', producer: 'Gaskin & Abel', kind: 'modelled', method: 'The destination margin of the model\u2019s own bilateral stock matrix, summed across all 53,130 corridors before any trimming.' },
+    ],
+    data: { wb: wbSeries(await j('wb_stock_anchor'), +STOCK_ANCHOR), gaskin: gaskinStock },
+    pairs: [['wb', 'gaskin']],
   },
   {
     id: 'unemployment',

@@ -24,23 +24,23 @@ await page.goto(`${BASE}/#/concordance`, { waitUntil: 'networkidle' });
 await page.waitForSelector('.cc-pair', { timeout: 15000 });
 
 const pairs = await page.locator('.cc-pair').count();
-check('every pair renders', pairs === 9, `${pairs} pairs`);
+check('every pair renders', pairs === 10, `${pairs} pairs`);
 
 const chips = await page.locator('.cc-chip').allTextContents();
 check('every pair carries a worded verdict, not colour alone',
   chips.filter(c => c.trim().length > 0).length >= 9 + 6);
 
 const strips = await page.locator('.cc-strip').count();
-check('every pair draws a ratio strip', strips === 9, `${strips} strips`);
+check('every pair draws a ratio strip', strips === 10, `${strips} strips`);
 
 const dots = await page.locator('.cc-dot').count();
-check('the overview plots one dot per pair', dots === 9, `${dots} dots`);
+check('the overview plots one dot per pair', dots === 10, `${dots} dots`);
 
 // Nine dots with no names would be a hover hunt. Every one carries its own label, and
 // none of them falls back to the measure title, which would mean DOT_LABEL went stale.
 const dotLabels = await page.locator('.cc-dotlab').allTextContents();
 const titles = await page.locator('.cc-measure h2').allTextContents();
-check('every dot is directly labelled', dotLabels.length === 9, `${dotLabels.length} labels`);
+check('every dot is directly labelled', dotLabels.length === 10, `${dotLabels.length} labels`);
 check('no dot label has fallen back to a measure title',
   !dotLabels.some(l => titles.some(t => t.trim() === l.trim())), dotLabels.join(' | '));
 // Four tones, and between them every one of the six verdicts is named in words.

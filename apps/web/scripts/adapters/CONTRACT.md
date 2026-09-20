@@ -63,7 +63,11 @@ A `Layer` is:
    different instrument. If commercial reuse is not clearly granted, set
    `commercialUseClear: false` and say why.
 7. **`latencyDays` is never stored.** Store `periodEnd`; age is computed at render.
-8. **No key, no registration.** The snapshot must rebuild from a clean clone.
+8. **A stock is measured at an instant, a flow over a period.** Eurostat's population tables
+   are "usual residents on 1 January", so that layer's `periodEnd` is `2025-01-01` with
+   `cadence: 'point'` — not the end of the labelled year. Deriving one from the other would
+   report a 1 January stock as most of a year fresher than it is.
+9. **No key, no registration.** The snapshot must rebuild from a clean clone.
 
 ## Traps already paid for, do not rediscover them
 

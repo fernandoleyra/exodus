@@ -83,7 +83,18 @@ describe('the shipped layer index', () => {
       expect(typeof l.vintage.provisional, l.id).toBe('boolean');
       expect(typeof l.vintage.commercialUseClear, l.id).toBe('boolean');
       expect(l.periods, l.id).toContain(l.vintage.periodLabel);
-      expect(periodEndOf(l.vintage.periodLabel), l.id).toBe(l.vintage.periodEnd);
+      // A flow over a period ends when the period does; a STOCK is measured at an instant.
+      // Eurostat's population tables are "usual residents on 1 January", so 2025 legitimately
+      // ends at 2025-01-01 there and at 2025-12-31 for a flow. Both conventions are right, so
+      // the invariant is the weaker true one: periodEnd falls within the labelled period.
+      // Monthly and quarterly labels leave no room for that ambiguity, so those are exact.
+      const end = l.vintage.periodEnd;
+      if (l.vintage.cadence === 'monthly' || l.vintage.cadence === 'quarterly') {
+        expect(periodEndOf(l.vintage.periodLabel), l.id).toBe(end);
+      } else {
+        const year = l.vintage.periodLabel.slice(0, 4);
+        expect(end >= `${year}-01-01` && end <= `${year}-12-31`, `${l.id}: periodEnd ${end} is outside ${year}`).toBe(true);
+      }
     }
   });
 
