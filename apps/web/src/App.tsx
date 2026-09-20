@@ -10,6 +10,7 @@ import { useStore } from './state';
 import { periodIndex } from './types';
 import { headroom } from './kernel/headroom';
 import { LayerPanel } from './LayerPanel';
+import { ageDays } from './vintage';
 import { useSurface } from './useSurface';
 import type { EstimateKind, Place } from './types';
 
@@ -241,8 +242,25 @@ function useEscapeClears() {
 
 export function Observer() {
   useEscapeClears();
-  const { load, ready, year, setYear, manifest, corridors, places } = useStore();
+  const { load, ready, year, setYear, manifest, corridors, places, layerIndex } = useStore();
   useEffect(() => { void load(); }, [load]);
+
+  // The spine's last year is a fact about the data, not a constant to type into the markup.
+  // It was hard-coded as 2023 in three places, which is how a snapshot rebuild can silently
+  // stop matching the interface describing it.
+  const spineMax = useMemo(() => (manifest?.yearRange?.[1] ?? 2023), [manifest]);
+
+  // The axis has to reach past the spine, because layers now do. Stocks are already at 2024
+  // and the EU registers run into 2026; a slider that stops where the flows stop makes the
+  // fresher layers unreachable.
+  const axisMax = useMemo(() => {
+    const years = layerIndex.map((l) => Number(l.vintage.periodEnd.slice(0, 4))).filter(Number.isFinite);
+    return Math.max(spineMax, ...years);
+  }, [layerIndex, spineMax]);
+
+  const freshest = useMemo(
+    () => [...layerIndex].sort((a, b) => Date.parse(b.vintage.periodEnd) - Date.parse(a.vintage.periodEnd))[0] ?? null,
+    [layerIndex]);
 
   return (
     <div className="app">
@@ -257,7 +275,8 @@ export function Observer() {
             <h2>Coverage</h2>
             <div className="kv"><span className="k">places</span><span className="v">{places.length}</span></div>
             <div className="kv"><span className="k">corridors</span><span className="v">{corridors.length}</span></div>
-            <div className="kv"><span className="k">years</span><span className="v">1990–2023</span></div>
+            <div className="kv"><span className="k">flow spine</span><span className="v">1990&ndash;{spineMax}</span></div>
+            <div className="kv"><span className="k">freshest layer</span><span className="v">{freshest ? `${freshest.vintage.periodLabel} · ${ageDays(freshest.vintage)} d` : '—'}</span></div>
             <div className="kv"><span className="k">with a second model</span><span className="v">{manifest?.corridorsWithSecondModel ?? 0}</span></div>
             <div className="kv"><span className="k">disputed, no data join</span><span className="v">{manifest?.disputedRenderedWithoutData.length ?? 0}</span></div>
           </div>
@@ -277,14 +296,16 @@ export function Observer() {
         <div className="timebar">
           <span className="year">{year}</span>
           <input
-            type="range" min={1990} max={2023} step={1} value={year}
+            type="range" min={1990} max={axisMax} step={1} value={year}
             onChange={(e) => setYear(+e.target.value)}
             aria-label="Year"
           />
           <span className="hint">
-            {periodIndex(useStore.getState().periodStarts, year) < 0
-              ? 'past 2019 · no second model exists here, so nothing is corroborated'
-              : 'discrete annual frames — nothing is interpolated'}
+            {year > spineMax
+              ? `past the flow spine — it ends at ${spineMax} and nothing extends it`
+              : periodIndex(useStore.getState().periodStarts, year) < 0
+                ? 'past 2019 · no second model exists here, so nothing is corroborated'
+                : 'discrete annual frames — nothing is interpolated'}
           </span>
         </div>
       </main>

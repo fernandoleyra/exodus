@@ -27,8 +27,17 @@ export const NO_DATA_LINE: [number, number, number] = [72, 86, 102];
 export const hexToRgb = (h: string): [number, number, number] =>
   [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
 
-export type SurfaceId =
+/** The surfaces computed from the flow spine. */
+export type BuiltinSurfaceId =
   | 'none' | 'inbound' | 'outbound' | 'net' | 'stockshare' | 'disagreement' | 'coverage';
+
+/**
+ * A surface is a built-in, or `layer:<id>` for one of the snapshot's data layers. The two are
+ * kept in one union rather than in parallel state so the globe, the legend and the panel
+ * cannot get out of step about which one is active — which was the bug that made the legend
+ * disagree with the map the first time this app grew a second encoding.
+ */
+export type SurfaceId = BuiltinSurfaceId | `layer:${string}`;
 
 export interface SurfaceSpec {
   id: SurfaceId;

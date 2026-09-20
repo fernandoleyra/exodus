@@ -3,7 +3,11 @@
 import { useEffect } from 'react';
 import { useStore } from './state';
 import { SURFACES, type Overlays } from './layers';
-import { useSurface } from './useSurface';
+import { layerSurfaceId, surfaceLayerId, useSurface } from './useSurface';
+import { ageDays } from './vintage';
+
+/** First period a layer covers. */
+const l0 = (periods: string[]) => periods[0] ?? '?';
 
 const OVERLAY_ROWS: { k: keyof Overlays; name: string; what: string; key: string }[] = [
   { k: 'corridors', name: 'Corridors', what: 'One arc per modelled flow', key: 'Q' },
@@ -13,8 +17,19 @@ const OVERLAY_ROWS: { k: keyof Overlays; name: string; what: string; key: string
 ];
 
 export function LayerPanel() {
-  const { surface, setSurface, overlays, toggleOverlay, filters, setFilters } = useStore();
-  const { spec, scale, noDataCount } = useSurface();
+  const { surface, setSurface, overlays, toggleOverlay, filters, setFilters,
+          layerIndex, layerRows, layerPending, loadLayer, year } = useStore();
+  const { spec, scale, noDataCount, layer, period } = useSurface();
+
+  // Only country layers can paint a choropleth. Corridor layers are origin-destination
+  // matrices; they belong to the inspector and the concordance page, and offering them here
+  // as a surface would promise something the globe cannot draw.
+  const countryLayers = layerIndex.filter((l) => l.entity === 'country');
+
+  // Fetch the rows the moment a layer becomes the active surface, not on page load: these
+  // files are much larger than the index and most visitors will never open most of them.
+  const activeLayerId = surfaceLayerId(surface);
+  useEffect(() => { if (activeLayerId) void loadLayer(activeLayerId); }, [activeLayerId, loadLayer]);
 
   // An intelligence surface should be drivable from the keyboard. Digits pick the surface
   // layer, letters toggle overlays — the same order they appear in.
@@ -55,6 +70,53 @@ export function LayerPanel() {
           ))}
         </div>
       </div>
+
+      {countryLayers.length > 0 && (
+        <div className="sec">
+          <h2>Data layers</h2>
+          <p className="seclede">
+            Each carries its own vintage and cadence. The flow spine above is annual and stops
+            at 2023; these do not follow it, and a layer that cannot answer for the year you
+            are on says so rather than guessing.
+          </p>
+          <div className="layerlist" role="radiogroup" aria-label="Data layers">
+            {countryLayers.map((l) => {
+              const id = layerSurfaceId(l.id);
+              const on = surface === id;
+              const loading = layerPending[l.id] && !layerRows[l.id];
+              const answers = l.periods.some((p) => p <= String(year) || l.vintage.cadence !== 'annual');
+              return (
+                <button
+                  key={l.id}
+                  role="radio"
+                  aria-checked={on}
+                  className={`layerrow${on ? ' on' : ''}${answers ? '' : ' stale'}`}
+                  onClick={() => setSurface(id)}
+                >
+                  <span className="layerkey">{l.vintage.cadence === 'monthly' ? 'M' : l.vintage.cadence === 'quarterly' ? 'Q' : 'Y'}</span>
+                  <span className="layertext">
+                    <span className="layername">{l.title}</span>
+                    <span className="layerwhat">{l.question}</span>
+                    <span className="layervintage">
+                      {l.vintage.periodLabel} &middot; {ageDays(l.vintage)} d &middot; {l.vintage.estimateKind}
+                      {l.vintage.provisional && <> &middot; <b>provisional</b></>}
+                      {loading && <> &middot; loading&hellip;</>}
+                    </span>
+                  </span>
+                  {!l.vintage.commercialUseClear && <span className="badge absent" title="This producer does not clearly grant commercial reuse">terms</span>}
+                </button>
+              );
+            })}
+          </div>
+          {layer && (
+            <p className="layernote">
+              {period
+                ? <>Painting <b>{period}</b>{period !== String(year) && <> &mdash; the newest period this layer has at or before {year}, not carried forward and not interpolated</>}. {layer.note}</>
+                : <>This layer starts at <b>{l0(layer.periods)}</b> and has nothing at or before {year}. Nothing is painted, and nothing has been carried backwards to pretend otherwise.</>}
+            </p>
+          )}
+        </div>
+      )}
 
       {scale && (
         <div className="sec">
