@@ -14,7 +14,11 @@ const IND = {
 };
 await mkdir('.cache', { recursive: true });
 for (const [key, code] of Object.entries(IND)) {
-  const url = `https://api.worldbank.org/v2/country/all/indicator/${code}?format=json&per_page=20000&date=2010:2023`;
+  // The ceiling was written as 2023 and quietly capped everything this script could ever
+  // fetch, however often it was run: population, unemployment and net migration have all
+  // reached 2025 and migrant stock 2024. Derive it instead — a year past the present costs
+  // one empty column and never goes stale.
+  const url = `https://api.worldbank.org/v2/country/all/indicator/${code}?format=json&per_page=20000&date=2010:${new Date().getUTCFullYear() + 1}`;
   const r = await fetch(url);
   if (!r.ok) { console.error(`${key} ${code}: HTTP ${r.status}`); continue; }
   const j = await r.json();

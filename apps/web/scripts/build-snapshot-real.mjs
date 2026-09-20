@@ -9,6 +9,9 @@ const RAW = '.cache/raw';
 const YEARS = Array.from({ length: 34 }, (_, i) => 1990 + i);     // 1990..2023, spine coverage
 const PERIOD_STARTS = [1990, 1995, 2000, 2005, 2010, 2015];        // the shared grid with Abel
 const TOP_PER_ORIGIN = 9;
+// Deliberately the only non-deterministic input, and it only ever widens a search window or
+// measures an age. Nothing it touches changes the values in the snapshot.
+const NOW_YEAR = new Date().getUTCFullYear();
 
 const lines = async function* (path) {
   const rl = createInterface({ input: createReadStream(path), crlfDelay: Infinity });
@@ -155,11 +158,15 @@ for (const f of fc.features) {
   if (!iso) { disputed.push(f.properties?.name ?? '?'); continue; }
   const centroid = centroidOf(f.geometry);
   if (!centroid) continue;
-  const latest = (m, yMax = 2023) => { for (let y = yMax; y >= 2000; y--) { const v = m?.get(iso)?.get(y); if (v != null) return { v, y }; } return null; };
-  const p = latest(POP), s = latest(STOCK, 2020), u = latest(UNEMP), g = latest(GDP);
+  // The ceilings here were 2023 and 2020 and both were stale against data already published:
+  // population reaches 2025, migrant stock 2024. A year past the present costs nothing and
+  // cannot go out of date, and each figure still carries its own observation year to the UI.
+  const latest = (m, yMax = NOW_YEAR + 1) => { for (let y = yMax; y >= 1990; y--) { const v = m?.get(iso)?.get(y); if (v != null) return { v, y }; } return null; };
+  const p = latest(POP), s = latest(STOCK), u = latest(UNEMP), g = latest(GDP);
   const bd = latest(BEDS), ph = latest(PHYS), em = latest(EMP), pt = latest(PTR);
   const present = [p, s, u, g].filter(Boolean).length;
-  const staleness = s ? Math.max(0, (2023 - s.y) / 23) : 1;
+  // Staleness is measured against now, not against a year typed into the source.
+  const staleness = s ? Math.max(0, Math.min(1, (NOW_YEAR - s.y) / 23)) : 1;
   places.push({
     iso3: iso, name: NAME.get(iso) ?? f.properties?.name ?? iso, centroid,
     pop: p?.v ?? null, popYear: p?.y ?? null,
@@ -540,6 +547,13 @@ console.log(`              ${wrapped} rings crossed the antimeridian; sealed ove
 
 await writeFile('public/snapshot/adm0.json', JSON.stringify(fc));
 await writeFile('public/snapshot/adm0_outline.json', JSON.stringify(outlineFc));
+// Read off the data rather than asserted. The hardcoded version of this string outlived two
+// vintages of the series it described.
+const stockYears = [...new Set([...STOCK.values()].flatMap((m) => [...m.keys()]))].sort((a, b) => a - b);
+const stockVintage = stockYears.length
+  ? `${stockYears.join(' / ')} — the anchors within the fetch window, not the full series`
+  : 'no observations';
+
 await writeFile('public/snapshot/manifest.json', JSON.stringify({
   builtFrom: 'Gaskin & Abel (spine) + Abel (second model) + World Bank WDI (context) + Natural Earth (geometry)',
   corridorCount: corridors.length,
@@ -556,11 +570,11 @@ await writeFile('public/snapshot/manifest.json', JSON.stringify({
     { id: 'abel-figshare', title: 'Abel, bilateral flow estimates by sex and type', licence: 'CC BY-4.0', estimateKind: 'modelled', latencyClass: 'quinquennial', vintage: '1990-2020',
       note: 'figshare 14579241, bilat_mig_sex_type.csv, estimator da_pb_closed. Summed across BOTH sex and type, neither of which ships a total row: outward, return and transit are disjoint components of one flow, not three estimates of it. THE SECOND OPINION.' },
     { id: 'wb-reported', title: 'World Bank WDI — reported series', licence: 'CC BY-4.0', estimateKind: 'observed', latencyClass: 'annual', vintage: 'per-country, shown with each figure',
-      note: 'SP.POP.TOTL (population), NY.GDP.PCAP.PP.KD (GDP per capita PPP), SH.MED.BEDS.ZS (hospital beds), SH.MED.PHYS.ZS (physicians), SE.PRM.ENRL.TC.ZS (pupil-teacher ratio). National reporting compiled by the World Bank.' },
+      note: 'NY.GDP.PCAP.PP.KD (GDP per capita PPP), SH.MED.BEDS.ZS (hospital beds), SH.MED.PHYS.ZS (physicians), SE.PRM.ENRL.TC.ZS (pupil-teacher ratio). National reporting compiled by the World Bank. SP.POP.TOTL is NOT here: its own metadata names UN World Population Prospects first among its sources and its note reads \'The values shown are midyear estimates\', and every one of 217 countries carries a value in every year because a model supplies them. It is badged modelled below.' },
     { id: 'wb-ilo-modelled', title: 'World Bank WDI — modelled ILO estimates', licence: 'CC BY-4.0', estimateKind: 'modelled', latencyClass: 'annual', vintage: 'per-country, shown with each figure',
       note: 'SL.UEM.TOTL.ZS and SL.EMP.TOTL.SP.ZS are labelled by their publisher as MODELLED ILO ESTIMATES, not national reporting. They are badged modelled here for that reason.' },
-    { id: 'wb-un-stock', title: 'World Bank WDI — migrant stock (UN estimates)', licence: 'CC BY-4.0', estimateKind: 'modelled', latencyClass: 'quinquennial', vintage: '2010 / 2015 / 2020 only',
-      note: 'SM.POP.TOTL originates as UN DESA quinquennial estimates. It is not annual and it is not observed; the year shown with each figure is the true observation year.' },
+    { id: 'wb-un-stock', title: 'World Bank WDI — migrant stock and population (UN estimates)', licence: 'CC BY-4.0', estimateKind: 'modelled', latencyClass: 'quinquennial', vintage: stockVintage,
+      note: 'SM.POP.TOTL originates as UN DESA quinquennial estimates and SP.POP.TOTL as UN World Population Prospects midyear estimates. Neither is annual national reporting and neither is observed; the year shown with each figure is the true observation year. The vintage above is read off the data rather than written down — it used to say "2010 / 2015 / 2020 only" and was wrong in both directions.' },
     { id: 'naturalearth', title: 'Natural Earth 110m Admin-0', licence: 'Public domain', estimateKind: 'observed', latencyClass: 'annual', vintage: 'v5',
       note: 'geometry and centroids only' },
   ],

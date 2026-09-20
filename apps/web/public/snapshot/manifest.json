@@ -26,7 +26,7 @@
       "n": 166
     },
     "emp": {
-      "value": 58.19,
+      "value": 57.84,
       "n": 168
     },
     "ptr": {
@@ -65,7 +65,7 @@
       "estimateKind": "observed",
       "latencyClass": "annual",
       "vintage": "per-country, shown with each figure",
-      "note": "SP.POP.TOTL (population), NY.GDP.PCAP.PP.KD (GDP per capita PPP), SH.MED.BEDS.ZS (hospital beds), SH.MED.PHYS.ZS (physicians), SE.PRM.ENRL.TC.ZS (pupil-teacher ratio). National reporting compiled by the World Bank."
+      "note": "NY.GDP.PCAP.PP.KD (GDP per capita PPP), SH.MED.BEDS.ZS (hospital beds), SH.MED.PHYS.ZS (physicians), SE.PRM.ENRL.TC.ZS (pupil-teacher ratio). National reporting compiled by the World Bank. SP.POP.TOTL is NOT here: its own metadata names UN World Population Prospects first among its sources and its note reads 'The values shown are midyear estimates', and every one of 217 countries carries a value in every year because a model supplies them. It is badged modelled below."
     },
     {
       "id": "wb-ilo-modelled",
@@ -78,12 +78,12 @@
     },
     {
       "id": "wb-un-stock",
-      "title": "World Bank WDI — migrant stock (UN estimates)",
+      "title": "World Bank WDI — migrant stock and population (UN estimates)",
       "licence": "CC BY-4.0",
       "estimateKind": "modelled",
       "latencyClass": "quinquennial",
-      "vintage": "2010 / 2015 / 2020 only",
-      "note": "SM.POP.TOTL originates as UN DESA quinquennial estimates. It is not annual and it is not observed; the year shown with each figure is the true observation year."
+      "vintage": "2010 / 2015 / 2020 / 2024 — the anchors within the fetch window, not the full series",
+      "note": "SM.POP.TOTL originates as UN DESA quinquennial estimates and SP.POP.TOTL as UN World Population Prospects midyear estimates. Neither is annual national reporting and neither is observed; the year shown with each figure is the true observation year. The vintage above is read off the data rather than written down — it used to say \"2010 / 2015 / 2020 only\" and was wrong in both directions."
     },
     {
       "id": "naturalearth",

@@ -116,6 +116,7 @@ body[data-route="observer"] { overflow: hidden; }
 .origin-val { font-family: var(--mono); font-size: 10.5px; color: var(--text); text-align: right; }
 
 /* ---------- data layers ---------- */
+.src-ships { margin: 0 0 11px; font-family: var(--mono); font-size: 11px; }
 .layergroup { margin-bottom: 10px; }
 .layergroup-head {
   display: flex; justify-content: space-between; align-items: baseline; gap: 8px;

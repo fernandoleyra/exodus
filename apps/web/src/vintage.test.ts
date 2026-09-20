@@ -98,6 +98,30 @@ describe('the shipped layer index', () => {
     }
   });
 
+  it.runIf(present)('counts entities and reporters separately, and neither exceeds the other', () => {
+    // A note saying "182 of 217" beside an index saying 187 is not a contradiction, it is two
+    // different questions asked in the same sentence. Both are shipped so neither has to be
+    // inferred, and the ordering between them is the invariant.
+    const { layers } = JSON.parse(readFileSync(path, 'utf8'));
+    for (const l of layers) {
+      expect(typeof l.entitiesAtNewest, l.id).toBe('number');
+      expect(l.entitiesAtNewest, `${l.id}: more entities at the newest period than in total`).toBeLessThanOrEqual(l.entities);
+      expect(l.nonZeroAtNewest, `${l.id}: more non-zero than present`).toBeLessThanOrEqual(l.entitiesAtNewest);
+      expect(l.entitiesAtNewest, `${l.id}: the period on the chip has no data at all`).toBeGreaterThan(0);
+    }
+  });
+
+  it.runIf(present)('carries something genuinely current, which is the point of the exercise', () => {
+    const { layers } = JSON.parse(readFileSync(path, 'utf8'));
+    const newest = layers.map((l: { vintage: { periodEnd: string } }) => l.vintage.periodEnd).sort().at(-1);
+    expect(String(newest) >= '2026-01-01', `freshest layer is ${newest}`).toBe(true);
+    // And the flow spine still stops where it stops. If this ever fails it is good news, but
+    // it means the prose about 2023 across the app needs rewriting rather than quietly
+    // becoming wrong.
+    const spine = layers.filter((l: { vintage: { producer: string } }) => l.vintage.producer === 'Gaskin & Abel');
+    expect(spine.length, 'the spine layers vanished').toBeGreaterThan(0);
+  });
+
   it.runIf(present)('records any adapter that failed rather than silently shipping fewer layers', () => {
     const doc = JSON.parse(readFileSync(path, 'utf8'));
     expect(Array.isArray(doc.failures)).toBe(true);

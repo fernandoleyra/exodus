@@ -61,16 +61,29 @@ for (const file of files) {
       continue;
     }
     await writeFile(`${OUT}/${layer.id}.json`, JSON.stringify({ rows: layer.rows }));
+
+    // Two counts, because they are different questions and conflating them is how a note ends
+    // up saying 182 while the index says 187. `entities` is everything the layer has ever
+    // covered; `entitiesAtNewest` is who actually filed for the period on the chip. The gap
+    // between them is the reporting tail, and the UI should be able to show it rather than
+    // pick one and hope.
     const entities = Object.keys(layer.rows).length;
+    const newest = layer.vintage.periodLabel;
+    const entitiesAtNewest = Object.values(layer.rows)
+      .filter((r) => typeof r[newest] === 'number' && Number.isFinite(r[newest])).length;
+    const nonZeroAtNewest = Object.values(layer.rows)
+      .filter((r) => typeof r[newest] === 'number' && r[newest] !== 0).length;
     index.push({
       id: layer.id, title: layer.title, question: layer.question, unit: layer.unit,
       entity: layer.entity, periods: layer.periods, vintage: layer.vintage,
-      note: layer.note, entities, adapter: mod.meta?.id ?? file.replace(/\.mjs$/, ''),
+      note: layer.note, entities, entitiesAtNewest, nonZeroAtNewest,
+      adapter: mod.meta?.id ?? file.replace(/\.mjs$/, ''),
     });
     const v = layer.vintage;
     console.log(
-      `ok    ${layer.id.padEnd(28)} ${layer.entity.padEnd(8)} ${String(entities).padStart(6)} entities  ` +
-      `${v.periodLabel.padEnd(8)} ${v.cadence.padEnd(12)} ${v.estimateKind}${v.provisional ? ' (provisional)' : ''}`);
+      `ok    ${layer.id.padEnd(28)} ${layer.entity.padEnd(8)} ${String(entities).padStart(6)} entities ` +
+      `(${entitiesAtNewest} at ${v.periodLabel}${nonZeroAtNewest !== entitiesAtNewest ? `, ${nonZeroAtNewest} non-zero` : ''})  ` +
+      `${v.cadence.padEnd(12)} ${v.estimateKind}${v.provisional ? ' (provisional)' : ''}`);
   }
 }
 
@@ -94,6 +107,30 @@ function validate(l) {
   if (v && 'latencyDays' in v) bad.push('vintage.latencyDays must not be stored');
   if (v?.periodEnd && Number.isNaN(Date.parse(v.periodEnd))) bad.push(`vintage.periodEnd ${v.periodEnd} unparseable`);
   if (v?.periodLabel && !l.periods.includes(v.periodLabel)) bad.push(`vintage.periodLabel ${v.periodLabel} is not in periods`);
+
+  // An adapter that reports a reporter count must report one its own rows support. This is the
+  // difference between a figure that is measured and a figure that is remembered.
+  //
+  // A REPORTER is the body that files the statistic, which is not the same as a row. On a
+  // corridor layer the destination files and the origin is a breakdown of what it filed, so
+  // 31 reporters and 5,352 corridors are both right about different things. And "filed" is
+  // genuinely ambiguous between "returned a cell" and "returned a non-zero cell" — a country
+  // reporting a real zero has filed — so either count satisfies this.
+  if (v?.reporters?.n != null && v.periodLabel) {
+    const at = v.periodLabel;
+    const reporterOf = l.entity === 'corridor' ? (k) => k.split('>')[1] : (k) => k;
+    const filed = new Set(), nonZero = new Set();
+    for (const [k, r] of Object.entries(l.rows)) {
+      const val = r[at];
+      if (typeof val !== 'number' || !Number.isFinite(val)) continue;
+      filed.add(reporterOf(k));
+      if (val !== 0) nonZero.add(reporterOf(k));
+    }
+    const ok = Math.abs(filed.size - v.reporters.n) <= 1 || Math.abs(nonZero.size - v.reporters.n) <= 1;
+    if (!ok) {
+      bad.push(`vintage.reporters.n is ${v.reporters.n} but ${filed.size} reporters filed at ${at} (${nonZero.size} non-zero)`);
+    }
+  }
 
   // Keys must be ISO-3166-1 alpha-3, because that is what places.json is keyed by and what
   // the globe looks up. A layer keyed by Eurostat's two-letter geo codes loads, validates on

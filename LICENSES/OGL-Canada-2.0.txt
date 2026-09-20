@@ -1,0 +1,42 @@
+Open Government Licence – Canada, Version 2.0
+=============================================
+
+IRCC publishes its monthly Permanent Residents and Asylum Claimants tables under this licence.
+The binding is dataset-scoped and machine-readable rather than taken from a website terms page:
+the open.canada.ca CKAN records f7e5498e-0ad8-4417-85c9-9b8aff9b9eda ("Permanent Residents –
+Monthly IRCC Updates") and b6cbcf4d-f763-4924-a2fb-8cc4a06e3de4 ("Asylum Claimants – Monthly
+IRCC Updates") both declare license_id ca-ogl-lgo. Read 2026-09-20.
+
+The grant, verbatim from https://open.canada.ca/en/open-government-licence-canada, read
+2026-09-20:
+
+  "The Information Provider grants you a worldwide, royalty-free, perpetual, non-exclusive
+  licence to use the Information, including for commercial purposes, subject to the terms
+  below."
+
+  "You are free to: Copy, modify, publish, translate, adapt, distribute or otherwise use the
+  Information in any medium, mode or format for any lawful purpose."
+
+The condition, where the provider specifies no wording of its own:
+
+  "Contains information licensed under the Open Government Licence – Canada."
+
+That sentence appears on /#/sources.
+
+The exclusions, which do not bite here
+--------------------------------------
+
+The licence does not grant rights in personal information, in third-party information the
+provider is not authorised to license, or in names, crests, logos and other official marks. The
+IRCC tables are aggregate counts rounded by the publisher to the nearest five, with small cells
+suppressed, so none of these apply.
+
+How Exodus satisfies the conditions
+-----------------------------------
+
+Attribution in the required form is on /#/sources, together with what was changed: the trailing
+"Q3 Total" column dropped because it equals July alone, suppressed cells kept distinct from
+published zeros, and the publisher's own rounding left as it is. The workbook stores every cell
+including the numerics as an inline string with no shared string table, and the asylum file is
+tab-separated despite its .csv extension; both are parsing facts rather than modifications, and
+are recorded in the adapter.

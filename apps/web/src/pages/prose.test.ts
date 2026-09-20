@@ -7,7 +7,8 @@
 // need a test or they drift, so these are read back out of the page and checked against
 // the data they claim to describe.
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
+import { SOURCES } from './Sources';
 
 const page = readFileSync(new URL('./Methods.tsx', import.meta.url), 'utf8');
 const snap = JSON.parse(readFileSync(new URL('../../public/snapshot/corridors.json', import.meta.url), 'utf8'));
@@ -39,5 +40,34 @@ describe('the figures the Methods page states', () => {
     // The second model ships unscaled. If that ever changes, the prose has to change too.
     expect(build).toContain('const scaleB = 1;');
     expect(page).toContain('Neither model is rescaled before the comparison');
+  });
+});
+
+describe('the source ledger against what is actually shipping', () => {
+  const idxPath = new URL('../../public/snapshot/layers/index.json', import.meta.url);
+  const present = existsSync(idxPath);
+
+  it.runIf(present)('has a ledger entry for every producer with layers in the snapshot', () => {
+    // Six producers were shipping data with no row on /#/sources. Every one of their licences
+    // requires attribution, and two of them are not Creative Commons, so an incomplete ledger
+    // is a compliance failure rather than a documentation gap. Deriving the whole page from
+    // the index would lose the curated prose; asserting the join keeps both.
+    const { layers } = JSON.parse(readFileSync(idxPath, 'utf8'));
+    const shipping = new Set<string>(layers.map((l: { vintage: { producer: string } }) => l.vintage.producer));
+    const ledger = new Set(SOURCES.map((s) => s.producer).filter(Boolean));
+    const missing = [...shipping].filter((p) => !ledger.has(p));
+    expect(missing, `producers shipping layers with no entry on /#/sources: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  it.runIf(present)('agrees with the adapters about who does not grant commercial reuse', () => {
+    const { layers } = JSON.parse(readFileSync(idxPath, 'utf8'));
+    for (const s of SOURCES) {
+      if (!s.producer) continue;
+      const mine = layers.filter((l: { vintage: { producer: string } }) => l.vintage.producer === s.producer);
+      if (!mine.length) continue;
+      const adaptersSay = mine.every((l: { vintage: { commercialUseClear: boolean } }) => l.vintage.commercialUseClear);
+      const pageSays = s.commercialUseClear !== false;
+      expect(pageSays, `${s.producer}: the page and the adapters disagree about commercial reuse`).toBe(adaptersSay);
+    }
   });
 });

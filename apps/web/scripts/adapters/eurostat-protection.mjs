@@ -128,7 +128,13 @@ async function estat(dataset, params, { label = dataset } = {}) {
 
   const j = await getJson(url);
   if (!j || !j.value || !j.dimension || !Array.isArray(j.id) || !Array.isArray(j.size)) {
-    throw new Error(`${label}: 200 but not JSON-stat — keys ${Object.keys(j ?? {}).join(',')}`);
+    // Do not assert a status we did not see. getJson() falls back to `curl -sS`, which is
+    // not `-f`, so it exits 0 on a 4xx and hands back Eurostat's error document — this
+    // branch is reached far more often by a 400 than by a lying 200. Quoting the source's
+    // own label is the whole diagnosis: "Dimension SEX is not defined" names the axis,
+    // where "keys error" names nothing.
+    const err = Array.isArray(j?.error) ? j.error.map((e) => e?.label ?? JSON.stringify(e)).join('; ') : null;
+    throw new Error(`${label}: not JSON-stat — ${err ? `source says: ${err}` : `keys ${Object.keys(j ?? {}).join(',')}`}`);
   }
   const got = String(j.extension?.id ?? '').toLowerCase();
   if (got !== dataset.toLowerCase()) {
@@ -220,6 +226,16 @@ function gateNewest(times, countOf, { window = 6, floor = 0.8, label = '' } = {}
     if (trailing.length < 3) break;
     const expected = median(trailing);
     const n = countOf(times[i]);
+    // An empty payload drives every count to zero, and `0 >= Math.ceil(0.8 * 0)` is true, so
+    // without this the gate CERTIFIES a period nobody reported. Observed consequence before
+    // the guard: a 0-row eu-asylum-decisions layer, and — because corridor layers inherit
+    // the country cut's gate — a eu-asylum-decisions-corridor shipping 1,474 real rows under
+    // a fabricated `reporters: {n: 0, expected: 0}`, which build-layers.mjs's "no rows" check
+    // does not catch. The size assertion in estat() cannot catch this either: Eurostat
+    // answers a valid-but-empty slice with HTTP 200 and NO zero-length dimension
+    // (migr_asydcfstq geo=UK, lastTimePeriod=12 → size [1,1,1,1,1,1,1,12], value {},
+    // reproduced 2026-09-20). No roster is not a small roster; it is no period at all.
+    if (n <= 0 || expected <= 0) { rejected.push(`${times[i]} (${n}/${expected}, empty)`); continue; }
     if (n >= Math.ceil(floor * expected)) return { period: times[i], index: i, n, expected, rejected };
     rejected.push(`${times[i]} (${n}/${expected})`);
   }
@@ -343,10 +359,12 @@ function countryLayer(j, { id, title, question, note, cadence, sel, periodsBack,
 /**
  * Corridor layer: rows keyed `CITIZENSHIP>REPORTER`.
  *
- * Codes are Eurostat's own, unreformatted, per the contract's "as the producer labels them":
- * two-letter ISO 3166-1 alpha-2 except EL (Greece, ISO GR), UK (United Kingdom, ISO GB) and
- * XK (Kosovo, no ISO code). build-concordance.mjs already resolves EL; UK is dropped here
- * for the licence reason above, so only XK is left for a consumer to decide about.
+ * Both ends are ISO-3166-1 alpha-3, because places.json and the globe are. The contract's
+ * "as the producer labels them" governs PERIOD labels, not row keys; reading it the other
+ * way is what shipped a layer that validated on every other axis and painted an entirely
+ * empty world. _iso3.mjs carries Eurostat's three departures — EL is Greece, UK is the
+ * United Kingdom, XK is Kosovo (XKX, user-assigned, no M49 entry) — and an unmapped code
+ * throws below rather than quietly dropping a corridor.
  *
  * Origin is CITIZENSHIP, not previous residence. An Afghan national applying in Austria is
  * AF>AT however long they lived in Iran first, so these corridors are not comparable with
@@ -645,7 +663,13 @@ export async function load({ log } = {}) {
       cadence: 'monthly',
       sel: { citizen: 'TOTAL' },
       periodsBack: 12,
-      note: 'A stock of open cases at the end of the month, not a flow; Italy is flagged as low-reliability for 2026-01 to 2026-04 and Spain provisional throughout.',
+      // The 'u' span and the two non-filers were re-read off the live status dict on
+      // 2026-09-20 rather than carried over: IT is flagged from 2025-03, not from 2026-01,
+      // which is ten of the twelve months shipped here and not a four-month blip. IT and PT
+      // are absent at 2026-06 (IT 2026-05 = 235,910, null after), so the 32 rows sum 21%
+      // lower at 2026-06 than at 2026-05 on non-filing alone. Their rows simply have no
+      // 2026-06 key, which the globe greys out; a reader summing the layer will not see it.
+      note: 'A stock of open cases at the end of the month, not a flow; Italy and Portugal had not filed for 2026-06, so the layer sums 21% below 2026-05 for that reason alone, Italy is flagged low-reliability from 2025-03 to 2026-04, and Spain is provisional throughout.',
       log,
     },
   ));

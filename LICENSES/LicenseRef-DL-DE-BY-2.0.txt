@@ -1,0 +1,47 @@
+Data Licence Germany – Attribution – Version 2.0
+================================================
+
+Destatis publishes under this licence. The variant matters and is not inferred: the Destatis
+Open Data page says "The statistical data can be reused in compliance with the Data Licence
+Germany 2.0 conditions", and on both the English and German pages that licence name is an
+anchor whose href is https://www.govdata.de/dl-de/by-2-0 — the Namensnennung (attribution)
+variant, not Zero. Read 2026-09-20.
+
+The operative grant, verbatim from https://www.govdata.de/dl-de/by-2-0, read 2026-09-20:
+
+  "The data and meta-data provided may, for commercial and non-commercial use, in particular
+
+    - be copied, printed, presented, altered, processed and transmitted to third parties;
+    - be merged with own data and with the data of others and be combined to form new and
+      independent datasets;
+    - be integrated in internal and external business processes, products and applications in
+      public and non-public electronic networks."
+
+The condition:
+
+  "Any applicable attribution by the provider has to be indicated. Changes, editing, new
+  designs or other amendments must be marked as such in the source note."
+
+Why this file exists rather than an SPDX identifier
+---------------------------------------------------
+
+DL-DE-BY-2.0 is not in the SPDX licence list, so REUSE needs it as a LicenseRef. It is a real
+public licence with a canonical text at the URL above, not a bespoke grant.
+
+A narrower grant appears inside the workbook itself
+---------------------------------------------------
+
+The Impressum of the Statistischer Bericht workbook grants only "Vervielfältigung und
+Verbreitung, auch auszugsweise, mit Quellenangabe gestattet" — reproduction and distribution,
+in whole or in part, with attribution. That is narrower than DL-DE-BY-2.0 and says nothing
+about commercial use or derivative works. Exodus relies on the Open Data page's grant, which is
+the publisher's own general statement about its statistical data and is the broader of the two;
+the narrower workbook note is recorded here so the difference is visible rather than glossed.
+
+How Exodus satisfies the conditions
+-----------------------------------
+
+Attribution is carried on /#/sources with the publisher, the workbook and the sheet. The
+modifications are set out in the same entry: partner countries selected by an explicit
+allow-list rather than by excluding aggregate names, the three sex categories summed, and
+partner labels joined to ISO-3166-1 alpha-3.

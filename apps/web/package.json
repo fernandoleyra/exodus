@@ -8,10 +8,11 @@
     "preview": "vite preview --host 127.0.0.1 --port 4173",
     "test": "vitest run",
     "placement:demo": "vite-node src/placement/demo.ts",
-    "snapshot": "node --max-old-space-size=4096 scripts/build-snapshot-real.mjs && vite-node scripts/build-concordance.mjs",
+    "snapshot": "node --max-old-space-size=4096 scripts/build-snapshot-real.mjs && node scripts/build-layers.mjs && vite-node scripts/build-concordance.mjs",
     "fetch": "node scripts/fetch-geometry.mjs && node scripts/fetch-wb.mjs && node scripts/fetch-spine.mjs && node scripts/fetch-concordance.mjs",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run typecheck && npm run test"
+    "verify": "npm run typecheck && npm run test",
+    "layers": "node scripts/build-layers.mjs"
   },
   "dependencies": {
     "@deck.gl/extensions": "^9.4.0",

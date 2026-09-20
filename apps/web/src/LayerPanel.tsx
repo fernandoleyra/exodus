@@ -122,6 +122,9 @@ export function LayerPanel() {
                       {l.vintage.provisional && <> &middot; <b>provisional</b></>}
                       {loading && <> &middot; loading&hellip;</>}
                     </span>
+                    <span className="layervintage">
+                      {l.entitiesAtNewest} of {l.entities} {l.entity === 'corridor' ? 'corridors' : 'countries'} at {l.vintage.periodLabel}
+                    </span>
                   </span>
                   {!l.vintage.commercialUseClear && <span className="badge absent" title="This producer does not clearly grant commercial reuse">terms</span>}
                 </button>

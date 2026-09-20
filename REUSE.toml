@@ -48,6 +48,25 @@ SPDX-FileCopyrightText = [
 ]
 SPDX-License-Identifier = "CC-BY-4.0 AND LicenseRef-Eurostat-Reuse AND LicenseRef-IMF-Data"
 
+# The layer snapshot carries eight producers under five different instruments, two of which are
+# not Creative Commons at all. The aggregate identifier below is the honest description; the
+# per-layer licence is in each layer's own vintage in index.json, and /#/sources carries the
+# attribution each one requires.
+[[annotations]]
+path = ["apps/web/public/snapshot/layers/**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+  "Thomas Gaskin and Guy J. Abel (Zenodo 10.5281/zenodo.17344747), CC BY 4.0",
+  "The World Bank, World Development Indicators, CC BY 4.0",
+  "European Union, Eurostat — reuse under Commission Decision 2011/833/EU",
+  "International Monetary Fund, Balance of Payments — IMF terms for statistical Data",
+  "Centraal Bureau voor de Statistiek (85484NED), CC BY 4.0",
+  "Immigration, Refugees and Citizenship Canada — contains information licensed under the Open Government Licence – Canada",
+  "Statistisches Bundesamt (Destatis) — Data Licence Germany – Attribution 2.0",
+  "Istituto nazionale di statistica (ISTAT), CC BY 4.0",
+]
+SPDX-License-Identifier = "CC-BY-4.0 AND LicenseRef-Eurostat-Reuse AND LicenseRef-IMF-Data AND OGL-Canada-2.0 AND LicenseRef-DL-DE-BY-2.0"
+
 [[annotations]]
 path = "apps/web/public/snapshot/adm0.json"
 precedence = "aggregate"

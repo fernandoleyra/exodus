@@ -312,14 +312,31 @@ function buildLayer({ id, title, question, unit, entity, cells, key, struct, per
   const kept = cells.filter((c) => key(c) !== null);
   const counts = {};
   for (const c of kept) (counts[c.time] ??= new Set()).add(c.geo);
-  const chosen = pickPeriod(Object.fromEntries(Object.entries(counts).map(([t, s]) => [t, s.size])), struct.latest, struct.dataset);
+  const order = Object.keys(counts).sort();
+  const chosen = pickPeriod(Object.fromEntries(order.map((t) => [t, counts[t].size])), struct.latest, struct.dataset);
+
+  // Falling back has to take the data with it. pickPeriod rejects a candidate because its
+  // reporters are too few for it to be a period at all, but rows/periods built from every
+  // cell would still hand build-layers that period: the chip would read 2024 while the
+  // app's cursor found a 2025 column to chart, which is the collapse rule 4 exists to stop.
+  // Cut by position in the same sorted order pickPeriod used rather than by string compare,
+  // so this survives a label that is no longer a bare year.
+  const shipped = (() => {
+    const allowed = new Set(order.slice(0, order.indexOf(chosen.period) + 1));
+    return kept.filter((c) => allowed.has(c.time));
+  })();
 
   const rows = {};
-  for (const c of kept) (rows[key(c)] ??= {})[c.time] = c.v;
-  const periods = [...new Set(kept.map((c) => c.time))].sort();
-  const newest = kept.filter((c) => c.time === chosen.period);
+  for (const c of shipped) (rows[key(c)] ??= {})[c.time] = c.v;
+  const periods = [...new Set(shipped.map((c) => c.time))].sort();
+  const newest = shipped.filter((c) => c.time === chosen.period);
   const provisionalIn = [...new Set(newest.filter((c) => hasFlag(c.flag, 'p')).map(key))].sort();
-  const breaks = [...new Set(newest.filter((c) => hasFlag(c.flag, 'b')).map(key))].sort().map((k) => `${k}@${chosen.period}`);
+  // Breaks are collected over every period the layer ships, not only the headline one —
+  // which is why they are keyed KEY@PERIOD. A discontinuity two years back is still inside
+  // the series the app draws: in migr_resfirst alone Greece breaks at 2021, Italy at 2022,
+  // Spain at 2023 and Hungary at 2024, and eu-population's five breaks are all pre-headline,
+  // so a newest-period-only scan renders every one of them as trend.
+  const breaks = [...new Set(shipped.filter((c) => hasFlag(c.flag, 'b')).map((c) => `${key(c)}@${c.time}`))].sort();
 
   const layer = {
     id, title, question, unit, entity,

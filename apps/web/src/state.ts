@@ -13,7 +13,13 @@ export interface LayerMeta {
   periods: string[];
   vintage: Vintage;
   note: string;
+  /** Every entity the layer has ever covered. */
   entities: number;
+  /** Entities that filed for the period on the chip. The gap between this and `entities` is
+   *  the reporting tail, and showing one without the other is how a note ends up claiming a
+   *  count the index contradicts. */
+  entitiesAtNewest: number;
+  nonZeroAtNewest: number;
   adapter: string;
 }
 
