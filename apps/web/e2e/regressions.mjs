@@ -3,7 +3,7 @@
 /** The three bugs a real user hit. Each test drives the app the way a person does, not the
  *  way a script finds convenient — that distinction is exactly why the scroll bug hid. */
 import { chromium } from 'playwright';
-const B = process.env.VITE_BASE ?? 'http://127.0.0.1:5173';
+const B = process.env.BASE ?? process.env.VITE_BASE ?? 'http://127.0.0.1:4173';
 const b = await chromium.launch({
   ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
   args: ['--use-gl=swiftshader','--enable-unsafe-swiftshader','--no-sandbox','--disable-dev-shm-usage'] });

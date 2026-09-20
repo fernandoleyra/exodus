@@ -125,15 +125,6 @@ body[data-route="observer"] { overflow: hidden; }
   margin-bottom: 5px;
 }
 .layergroup-head span:last-child { letter-spacing: .04em; text-transform: none; opacity: .75; }
-.seclede { font-size: 11.5px; color: var(--text-muted); line-height: 1.6; margin: 0 0 11px; }
-.layervintage {
-  display: block; margin-top: 4px; font-family: var(--mono); font-size: 9.5px;
-  letter-spacing: .04em; color: var(--text-muted);
-}
-.layervintage b { color: var(--accent-2); font-weight: 600; }
-/* A layer whose coverage does not reach the cursor is dimmed rather than hidden: the reader
-   should be able to see that it exists and why it is not answering. */
-.layerrow.stale { opacity: .55; }
 .layernote {
   font-size: 11.5px; color: var(--text-muted); line-height: 1.65;
   margin: 11px 0 0; padding-left: 11px; border-left: 1px solid var(--border-strong);
@@ -211,4 +202,113 @@ body[data-route="observer"] { overflow: hidden; }
 .hover-hint {
   flex: 0 0 auto; font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
   text-transform: uppercase; color: var(--text-muted); padding-top: 3px;
+}
+
+/* ---------- the layer list ----------
+   One row is one line, a coverage bar and a period. The bar replaces the paragraph that used
+   to sit under every name: it shows where a layer has data and where the cursor is inside it,
+   which is the question a reader actually has when the map changes as they scrub. */
+.sec-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.sec-bar h2 { margin: 0; flex: 1; }
+.layerfind {
+  width: 92px; padding: 4px 8px; font-size: 11px; font-family: var(--sans);
+  color: var(--text); background: var(--bg-panel); border: 1px solid var(--border-strong);
+  border-radius: 3px; outline: none;
+}
+.layerfind:focus { border-color: var(--accent); width: 130px; }
+
+/* The list scrolls inside itself rather than pushing everything below it off the panel.
+   Fifty rows is about 1,500px; without this the legend and the period the active layer is
+   painting — the two things you read while dragging the year — sat below all of them. */
+.layerlist {
+  display: block; max-height: 42vh; overflow-y: auto; overscroll-behavior: contain;
+  padding-right: 4px; margin-right: -4px;
+}
+.layerlist::-webkit-scrollbar { width: 6px; }
+.layerlist::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+.layerlist::-webkit-scrollbar-track { background: transparent; }
+.layergroup { margin-bottom: 12px; }
+.layergroup-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--text-muted); padding: 6px 0 5px; border-bottom: 1px solid var(--border);
+  margin-bottom: 3px;
+}
+
+.layerrow {
+  display: grid; grid-template-columns: 1fr 44px 48px; gap: 7px; align-items: center;
+  width: 100%; padding: 5px 7px; margin: 0; border: 0; border-radius: 3px;
+  background: none; text-align: left; cursor: pointer;
+}
+.layerrow:hover { background: var(--bg-raised); }
+.layerrow.on { background: #0d2b23; box-shadow: inset 0 0 0 1px #1d5c4a; }
+.layerrow.on .layername { color: var(--accent); }
+/* A layer with nothing at the cursor is dimmed, never hidden: the reader should see that it
+   exists and why it is not answering. */
+.layerrow.off { opacity: .42; }
+/* Names wrap rather than truncate. A clipped "EU foreign citizens r…" costs the reader more
+   than the second line does, and most names fit on one anyway. */
+.layername { font-size: 11.5px; color: var(--text-dim); line-height: 1.3; }
+.layername em {
+  font-style: normal; font-family: var(--mono); font-size: 9px;
+  color: var(--text-muted); margin-left: 5px; white-space: nowrap;
+}
+.layerat { font-family: var(--mono); font-size: 9.5px; color: var(--text-muted); text-align: right; }
+
+.cov { position: relative; display: block; height: 4px; background: var(--bg-raised); border-radius: 2px; }
+.cov i { position: absolute; top: 0; height: 100%; border-radius: 2px; background: var(--text-muted); }
+.cov b { position: absolute; top: -2px; width: 1px; height: 8px; background: var(--text); opacity: .8; }
+.cov-exact i { background: var(--accent); }
+.cov-behind i { background: var(--accent-2); }
+.cov-none i { background: var(--border-strong); }
+.cov-timeless { background: repeating-linear-gradient(90deg, var(--text-muted) 0 2px, transparent 2px 4px); opacity: .45; }
+
+/* ---------- the active layer ---------- */
+.activehead { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.activehead > span:first-child { font-size: 13px; color: var(--text); font-weight: 600; }
+.activehead .badge { margin-left: auto; }
+.activewhat { font-size: 12px; color: var(--text-dim); line-height: 1.5; margin: 0 0 7px; }
+.activewhen { font-family: var(--mono); font-size: 10px; color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
+.activewhen b { color: var(--text-dim); font-weight: 600; }
+.activewhen b.warn { color: var(--accent-2); }
+
+.legend-note { font-size: 10.5px; color: var(--text-muted); line-height: 1.5; margin: 7px 0 0; }
+.nodata-swatch {
+  display: inline-block; width: 8px; height: 8px; border-radius: 2px;
+  background: rgb(26,33,42); border: 1px solid var(--border-strong); vertical-align: -1px; margin-right: 3px;
+}
+
+/* ---------- overlays and filters ---------- */
+.overlaylist { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px;
+  font-size: 11px; color: var(--text-muted); background: var(--bg-panel);
+  border: 1px solid var(--border-strong); border-radius: 3px; cursor: pointer;
+}
+.chip:hover { color: var(--text-dim); }
+.chip.on { color: var(--accent); border-color: #1d5c4a; background: #0d2b23; }
+.filterrow { display: grid; gap: 8px; }
+.filterslider { display: grid; grid-template-columns: 76px 1fr 60px; gap: 8px; align-items: center; font-size: 11px; color: var(--text-muted); }
+.filterslider b { font-family: var(--mono); font-size: 10px; color: var(--text-dim); text-align: right; }
+.filterslider input { width: 100%; }
+
+.legend { display: flex; height: 10px; border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+.legend i { flex: 1; display: block; }
+.legend-ends {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  font-family: var(--mono); font-size: 9.5px; color: var(--text-muted);
+}
+.legend-unit { color: var(--text-dim); }
+
+/* A heading that has to name a period other than the cursor's says so in the heading, where
+   the number is, rather than in a note the reader has to find. */
+.h2-note {
+  margin-left: 7px; font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  text-transform: none; color: var(--accent-2);
+}
+
+/* An overlay standing in for an older period names it on the chip, because no legend
+   elsewhere is going to. */
+.chip-at {
+  margin-left: 6px; font-family: var(--mono); font-size: 9px; color: var(--accent-2);
 }

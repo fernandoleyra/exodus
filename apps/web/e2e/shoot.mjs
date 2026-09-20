@@ -1,7 +1,8 @@
 import { chromium } from 'playwright';
 import { writeFileSync } from 'node:fs';
+const BASE = process.env.BASE ?? 'http://127.0.0.1:4173';
 
-const URL = 'http://127.0.0.1:5173/#/observer';
+const URL = `${BASE}/#/observer`;
 const errors = [];
 const browser = await chromium.launch({
   ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
@@ -13,7 +14,7 @@ page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
 
 // The Observer sits behind the terms gate. Accept first, so this harness exercises the
 // Observer itself rather than the landing.
-await page.goto('http://127.0.0.1:5173/', { waitUntil: 'domcontentloaded' });
+await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
 await page.evaluate(() => localStorage.setItem('exodus.terms.accepted.v1', new Date().toISOString()));
 await page.goto(URL, { waitUntil: 'networkidle' });
 await page.waitForFunction(() => document.querySelectorAll('.legend-row').length > 0, { timeout: 30000 });

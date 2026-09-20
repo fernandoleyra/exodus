@@ -53,11 +53,32 @@ export interface Manifest {
   disputedRenderedWithoutData: string[];
 }
 
-/** Which 5-year period a year falls in, or -1 when the second model has no grid there. */
-export function periodIndex(periodStarts: number[], year: number): number {
-  for (let i = periodStarts.length - 1; i >= 0; i--) {
-    const s = periodStarts[i]!;
-    if (year >= s && year < s + 5) return i;
-  }
-  return -1;
+/**
+ * The newest five-year window at or before this year, or -1 if the year precedes them all.
+ *
+ * This replaced a strict "which window is this year INSIDE", which returned -1 from 2020
+ * because the windows stop in 2015 — so the disagreement surface emptied the globe and the
+ * halos disappeared, with the only explanation a hint in the corner of the timeline. Holding
+ * the last window is continuous; naming it is what keeps it honest, and every reader of this
+ * function has to do that. The surface says so in the panel, the halos in their chip.
+ */
+export function periodAtOrBefore(periodStarts: number[], year: number): number {
+  let idx = -1;
+  for (let i = 0; i < periodStarts.length; i++) if (periodStarts[i]! <= year) idx = i;
+  return idx;
+}
+
+/**
+ * The index into a corridor's annual array for a cursor year, clamped to the spine's frames.
+ *
+ * The cursor runs to 2026 because other layers reach that far; the spine's annual frames stop
+ * at 2023. Reading v[36] gives undefined, which every caller turned into 0 — so the arcs
+ * vanished, the choropleth emptied and the inspector reported no arrivals, three
+ * different-looking failures with one cause, all at the year the reader crossed. Holding the
+ * last frame and naming it is the rule catalogue.resolve applies to every other layer, and
+ * this is that rule for the spine. It lives here, once, because it drifted when it did not.
+ */
+export function spineFrame(range: [number, number], year: number): number {
+  const [min, max] = range;
+  return Math.min(Math.max(year, min), max) - min;
 }

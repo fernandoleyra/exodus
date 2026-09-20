@@ -4,7 +4,7 @@
  *  Fails on ANY cross-origin request, from any route, including workers and beacons. */
 import { chromium } from 'playwright';
 
-const ORIGIN = process.env.VITE_BASE ?? 'http://127.0.0.1:5173';
+const ORIGIN = process.env.BASE ?? process.env.VITE_BASE ?? 'http://127.0.0.1:4173';
 const ROUTES = ['/', '/#/sources', '/#/methods', '/#/legal', '/#/concordance', '/#/observer'];
 
 const browser = await chromium.launch({

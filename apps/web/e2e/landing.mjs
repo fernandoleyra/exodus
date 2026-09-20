@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+const BASE = process.env.BASE ?? 'http://127.0.0.1:4173';
 const browser = await chromium.launch({
   ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
   args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--no-sandbox', '--disable-dev-shm-usage'],
@@ -8,7 +9,7 @@ const errors = [];
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 page.on('pageerror', (e) => errors.push('pageerror: ' + e.message));
 
-await page.goto('http://127.0.0.1:5173/', { waitUntil: 'networkidle' });
+await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(4500);
 const shot = async (n) => { await page.screenshot({ path: `shots/L${n}.png` }); console.log('shot:', n); };
 await shot('1-open');
@@ -49,9 +50,9 @@ await page.waitForTimeout(5000);
 await shot('8-observer');
 
 // Legal + sources
-await page.goto('http://127.0.0.1:5173/#/legal', { waitUntil: 'networkidle' });
+await page.goto(`${BASE}/#/legal`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(1200); await shot('9-legal');
-await page.goto('http://127.0.0.1:5173/#/sources', { waitUntil: 'networkidle' });
+await page.goto(`${BASE}/#/sources`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(1800); await shot('10-sources');
 
 console.log('errors:', errors.length);

@@ -7,7 +7,7 @@ import { Methods } from './pages/Methods';
 import { ConcordancePage } from './concordance/Concordance';
 import { Globe } from './Globe';
 import { useStore } from './state';
-import { periodIndex } from './types';
+import { periodAtOrBefore, spineFrame } from './types';
 import { headroom } from './kernel/headroom';
 import { LayerPanel } from './LayerPanel';
 import { ageDays } from './vintage';
@@ -116,16 +116,20 @@ function Inspector() {
   const { places, corridors, selected, hovered, year, select } = useStore();
   const iso = selected ?? hovered;
   const p = useMemo(() => places.find((x) => x.iso3 === iso), [places, iso]);
-  const yi = year - 1990;
 
   const periodStarts = useStore((s) => s.periodStarts);
   const { spec: surfaceSpec, valueFor } = useSurface();
   const surfaceValue = p ? valueFor(places.indexOf(p)) : null;
   const manifest = useStore((s) => s.manifest);
+  const range = manifest?.yearRange ?? [1990, 2023];
+  const yi = spineFrame(range, year);
+  // What the corridor figures below are actually from, which is not the cursor once the
+  // reader is past the spine.
+  const flowYear = Math.min(year, range[1]);
   const flows = useMemo(() => {
     if (!p) return null;
     const i = places.indexOf(p);
-    const pi = periodIndex(periodStarts, year);
+    const pi = periodAtOrBefore(periodStarts, year);
     let inb = 0, out = 0, nIn = 0, nOut = 0, dpMax = 0;
     const dps: number[] = [];
     for (const c of corridors) {
@@ -166,7 +170,9 @@ function Inspector() {
                 vintage={p.unempYear} kind="modelled" />
       </div>
       <div className="sec">
-        <h2>Corridors in {year}</h2>
+        {/* The spine's newest frame, not the cursor's year — and it says which when they
+            differ, rather than putting 2023 figures under a 2026 heading. */}
+        <h2>Corridors in {flowYear}{flowYear !== year && <span className="h2-note">{' '}newest &middot; cursor at {year}</span>}</h2>
         <Figure label="Inbound (modelled)" value={flows!.nIn ? fmt(flows!.inb) : null}
                 kind="modelled" absentNote="not in the top-9 set" />
         <Figure label="Outbound (modelled)" value={flows!.nOut ? fmt(flows!.out) : null}
@@ -376,10 +382,8 @@ export function Observer() {
           />
           <span className="hint">
             {year > spineMax
-              ? `past the flow spine — it ends at ${spineMax} and nothing extends it`
-              : periodIndex(useStore.getState().periodStarts, year) < 0
-                ? 'past 2019 · no second model exists here, so nothing is corroborated'
-                : 'discrete annual frames — nothing is interpolated'}
+              ? `the flow spine ends at ${spineMax} — each layer says which period it is showing`
+              : 'discrete annual frames — nothing is interpolated'}
           </span>
         </div>
       </main>

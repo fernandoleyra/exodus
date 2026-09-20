@@ -1,11 +1,12 @@
 import { chromium } from 'playwright';
+const BASE = process.env.BASE ?? 'http://127.0.0.1:4173';
 const b = await chromium.launch({
   ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}),
   args: ['--use-gl=swiftshader','--enable-unsafe-swiftshader','--no-sandbox','--disable-dev-shm-usage'] });
 const page = await b.newPage({ viewport: { width: 1500, height: 940 }, deviceScaleFactor: 2 });
-await page.goto('http://127.0.0.1:5173/', { waitUntil: 'domcontentloaded' });
+await page.goto(`${BASE}/`, { waitUntil: 'domcontentloaded' });
 await page.evaluate(() => localStorage.setItem('exodus.terms.accepted.v1', new Date().toISOString()));
-await page.goto('http://127.0.0.1:5173/#/observer', { waitUntil: 'networkidle' });
+await page.goto(`${BASE}/#/observer`, { waitUntil: 'networkidle' });
 await page.waitForSelector('.layerrow', { timeout: 20000 });
 await page.waitForTimeout(3000);
 // Rotate to the Americas, where the biggest polygons are.

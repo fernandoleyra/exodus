@@ -7,7 +7,7 @@ import { greatCircle } from './greatcircle';
 import { SimpleMeshLayer } from '@deck.gl/mesh-layers';
 import { SphereGeometry } from '@luma.gl/engine';
 import { useStore } from './state';
-import { periodIndex } from './types';
+import { periodAtOrBefore, spineFrame } from './types';
 import { NO_DATA_FILL, NO_DATA_LINE } from './layers';
 import { useSurface } from './useSurface';
 
@@ -23,7 +23,7 @@ const INITIAL = { longitude: 14, latitude: 24, zoom: 1.65, pitch: 0, bearing: 0 
 
 export function Globe() {
   const { places, corridors, adm0, adm0Outline, year, periodStarts, selected, hovered, select, hover,
-          surface, overlays, filters } = useStore();
+          surface, overlays, filters, manifest } = useStore();
   const [view, setView] = useState(INITIAL);
   // The camera is CONTROLLED: deck.gl reports every change through onViewStateChange and we
   // hand the result straight back. It used to be uncontrolled, with only initialViewState,
@@ -36,7 +36,11 @@ export function Globe() {
   (window as unknown as Record<string, unknown>).__setView =
     (longitude: number, latitude: number, zoom = 2.1) => setView((v) => ({ ...v, longitude, latitude, zoom }));
   (window as unknown as Record<string, unknown>).__select = (iso3: string | null) => select(iso3);
-  const yi = year - 1990;
+  // The same clamp the surface uses. The cursor runs to 2026 because other layers do; the
+  // spine's annual frames stop at 2023. Past that the arcs hold the last frame rather than
+  // vanishing, and the timebar says which one — the corridors used to disappear at the same
+  // year the choropleth emptied, which read as the map breaking rather than the data ending.
+  const yi = spineFrame(manifest?.yearRange ?? [1990, 2023], year);
 
   const { spec, scale, valueFor } = useSurface();
   const placeIndex = useMemo(
@@ -48,7 +52,9 @@ export function Globe() {
     // the far hemisphere must be culled here instead. A corridor is drawn only when both
     // endpoints face the camera.
     const cam = unit(view.longitude, view.latitude);
-    const pi = periodIndex(periodStarts, year);
+    // periodAtOrBefore, not periodIndex: the halos must show the same window the
+    // disagreement surface paints, and that one holds the last window past 2019.
+    const pi = periodAtOrBefore(periodStarts, year);
     return corridors.map((c) => {
       const o = places[c.o]!, d = places[c.d]!;
       // dp is null when the second model says nothing about this corridor-period. That is a
