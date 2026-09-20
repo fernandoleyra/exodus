@@ -19,8 +19,10 @@ const OUT = 'public/snapshot/layers';
 await rm(OUT, { recursive: true, force: true });
 await mkdir(OUT, { recursive: true });
 
+// A leading underscore marks a shared helper rather than an adapter, so _iso3.mjs is not
+// asked for layers it does not have.
 const files = (await readdir('scripts/adapters'))
-  .filter((f) => f.endsWith('.mjs'))
+  .filter((f) => f.endsWith('.mjs') && !f.startsWith('_'))
   .sort();
 
 const index = [];
@@ -92,6 +94,20 @@ function validate(l) {
   if (v && 'latencyDays' in v) bad.push('vintage.latencyDays must not be stored');
   if (v?.periodEnd && Number.isNaN(Date.parse(v.periodEnd))) bad.push(`vintage.periodEnd ${v.periodEnd} unparseable`);
   if (v?.periodLabel && !l.periods.includes(v.periodLabel)) bad.push(`vintage.periodLabel ${v.periodLabel} is not in periods`);
+
+  // Keys must be ISO-3166-1 alpha-3, because that is what places.json is keyed by and what
+  // the globe looks up. A layer keyed by Eurostat's two-letter geo codes loads, validates on
+  // every other axis, and paints an entirely empty world — which is exactly how this check
+  // came to exist. Checking the SHAPE is not enough on its own, but it is cheap and it caught
+  // it; build-layers cannot import places.json without coupling the two, so the shape check
+  // is the line of defence here and the e2e suite covers the join.
+  const keys = Object.keys(l.rows);
+  const shaped = l.entity === 'corridor'
+    ? keys.filter((k) => /^[A-Z]{3}>[A-Z]{3}$/.test(k)).length
+    : keys.filter((k) => /^[A-Z]{3}$/.test(k)).length;
+  if (shaped / keys.length < 0.9) {
+    bad.push(`${keys.length - shaped} of ${keys.length} keys are not ISO3${l.entity === 'corridor' ? ' pairs' : ''} (e.g. ${keys.filter((k) => !(l.entity === 'corridor' ? /^[A-Z]{3}>[A-Z]{3}$/ : /^[A-Z]{3}$/).test(k)).slice(0, 4).join(', ')})`);
+  }
 
   // Every value the app will divide, colour or sum must be a finite number. A null that
   // reaches a choropleth is painted as a low value, which is the commonest lie in the genre.

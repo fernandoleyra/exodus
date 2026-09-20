@@ -47,6 +47,7 @@ import { mkdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { pathToFileURL } from 'node:url';
+import { checkIso3, toIso3 } from './_iso3.mjs';
 
 const run = promisify(execFile);
 
@@ -327,7 +328,11 @@ function countryLayer(j, { id, title, question, note, cadence, sel, periodsBack,
       const v = u.value({ ...sel, geo, time });
       if (v !== null) series[time] = v;          // a null is "did not file", never a zero
     }
-    if (Object.keys(series).length) rows[geo] = series;
+    // Keyed by ISO3, because places.json and the globe are. Keying by Eurostat's own
+    // two-letter geo codes validates on every other axis and paints an empty world.
+    const a3 = toIso3(geo);
+    if (!a3) throw new Error(`geo code ${geo} has no ISO3 mapping — fix scripts/adapters/_iso3.mjs rather than dropping the country`);
+    if (Object.keys(series).length) rows[a3] = series;
   }
 
   const scan = buildVintage(u, j, { period: gate.period, periods, cadence, n: gate.n, expected: gate.expected, geos, sel });
@@ -411,7 +416,9 @@ function corridorLayer(j, { id, title, question, note, cadence, sel, periodsBack
       // "Germany decided no Bhutanese cases this quarter" is a fact, and the contract's
       // rule is that absent must not be rendered as zero, not that zero must be hidden.
       if (!any) { dropped++; continue; }
-      if (Object.keys(series).length) rows[`${orig}>${dest}`] = series;
+      const o3 = toIso3(orig), d3 = toIso3(dest);
+      if (!o3 || !d3) throw new Error(`corridor ${orig}>${dest} has no ISO3 mapping — fix scripts/adapters/_iso3.mjs`);
+      if (Object.keys(series).length) rows[`${o3}>${d3}`] = series;
     }
   }
 
@@ -426,6 +433,7 @@ function corridorLayer(j, { id, title, question, note, cadence, sel, periodsBack
 
 // ---------------------------------------------------------------- load
 export async function load({ log } = {}) {
+  await checkIso3();   // a typo in the crosswalk must fail here, not paint an empty world
   const layers = [];
 
   // ---- migr_asyappctzm: monthly applications ---------------------------------------
